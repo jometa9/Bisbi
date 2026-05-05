@@ -18,6 +18,7 @@ export interface AppSettings {
   pasteMode: 'paste' | 'clipboard';
   saveHistory: boolean;
   precision: Precision;
+  microphoneId: string | null;
 }
 
 export interface TranscriptionResult {

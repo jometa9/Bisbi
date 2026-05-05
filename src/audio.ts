@@ -14,19 +14,25 @@ export interface RecordingHandle {
 
 export interface StartRecordingOptions {
   onLevel?: (level: number) => void;
+  // The user's preferred input device. If null/undefined or the device is no
+  // longer plugged in, we silently fall back to the OS default mic.
+  deviceId?: string | null;
 }
 
 export async function startRecording(
   opts: StartRecordingOptions = {}
 ): Promise<RecordingHandle> {
+  const deviceId = await resolveDeviceId(opts.deviceId ?? null);
+  const audio: MediaTrackConstraints = {
+    channelCount: 1,
+    sampleRate: 48000,
+    echoCancellation: true,
+    noiseSuppression: true,
+    autoGainControl: true,
+  };
+  if (deviceId) audio.deviceId = { exact: deviceId };
   const stream = await navigator.mediaDevices.getUserMedia({
-    audio: {
-      channelCount: 1,
-      sampleRate: 48000,
-      echoCancellation: true,
-      noiseSuppression: true,
-      autoGainControl: true,
-    },
+    audio,
     video: false,
   });
 
@@ -111,6 +117,32 @@ function downsampleBuffer(buffer: Float32Array, srcRate: number, dstRate: number
     offsetBuffer = nextOffsetBuffer;
   }
   return result;
+}
+
+export interface MicrophoneDevice {
+  deviceId: string;
+  label: string;
+}
+
+// Returns just the audio inputs. Labels are empty strings until the user has
+// granted mic permission at least once, so the Settings UI may need to prompt
+// for access before showing real names.
+export async function listMicrophones(): Promise<MicrophoneDevice[]> {
+  if (!navigator.mediaDevices?.enumerateDevices) return [];
+  try {
+    const devices = await navigator.mediaDevices.enumerateDevices();
+    return devices
+      .filter((d) => d.kind === 'audioinput')
+      .map((d) => ({ deviceId: d.deviceId, label: d.label }));
+  } catch {
+    return [];
+  }
+}
+
+async function resolveDeviceId(preferred: string | null): Promise<string | null> {
+  if (!preferred) return null;
+  const mics = await listMicrophones();
+  return mics.some((m) => m.deviceId === preferred) ? preferred : null;
 }
 
 function floatTo16BitPcm(input: Float32Array): Int16Array {

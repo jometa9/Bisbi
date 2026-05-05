@@ -14,6 +14,7 @@ const DEFAULT_SETTINGS: AppSettings = {
   pasteMode: 'paste',
   saveHistory: true,
   precision: 'balanced',
+  microphoneId: null,
 };
 
 function settingsPath(): string {

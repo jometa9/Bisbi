@@ -76,6 +76,12 @@ export const en: {
       pushToTalk: { label: string; hint: string };
       tapToToggle: { label: string; hint: string };
     };
+    microphone: {
+      title: string;
+      description: string;
+      systemDefault: string;
+      unnamed: string;
+    };
     transcriptionLanguage: { title: string; description: string };
     uiLanguage: { title: string; description: string; system: string };
     pasteMode: { title: string; description: string; paste: string; clipboard: string };
@@ -237,6 +243,13 @@ export const en: {
         label: 'Hands-free',
         hint: 'Tap the shortcut once to start recording, tap again to stop. Best for longer dictations where you do not want to keep a key pressed.',
       },
+    },
+    microphone: {
+      title: 'Microphone',
+      description:
+        'Pick which input we use to record. Falls back to the system default if your chosen device is not connected.',
+      systemDefault: 'System default',
+      unnamed: 'Microphone {index}',
     },
     transcriptionLanguage: {
       title: 'Transcription language',

@@ -114,6 +114,12 @@ export const zh: Translations = {
         hint: '点击快捷键一次开始录音,再次点击结束录音。适合较长的口述,你不想一直按着按键。',
       },
     },
+    microphone: {
+      title: '麦克风',
+      description: '选择用于录音的输入设备。如果所选设备未连接，则回退到系统默认设备。',
+      systemDefault: '系统默认',
+      unnamed: '麦克风 {index}',
+    },
     transcriptionLanguage: {
       title: '转写语言',
       description: 'Whisper 会自动检测语言。固定它可以提速。',

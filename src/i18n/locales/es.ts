@@ -116,6 +116,13 @@ export const es: Translations = {
         hint: 'Tocás el atajo una vez para empezar a grabar y lo tocás de nuevo para detener. Ideal para dictados largos en los que no querés tener una tecla apretada.',
       },
     },
+    microphone: {
+      title: 'Micrófono',
+      description:
+        'Elegí qué entrada usamos para grabar. Si el dispositivo no está conectado, usamos el del sistema.',
+      systemDefault: 'Predeterminado del sistema',
+      unnamed: 'Micrófono {index}',
+    },
     transcriptionLanguage: {
       title: 'Idioma de transcripción',
       description: 'Whisper detecta el idioma automáticamente. Fijalo si querés más velocidad.',

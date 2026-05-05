@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Home } from './pages/Home';
 import { Settings } from './pages/Settings';
 import { History } from './pages/History';
@@ -16,9 +16,16 @@ export function App() {
   const { isLoading: isAuthLoading, isAuthenticated, userInfo } = useAuth();
   const [tab, setTab] = useState<Tab>('home');
   const [settings, setSettings] = useState<AppSettings | null>(null);
+  // Read inside the recording-start handler without resubscribing on every
+  // settings change.
+  const settingsRef = useRef<AppSettings | null>(null);
   const [recState, setRecState] = useState<RecordingState>('idle');
   const [appVersion, setAppVersion] = useState('');
   const [resourcesOk, setResourcesOk] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    settingsRef.current = settings;
+  }, [settings]);
 
   useEffect(() => {
     if (!window.bisbi) return;
@@ -56,6 +63,7 @@ export function App() {
         try {
           handle = await startRecording({
             onLevel: (level) => window.bisbi.sendRecordingLevel(level),
+            deviceId: settingsRef.current?.microphoneId ?? null,
           });
         } catch (err) {
           console.error('[App] mic access failed:', err);

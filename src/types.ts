@@ -13,6 +13,10 @@ export interface AppSettings {
   pasteMode: 'paste' | 'clipboard';
   saveHistory: boolean;
   precision: Precision;
+  // null means "use the operating-system default microphone". A non-null id is
+  // remembered even if the device is currently unplugged, so we automatically
+  // re-pick it the next time it shows up.
+  microphoneId: string | null;
 }
 
 export interface TranscriptionRow {

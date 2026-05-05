@@ -1,4 +1,4 @@
-import { Tray, Menu, nativeImage, app } from 'electron';
+import { Tray, Menu, nativeImage, nativeTheme, app } from 'electron';
 import path from 'path';
 import fs from 'fs';
 import type { RecordingState, UiLanguage } from './types';
@@ -11,13 +11,25 @@ let lastState: RecordingState = 'idle';
 let currentOpts: TrayOptions | null = null;
 let currentLang: UiLanguage = 'en';
 
-function trayIconPath(): string {
-  // Tray icon is a small monochrome PNG. Falls back to the main app icon if
-  // the tray-specific asset is missing during early dev.
+type IconColor = 'black' | 'white';
+
+function pickIconColor(): IconColor {
+  // On macOS we always use the black variant and let the OS render it as a
+  // template image — that way the icon picks up the actual menubar tint
+  // (which depends on the wallpaper, not the system Light/Dark setting).
+  if (process.platform === 'darwin') return 'black';
+  return nativeTheme.shouldUseDarkColors ? 'white' : 'black';
+}
+
+function trayIconPath(state: RecordingState): string {
+  const devRoot = path.resolve(__dirname, '..', '..', '..');
+  const prodRoot = process.resourcesPath ?? devRoot;
+  const slot = state === 'recording' ? 'rec' : 'idle';
+  const color = pickIconColor();
+  const filename = `owl_${slot}_${color}.png`;
   const candidates = [
-    path.resolve(__dirname, '..', '..', '..', 'build-resources', 'trayTemplate.png'),
-    path.resolve(__dirname, '..', '..', '..', 'build-resources', 'icon.png'),
-    path.resolve(__dirname, '..', '..', '..', 'public', 'icon.png'),
+    path.join(prodRoot, filename),
+    path.join(devRoot, 'build-resources', filename),
   ];
   for (const p of candidates) {
     if (fs.existsSync(p)) return p;
@@ -25,18 +37,18 @@ function trayIconPath(): string {
   return '';
 }
 
-function buildIcon(): Electron.NativeImage {
-  const p = trayIconPath();
+function buildIcon(state: RecordingState): Electron.NativeImage {
+  const p = trayIconPath(state);
   if (!p) {
-    // Empty image; macOS will still show a tray slot with the title text.
     return nativeImage.createEmpty();
   }
-  const img = nativeImage.createFromPath(p);
+  const resized = nativeImage.createFromPath(p).resize({ width: 18, height: 18 });
   if (process.platform === 'darwin') {
-    // Template images render correctly in dark/light mode on macOS.
-    img.setTemplateImage(true);
+    // Must set the template flag AFTER resize — resize() returns a new
+    // NativeImage and does not carry the flag over.
+    resized.setTemplateImage(true);
   }
-  return img.resize({ width: 18, height: 18 });
+  return resized;
 }
 
 export interface TrayOptions {
@@ -55,22 +67,21 @@ export function initTray(opts: TrayOptions): void {
   currentLang = opts.uiLanguage;
 
   try {
-    tray = new Tray(buildIcon());
+    tray = new Tray(buildIcon('idle'));
   } catch (err) {
     console.error('[tray] failed to create tray:', err);
     return;
   }
   tray.setToolTip(tBackend(currentLang, 'tray.tooltipIdle'));
 
-  // Always show a visible label on macOS so the user can find the tray entry
-  // even before we have a proper icon asset in build-resources/.
-  if (process.platform === 'darwin') {
-    tray.setTitle('Bisbi');
-  }
-
   if (process.platform !== 'darwin') {
     tray.on('click', () => opts.onOpenSettings());
   }
+
+  nativeTheme.on('updated', () => {
+    if (!tray) return;
+    tray.setImage(buildIcon(lastState));
+  });
 
   rebuildMenu();
 }
@@ -85,11 +96,7 @@ export function setRecordingState(state: RecordingState): void {
       ? 'tray.tooltipTranscribing'
       : 'tray.tooltipIdle';
   tray.setToolTip(tBackend(currentLang, tooltipKey));
-  if (process.platform === 'darwin') {
-    const title =
-      state === 'recording' ? '● REC' : state === 'transcribing' ? '… ' : 'Bisbi';
-    tray.setTitle(title);
-  }
+  tray.setImage(buildIcon(state));
 }
 
 export function getRecordingState(): RecordingState {

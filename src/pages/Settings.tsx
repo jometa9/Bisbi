@@ -9,6 +9,7 @@ import {
 } from '../i18n';
 import { Select } from '../components/Select';
 import { ConfirmButton } from '../components/ConfirmButton';
+import { listMicrophones, type MicrophoneDevice } from '../audio';
 
 interface Props {
   settings: AppSettings;
@@ -50,6 +51,16 @@ export function Settings({ settings, onChange, onReset, onClearHistory }: Props)
         <HotkeyInput
           value={settings.hotkey}
           onChange={(hotkey) => onChange({ hotkey })}
+        />
+      </Section>
+
+      <Section
+        title={t('settings.microphone.title')}
+        description={t('settings.microphone.description')}
+      >
+        <MicrophonePicker
+          value={settings.microphoneId}
+          onChange={(microphoneId) => onChange({ microphoneId })}
         />
       </Section>
 
@@ -361,6 +372,62 @@ function HotkeyInput({
         </button>
       </div>
     </div>
+  );
+}
+
+const DEFAULT_MIC_VALUE = '__system_default__';
+
+function MicrophonePicker({
+  value,
+  onChange,
+}: {
+  value: string | null;
+  onChange: (next: string | null) => void;
+}) {
+  const { t } = useTranslation();
+  const [devices, setDevices] = useState<MicrophoneDevice[]>([]);
+
+  // Refresh whenever the OS reports a device add/remove (plugging in a USB
+  // mic, switching Bluetooth headphones, etc.).
+  useEffect(() => {
+    let cancelled = false;
+    const refresh = async () => {
+      const list = await listMicrophones();
+      if (!cancelled) setDevices(list);
+    };
+    void refresh();
+    const md = navigator.mediaDevices;
+    md?.addEventListener?.('devicechange', refresh);
+    return () => {
+      cancelled = true;
+      md?.removeEventListener?.('devicechange', refresh);
+    };
+  }, []);
+
+  // If the persisted device isn't currently available, the dropdown shows
+  // "System default" — the saved id stays put so the device gets re-picked
+  // automatically when it comes back.
+  const persistedAvailable =
+    value !== null && devices.some((d) => d.deviceId === value);
+  const selected = persistedAvailable ? (value as string) : DEFAULT_MIC_VALUE;
+
+  const options = [
+    { value: DEFAULT_MIC_VALUE, label: t('settings.microphone.systemDefault') },
+    ...devices.map((d, i) => ({
+      value: d.deviceId,
+      label: d.label || t('settings.microphone.unnamed', { index: i + 1 }),
+    })),
+  ];
+
+  return (
+    <Select<string>
+      value={selected}
+      onChange={(next) =>
+        onChange(next === DEFAULT_MIC_VALUE ? null : next)
+      }
+      ariaLabel={t('settings.microphone.title')}
+      options={options}
+    />
   );
 }
 

@@ -18,7 +18,11 @@ release/
 out/
 .cache/
 .electron-dev-data/
-build-resources/
+build-resources/*
+# Track tray icon source SVGs and generated PNGs (the rest of build-resources
+# contains chrome binaries downloaded by electron-builder).
+!build-resources/owl_*.svg
+!build-resources/owl_*.png
 
 # Local runtime state (SQLite, logs)
 userData/
