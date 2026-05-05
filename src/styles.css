@@ -102,11 +102,44 @@ button { font-family: inherit; }
 
 .sidebar {
   -webkit-app-region: drag;
-  flex: 0 0 200px;
+  flex: 0 0 250px;
   display: flex;
   flex-direction: column;
   background: var(--bg-soft);
   border-inline-end: 1px solid var(--border);
+  position: relative;
+  overflow: hidden;
+}
+
+.sidebar::after {
+  content: '';
+  position: absolute;
+  inset: auto -25% -10% -25%;
+  height: 200%;
+  background-color: var(--text);
+  -webkit-mask-image: var(--owl-idle);
+  mask-image: var(--owl-idle);
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-size: 200% auto;
+  mask-size: 200% auto;
+  -webkit-mask-position: center bottom;
+  mask-position: center bottom;
+  opacity: 0.05;
+  pointer-events: none;
+  z-index: 0;
+  transition: opacity 200ms ease;
+}
+
+.sidebar.is-recording::after {
+  -webkit-mask-image: var(--owl-rec);
+  mask-image: var(--owl-rec);
+  opacity: 0.05;
+}
+
+.sidebar > * {
+  position: relative;
+  z-index: 1;
 }
 
 .sidebar-top {

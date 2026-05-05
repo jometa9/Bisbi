@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { Home } from './pages/Home';
 import { Settings } from './pages/Settings';
 import { History } from './pages/History';
@@ -8,6 +8,8 @@ import { startRecording, type RecordingHandle } from './audio';
 import type { AppSettings, RecordingState } from './types';
 import { useTranslation } from './i18n';
 import { useAuth } from './context/AuthContext';
+import owlIdleSvg from '../build-resources/owl_head.svg';
+import owlRecSvg from '../build-resources/owl_head_rec.svg';
 
 type Tab = 'home' | 'settings' | 'history' | 'account';
 
@@ -133,7 +135,13 @@ export function App() {
 
   return (
     <div className="app">
-      <aside className="sidebar">
+      <aside
+        className={`sidebar${recState === 'recording' ? ' is-recording' : ''}`}
+        style={{
+          '--owl-idle': `url(${owlIdleSvg})`,
+          '--owl-rec': `url(${owlRecSvg})`,
+        } as CSSProperties}
+      >
         <div className="sidebar-top">
           <div className="sidebar-brand">{t('app.brand')}</div>
         </div>
