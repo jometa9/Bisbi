@@ -286,6 +286,12 @@ button { font-family: inherit; }
   padding-top: 24px;
 }
 
+.home--centered {
+  min-height: calc(75vh);
+  justify-content: center;
+  padding-top: 0;
+}
+
 .home-hero {
   display: flex;
   flex-direction: column;
@@ -570,7 +576,7 @@ button { font-family: inherit; }
   text-align: center;
   border: 1px dashed var(--border-strong);
   border-radius: var(--radius);
-  background: var(--bg);
+  background: var(--bg-soft);
 }
 
 /* Settings */
@@ -970,7 +976,7 @@ button { font-family: inherit; }
   padding: 48px 28px;
   border: 1px dashed var(--border-strong);
   border-radius: var(--radius);
-  background: var(--bg);
+  background: var(--bg-soft);
   color: var(--text-muted);
 }
 

@@ -60,7 +60,7 @@ export function Home({ settings, recState, onNavigateToHistory }: Props) {
     totals.totalWords === 1 ? t('home.wordsOne') : t('home.wordsOther');
 
   return (
-    <div className="home">
+    <div className={`home${settings.saveHistory ? '' : ' home--centered'}`}>
       <div className="home-hero">
         <span className="home-greeting">{greeting}</span>
         <h1 className="home-title">
@@ -82,35 +82,39 @@ export function Home({ settings, recState, onNavigateToHistory }: Props) {
         </span>
       </div>
 
-      <section className="home-section">
-        <h2 className="home-section-title">{t('home.activitySection')}</h2>
-        <div className="home-stats">
-          <Stat
-            value={formatNumber(totals.totalTranscriptions, language)}
-            label={transcriptionsLabel}
-          />
-          <Stat
-            value={formatDuration(Math.round(totals.totalAudioMs / 1000))}
-            label={t('home.dictated')}
-          />
-          <Stat value={formatNumber(totals.totalWords, language)} label={wordsLabel} />
-          <Stat value={formatNumber(wpm, language)} label={t('home.wpmLabel')} />
-        </div>
-      </section>
+      {settings.saveHistory && (
+        <>
+          <section className="home-section">
+            <h2 className="home-section-title">{t('home.activitySection')}</h2>
+            <div className="home-stats">
+              <Stat
+                value={formatNumber(totals.totalTranscriptions, language)}
+                label={transcriptionsLabel}
+              />
+              <Stat
+                value={formatDuration(Math.round(totals.totalAudioMs / 1000))}
+                label={t('home.dictated')}
+              />
+              <Stat value={formatNumber(totals.totalWords, language)} label={wordsLabel} />
+              <Stat value={formatNumber(wpm, language)} label={t('home.wpmLabel')} />
+            </div>
+          </section>
 
-      <section className="home-section">
-        <h2 className="home-section-title">{t('home.recentSection')}</h2>
-        <TranscriptionList rows={recent} emptyLabel={t('home.empty')} />
-        {hasMore && (
-          <button
-            type="button"
-            className="home-see-more"
-            onClick={() => onNavigateToHistory?.()}
-          >
-            {t('home.seeMore')}
-          </button>
-        )}
-      </section>
+          <section className="home-section">
+            <h2 className="home-section-title">{t('home.recentSection')}</h2>
+            <TranscriptionList rows={recent} emptyLabel={t('home.empty')} />
+            {hasMore && (
+              <button
+                type="button"
+                className="home-see-more"
+                onClick={() => onNavigateToHistory?.()}
+              >
+                {t('home.seeMore')}
+              </button>
+            )}
+          </section>
+        </>
+      )}
     </div>
   );
 }
