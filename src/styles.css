@@ -558,9 +558,9 @@ html.recording-window #root {
 .recording-pill {
   display: flex;
   align-items: center;
-  gap: 10px;
-  background: rgba(20, 20, 22, 0.92);
-  padding: 0 12px;
+  gap: 8px;
+  background: rgba(20, 20, 22, 0.5);
+  padding: 0 10px;
   border-radius: 999px;
   -webkit-app-region: no-drag;
   height: 100%;
@@ -572,21 +572,11 @@ html.recording-window #root {
 
 .rec-indicator {
   flex: 0 0 auto;
-  width: 14px;
-  height: 14px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
   background: var(--recording);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  animation: rec-pulse 1.4s ease-in-out infinite;
-}
-
-.rec-square {
-  width: 5px;
-  height: 5px;
-  border-radius: 1px;
-  background: #fff;
+  transition: background 180ms ease;
 }
 
 .rec-waveform {
@@ -594,23 +584,21 @@ html.recording-window #root {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 2px;
-  height: 22px;
+  height: 16px;
 }
 
 .rec-bar {
-  flex: 1 1 0;
+  flex: 0 0 2px;
   height: 100%;
-  background: rgba(255, 255, 255, 0.85);
-  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 1px;
   transform-origin: center;
-  transform: scaleY(0.12);
+  transform: scaleY(0.08);
   transition: transform 90ms linear;
 }
 
 .recording-pill.state-transcribing .rec-indicator {
   background: var(--transcribing);
-  animation: rec-pulse 0.6s ease-in-out infinite;
 }
 
 .recording-pill.state-transcribing .rec-bar {

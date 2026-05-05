@@ -5,9 +5,9 @@ import type { RecordingState } from './types';
 
 let win: BrowserWindow | null = null;
 
-const WIDTH = 140;
-const HEIGHT = 38;
-const MARGIN_BOTTOM = 8;
+const WIDTH = 100;
+const HEIGHT = 28;
+const MARGIN_BOTTOM = 15;
 
 let followTimer: NodeJS.Timeout | null = null;
 let lastDisplayId: number | null = null;
@@ -29,9 +29,14 @@ function getActiveDisplay(): Electron.Display {
   }
 }
 
+// Always position relative to the display's physical bounds (not workArea),
+// so the bar sits at the screen bottom regardless of dock visibility, full-
+// screen apps, or which space is active. Combined with the 'screen-saver'
+// window level + NSPanel type, the bar floats above the dock when present.
+// This is the same approach Wispr Flow uses ("locked to bottom-center").
 function placeBottomCenter(w: BrowserWindow): void {
   const display = getActiveDisplay();
-  const { x, y, width, height } = display.workArea;
+  const { x, y, width, height } = display.bounds;
   const changed = display.id !== lastDisplayId;
   lastDisplayId = display.id;
   w.setBounds({
@@ -40,9 +45,6 @@ function placeBottomCenter(w: BrowserWindow): void {
     width: WIDTH,
     height: HEIGHT,
   });
-  // On macOS, moving across displays can drop the always-on-top /
-  // all-workspaces flags and the window may not redraw on the new screen.
-  // Re-applying them and calling showInactive() forces it to reappear.
   if (changed) {
     try { w.setAlwaysOnTop(true, 'screen-saver'); } catch {}
     try { w.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true }); } catch {}
@@ -85,8 +87,6 @@ export function showRecordingWindow(state: RecordingState): void {
       hasShadow: false,
       focusable: false,
       show: false,
-      // 'panel' on macOS creates an NSPanel which floats above full-screen
-      // apps and follows the user across spaces. Other platforms ignore it.
       ...(process.platform === 'darwin' && { type: 'panel' as const }),
       webPreferences: {
         preload: path.join(__dirname, '..', 'preload.js'),

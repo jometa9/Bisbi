@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import type { RecordingState } from './types';
 
-const BARS = 16;
-const FALLOFF = 0.85;
+const BARS = 12;
+const FALLOFF = 0.78;
 
 export function RecordingApp() {
   const [state, setState] = useState<RecordingState>('recording');
@@ -37,9 +37,7 @@ export function RecordingApp() {
 
   return (
     <div className={`recording-pill state-${state}`}>
-      <div className="rec-indicator" aria-hidden="true">
-        <span className="rec-square" />
-      </div>
+      <div className="rec-indicator" aria-hidden="true" />
       <div className="rec-waveform" aria-hidden="true">
         {bars.map((v, i) => (
           <span
