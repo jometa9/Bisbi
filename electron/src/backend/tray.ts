@@ -1,12 +1,15 @@
 import { Tray, Menu, nativeImage, app } from 'electron';
 import path from 'path';
 import fs from 'fs';
-import type { RecordingState } from './types';
+import type { RecordingState, UiLanguage } from './types';
+import { tBackend } from './i18n';
 
 let tray: Tray | null = null;
 let onOpenSettings: (() => void) | null = null;
 let onShowHistory: (() => void) | null = null;
 let lastState: RecordingState = 'idle';
+let currentOpts: TrayOptions | null = null;
+let currentLang: UiLanguage = 'en';
 
 function trayIconPath(): string {
   // Tray icon is a small monochrome PNG. Falls back to the main app icon if
@@ -37,6 +40,7 @@ function buildIcon(): Electron.NativeImage {
 }
 
 export interface TrayOptions {
+  uiLanguage: UiLanguage;
   onOpenSettings: () => void;
   onShowHistory: () => void;
   onQuit: () => void;
@@ -47,6 +51,8 @@ export function initTray(opts: TrayOptions): void {
   if (tray) return;
   onOpenSettings = opts.onOpenSettings;
   onShowHistory = opts.onShowHistory;
+  currentOpts = opts;
+  currentLang = opts.uiLanguage;
 
   try {
     tray = new Tray(buildIcon());
@@ -54,7 +60,7 @@ export function initTray(opts: TrayOptions): void {
     console.error('[tray] failed to create tray:', err);
     return;
   }
-  tray.setToolTip('Bisbi — listo para dictar');
+  tray.setToolTip(tBackend(currentLang, 'tray.tooltipIdle'));
 
   // Always show a visible label on macOS so the user can find the tray entry
   // even before we have a proper icon asset in build-resources/.
@@ -66,19 +72,19 @@ export function initTray(opts: TrayOptions): void {
     tray.on('click', () => opts.onOpenSettings());
   }
 
-  rebuildMenu(opts);
+  rebuildMenu();
 }
 
 export function setRecordingState(state: RecordingState): void {
   if (!tray) return;
   lastState = state;
-  const tooltip =
+  const tooltipKey =
     state === 'recording'
-      ? 'Bisbi — grabando…'
+      ? 'tray.tooltipRecording'
       : state === 'transcribing'
-      ? 'Bisbi — transcribiendo…'
-      : 'Bisbi — listo para dictar';
-  tray.setToolTip(tooltip);
+      ? 'tray.tooltipTranscribing'
+      : 'tray.tooltipIdle';
+  tray.setToolTip(tBackend(currentLang, tooltipKey));
   if (process.platform === 'darwin') {
     const title =
       state === 'recording' ? '● REC' : state === 'transcribing' ? '… ' : 'Bisbi';
@@ -90,8 +96,17 @@ export function getRecordingState(): RecordingState {
   return lastState;
 }
 
-function rebuildMenu(opts: TrayOptions): void {
+export function rebuildTrayLabels(lang: UiLanguage): void {
+  currentLang = lang;
   if (!tray) return;
+  // Refresh tooltip for the current state and rebuild the context menu.
+  setRecordingState(lastState);
+  rebuildMenu();
+}
+
+function rebuildMenu(): void {
+  if (!tray || !currentOpts) return;
+  const opts = currentOpts;
   const menu = Menu.buildFromTemplate([
     {
       label: 'Bisbi',
@@ -99,25 +114,25 @@ function rebuildMenu(opts: TrayOptions): void {
     },
     { type: 'separator' },
     {
-      label: 'Abrir ajustes',
+      label: tBackend(currentLang, 'tray.openSettings'),
       click: () => onOpenSettings?.(),
     },
     {
-      label: 'Historial',
+      label: tBackend(currentLang, 'tray.history'),
       click: () => onShowHistory?.(),
     },
     { type: 'separator' },
     {
-      label: 'Buscar actualizaciones',
+      label: tBackend(currentLang, 'tray.checkUpdates'),
       click: () => opts.onCheckForUpdates(),
     },
     { type: 'separator' },
     {
-      label: `Versión ${app.getVersion()}`,
+      label: tBackend(currentLang, 'tray.version', { v: app.getVersion() }),
       enabled: false,
     },
     {
-      label: 'Salir',
+      label: tBackend(currentLang, 'tray.quit'),
       click: () => opts.onQuit(),
     },
   ]);

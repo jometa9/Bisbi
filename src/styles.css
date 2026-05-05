@@ -584,3 +584,16 @@ body.recording {
   0%, 100% { opacity: 1; transform: scale(1); }
   50% { opacity: 0.5; transform: scale(0.8); }
 }
+
+/* RTL adjustments. Most of the layout is flex-based and flips automatically
+   when document.documentElement.dir is set to "rtl" by the I18nProvider.
+   These rules cover the few places that use physical (left/right) properties. */
+[dir="rtl"] .status {
+  margin-left: 0;
+  margin-right: auto;
+}
+
+[dir="rtl"] .history-meta .dim::before {
+  padding-right: 0;
+  padding-left: 6px;
+}

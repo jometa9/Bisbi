@@ -2,6 +2,7 @@ import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { App } from './App';
 import { RecordingApp } from './RecordingApp';
+import { I18nGate } from './i18n/I18nGate';
 import './styles.css';
 
 const root = createRoot(document.getElementById('root')!);
@@ -11,6 +12,8 @@ const isRecordingWindow = route.startsWith('/recording');
 
 root.render(
   <React.StrictMode>
-    {isRecordingWindow ? <RecordingApp /> : <App />}
+    <I18nGate>
+      {isRecordingWindow ? <RecordingApp /> : <App />}
+    </I18nGate>
   </React.StrictMode>
 );

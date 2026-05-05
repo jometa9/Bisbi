@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { AppSettings, RecordingState, TranscriptionRow } from '../types';
+import { useTranslation, type UiLanguage } from '../i18n';
 
 interface Props {
   settings: AppSettings;
@@ -7,6 +8,7 @@ interface Props {
 }
 
 export function Home({ settings, recState }: Props) {
+  const { t, language } = useTranslation();
   const [rows, setRows] = useState<TranscriptionRow[]>([]);
 
   useEffect(() => {
@@ -17,16 +19,15 @@ export function Home({ settings, recState }: Props) {
     return off;
   }, []);
 
-  const greeting = useMemo(() => timeGreeting(), []);
+  const greeting = useMemo(() => t(timeGreetingKey()), [t]);
   const last = rows[0];
   const today = useMemo(() => countToday(rows), [rows]);
 
-  const statusText =
-    recState === 'recording'
-      ? 'Grabando ahora'
-      : recState === 'transcribing'
-        ? 'Transcribiendo'
-        : 'Listo para escuchar';
+  const statusText = t(`home.statusTitle.${recState}` as const);
+  const transcriptionsLabel =
+    today.count === 1
+      ? t('home.transcriptionsOne')
+      : t('home.transcriptionsOther');
 
   return (
     <div className="home">
@@ -35,35 +36,38 @@ export function Home({ settings, recState }: Props) {
         <h1 className="home-title">
           {statusText}.
           <br />
-          <em>Apretá el atajo y hablá.</em>
+          <em>{t('home.titleHint')}</em>
         </h1>
       </div>
 
       <div className="home-hotkey">
-        <span className="home-hotkey-label">Atajo</span>
+        <span className="home-hotkey-label">{t('home.hotkeyLabel')}</span>
         <div className="home-hotkey-keys">{renderHotkey(settings.hotkey)}</div>
         <span className="home-hotkey-hint">
           {settings.pasteMode === 'paste'
-            ? 'El texto se pega automáticamente donde estés escribiendo.'
-            : 'El texto se copia al portapapeles.'}
+            ? t('home.hotkeyHintPaste')
+            : t('home.hotkeyHintClipboard')}
         </span>
       </div>
 
       <section className="home-section">
-        <h2 className="home-section-title">Hoy</h2>
+        <h2 className="home-section-title">{t('home.todaySection')}</h2>
         <div className="home-stats">
-          <Stat value={today.count} label={today.count === 1 ? 'transcripción' : 'transcripciones'} />
-          <Stat value={formatSeconds(today.seconds)} label="dictado" />
-          <Stat value={formatLanguage(last?.language) ?? '—'} label="último idioma" />
+          <Stat value={today.count} label={transcriptionsLabel} />
+          <Stat value={formatSeconds(today.seconds)} label={t('home.dictated')} />
+          <Stat
+            value={formatLanguage(last?.language, t) ?? '—'}
+            label={t('home.lastLanguage')}
+          />
         </div>
       </section>
 
       <section className="home-section">
-        <h2 className="home-section-title">Última transcripción</h2>
+        <h2 className="home-section-title">{t('home.lastTranscriptionSection')}</h2>
         {last ? (
           <article className="home-recent">
             <div className="home-recent-meta">
-              <time>{relativeTime(last.createdAt)}</time>
+              <time>{relativeTime(last.createdAt, language, t)}</time>
               {last.durationMs != null && (
                 <> · {(last.durationMs / 1000).toFixed(1)}s</>
               )}
@@ -71,7 +75,7 @@ export function Home({ settings, recState }: Props) {
             <p className="home-recent-text">{last.text}</p>
           </article>
         ) : (
-          <p className="home-empty">Todavía no hay transcripciones. Probá tu atajo.</p>
+          <p className="home-empty">{t('home.empty')}</p>
         )}
       </section>
     </div>
@@ -124,12 +128,16 @@ function prettyKey(part: string): string {
   }
 }
 
-function timeGreeting(): string {
+function timeGreetingKey():
+  | 'home.greeting.lateNight'
+  | 'home.greeting.morning'
+  | 'home.greeting.afternoon'
+  | 'home.greeting.evening' {
   const h = new Date().getHours();
-  if (h < 6) return 'Buenas noches';
-  if (h < 13) return 'Buen día';
-  if (h < 20) return 'Buenas tardes';
-  return 'Buenas noches';
+  if (h < 6) return 'home.greeting.lateNight';
+  if (h < 13) return 'home.greeting.morning';
+  if (h < 20) return 'home.greeting.afternoon';
+  return 'home.greeting.evening';
 }
 
 function countToday(rows: TranscriptionRow[]): { count: number; seconds: number } {
@@ -155,27 +163,35 @@ function formatSeconds(s: number): string {
   return rem === 0 ? `${m}m` : `${m}m ${rem}s`;
 }
 
-function formatLanguage(code: string | null | undefined): string | null {
+type TFn = ReturnType<typeof useTranslation>['t'];
+
+function formatLanguage(code: string | null | undefined, t: TFn): string | null {
   if (!code) return null;
-  const map: Record<string, string> = {
-    es: 'Español',
-    en: 'Inglés',
-    pt: 'Portugués',
-    fr: 'Francés',
-    it: 'Italiano',
-    de: 'Alemán',
-  };
-  return map[code] ?? code.toUpperCase();
+  const key = `languages.${code}` as const;
+  // Falls back to the uppercase code when the language is not in the catalog.
+  const translated = t(key as Parameters<TFn>[0]);
+  if (translated === key) return code.toUpperCase();
+  return translated;
 }
 
-function relativeTime(ts: number): string {
+function relativeTime(ts: number, lang: UiLanguage, t: TFn): string {
   const diff = Date.now() - ts;
   const mins = Math.floor(diff / 60000);
-  if (mins < 1) return 'hace un momento';
-  if (mins < 60) return `hace ${mins} min`;
+  if (mins < 1) return t('home.relative.justNow');
+  if (mins < 60) return t('home.relative.minutes', { n: mins });
   const hours = Math.floor(mins / 60);
-  if (hours < 24) return `hace ${hours} h`;
+  if (hours < 24) return t('home.relative.hours', { n: hours });
   const days = Math.floor(hours / 24);
-  if (days < 7) return `hace ${days} d`;
-  return new Date(ts).toLocaleDateString();
+  if (days < 7) return t('home.relative.days', { n: days });
+  return new Date(ts).toLocaleDateString(localeForLang(lang));
+}
+
+function localeForLang(lang: UiLanguage): string {
+  switch (lang) {
+    case 'en': return 'en-US';
+    case 'es': return 'es-ES';
+    case 'zh': return 'zh-CN';
+    case 'hi': return 'hi-IN';
+    case 'ar': return 'ar';
+  }
 }

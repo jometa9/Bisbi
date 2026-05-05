@@ -4,10 +4,12 @@ import { Settings } from './pages/Settings';
 import { History } from './pages/History';
 import { startRecording, type RecordingHandle } from './audio';
 import type { AppSettings, RecordingState } from './types';
+import { useTranslation } from './i18n';
 
 type Tab = 'home' | 'settings' | 'history';
 
 export function App() {
+  const { t } = useTranslation();
   const [tab, setTab] = useState<Tab>('home');
   const [settings, setSettings] = useState<AppSettings | null>(null);
   const [recState, setRecState] = useState<RecordingState>('idle');
@@ -47,9 +49,7 @@ export function App() {
       } catch (err) {
         console.error('[App] mic access failed:', err);
         await window.bisbi.cancelRecording();
-        alert(
-          'No se pudo acceder al micrófono. Asegurate de que Bisbi tenga permiso en los ajustes del sistema.'
-        );
+        alert(t('app.micError'));
       }
     });
 
@@ -73,51 +73,55 @@ export function App() {
       offStop();
       handle?.cancel();
     };
-  }, []);
+  }, [t]);
 
   if (!window.bisbi) {
     return (
       <div className="not-electron">
         <h1>Bisbi</h1>
+        <p>{t('app.notElectron.body')}</p>
         <p>
-          Esta ventana tiene que abrirse desde Electron para que funcionen el
-          hotkey global, el micrófono y la transcripción.
-        </p>
-        <p>
-          Si estás en desarrollo, corré <code>npm run dev</code> en la raíz del
-          repo y dejá que Electron abra su propia ventana. No abras{' '}
-          <code>http://localhost:7775</code> directamente en el browser.
+          {renderWithTokens(
+            t('app.notElectron.devHint', {
+              cmd: '__CMD__',
+              url: '__URL__',
+            }),
+            {
+              __CMD__: <code key="cmd">npm run dev</code>,
+              __URL__: <code key="url">http://localhost:7775</code>,
+            }
+          )}
         </p>
       </div>
     );
   }
 
   if (!settings) {
-    return <div className="loading">Cargando…</div>;
+    return <div className="loading">{t('app.loading')}</div>;
   }
 
   return (
     <div className="app">
       <header className="titlebar">
-        <div className="brand">Bisbi</div>
+        <div className="brand">{t('app.brand')}</div>
         <nav className="tabs">
           <button
             className={tab === 'home' ? 'active' : ''}
             onClick={() => setTab('home')}
           >
-            Inicio
+            {t('app.tabs.home')}
           </button>
           <button
             className={tab === 'history' ? 'active' : ''}
             onClick={() => setTab('history')}
           >
-            Historial
+            {t('app.tabs.history')}
           </button>
           <button
             className={tab === 'settings' ? 'active' : ''}
             onClick={() => setTab('settings')}
           >
-            Ajustes
+            {t('app.tabs.settings')}
           </button>
         </nav>
         <div className="status">
@@ -127,8 +131,10 @@ export function App() {
 
       {resourcesOk === false && (
         <div className="banner banner-error">
-          Faltan los recursos de Whisper. Mirá el README para descargar el
-          binario y el modelo en <code>resources/whisper</code>.
+          {renderWithTokens(
+            t('app.resourcesMissing', { path: '__PATH__' }),
+            { __PATH__: <code key="path">resources/whisper</code> }
+          )}
         </div>
       )}
 
@@ -164,7 +170,26 @@ export function App() {
 }
 
 function StatusBadge({ state }: { state: RecordingState }) {
-  const text =
-    state === 'recording' ? 'Grabando' : state === 'transcribing' ? 'Transcribiendo' : 'Listo';
+  const { t } = useTranslation();
+  const text = t(`app.status.${state}` as const);
   return <span className={`badge badge-${state}`}>{text}</span>;
+}
+
+// Splits a translated string by tokens like __CMD__ and replaces them with
+// React nodes. Lets translators move placeholders around freely while the
+// markup is owned by the component.
+function renderWithTokens(
+  template: string,
+  replacements: Record<string, React.ReactNode>
+): React.ReactNode[] {
+  const tokens = Object.keys(replacements);
+  if (tokens.length === 0) return [template];
+  const re = new RegExp(`(${tokens.join('|')})`, 'g');
+  return template.split(re).map((part, i) =>
+    tokens.includes(part) ? (
+      <span key={i}>{replacements[part]}</span>
+    ) : (
+      <span key={i}>{part}</span>
+    )
+  );
 }

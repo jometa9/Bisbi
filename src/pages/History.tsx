@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
 import type { TranscriptionRow } from '../types';
+import { useTranslation } from '../i18n';
 
 export function History() {
+  const { t } = useTranslation();
   const [rows, setRows] = useState<TranscriptionRow[]>([]);
 
   const refresh = () => void window.bisbi.listHistory(200).then(setRows);
@@ -15,22 +17,22 @@ export function History() {
   return (
     <div className="history">
       <div className="history-header">
-        <h2>Transcripciones recientes</h2>
+        <h2>{t('history.title')}</h2>
         {rows.length > 0 && (
           <button
             className="btn-secondary"
             onClick={async () => {
-              if (!confirm('¿Borrar todo el historial?')) return;
+              if (!confirm(t('history.confirmClear'))) return;
               await window.bisbi.clearHistory();
             }}
           >
-            Borrar todo
+            {t('history.clearAll')}
           </button>
         )}
       </div>
 
       {rows.length === 0 ? (
-        <p className="empty">Todavía no hay transcripciones. Probá tu atajo.</p>
+        <p className="empty">{t('history.empty')}</p>
       ) : (
         <ul className="history-list">
           {rows.map((row) => (
@@ -48,13 +50,13 @@ export function History() {
                   className="btn-link"
                   onClick={() => navigator.clipboard.writeText(row.text)}
                 >
-                  Copiar
+                  {t('history.copy')}
                 </button>
                 <button
                   className="btn-link danger"
                   onClick={() => window.bisbi.deleteHistory(row.id)}
                 >
-                  Eliminar
+                  {t('history.delete')}
                 </button>
               </div>
             </li>

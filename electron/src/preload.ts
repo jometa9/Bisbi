@@ -15,6 +15,7 @@ const bisbi = {
   // App
   getAppVersion: () => invoke<string>('app:getVersion'),
   getPlatform: () => invoke<NodeJS.Platform>('app:getPlatform'),
+  getSystemLocale: () => invoke<string>('app:getSystemLocale'),
   openSettings: () => invoke<void>('app:openSettings'),
 
   // Settings

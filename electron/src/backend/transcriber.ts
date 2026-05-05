@@ -4,10 +4,12 @@ import path from 'path';
 import fs from 'fs';
 import os from 'os';
 import { randomUUID } from 'crypto';
-import { BUILD_CONFIG } from '../buildConfig';
+import { BUILD_CONFIG, WHISPER_MODELS } from '../buildConfig';
+import type { Precision } from './types';
 
 export interface TranscribeOptions {
   language: string; // 'auto' or ISO code (e.g. 'es', 'en')
+  precision: Precision;
   threads?: number;
 }
 
@@ -15,6 +17,11 @@ export interface TranscribeOutput {
   text: string;
   language: string | null;
   durationMs: number;
+  modelFile: string;
+}
+
+export function modelFileForPrecision(precision: Precision): string {
+  return WHISPER_MODELS[precision] ?? WHISPER_MODELS[BUILD_CONFIG.DEFAULT_PRECISION];
 }
 
 function platformDir(): string {
@@ -43,8 +50,8 @@ export function whisperBinaryPath(): string {
   return path.join(resourceRoot(), platformDir(), whisperBinaryName());
 }
 
-export function whisperModelPath(): string {
-  return path.join(resourceRoot(), BUILD_CONFIG.WHISPER_MODEL_FILE);
+export function whisperModelPath(precision: Precision = BUILD_CONFIG.DEFAULT_PRECISION): string {
+  return path.join(resourceRoot(), modelFileForPrecision(precision));
 }
 
 export interface ResourceCheck {
@@ -54,9 +61,9 @@ export interface ResourceCheck {
   missing: string[];
 }
 
-export function checkResources(): ResourceCheck {
+export function checkResources(precision: Precision = BUILD_CONFIG.DEFAULT_PRECISION): ResourceCheck {
   const binaryPath = whisperBinaryPath();
-  const modelPath = whisperModelPath();
+  const modelPath = whisperModelPath(precision);
   const missing: string[] = [];
   if (!fs.existsSync(binaryPath)) missing.push(binaryPath);
   if (!fs.existsSync(modelPath)) missing.push(modelPath);
@@ -96,7 +103,7 @@ export async function transcribePcm(
   channels: number,
   opts: TranscribeOptions
 ): Promise<TranscribeOutput> {
-  const check = checkResources();
+  const check = checkResources(opts.precision);
   if (!check.ok) {
     throw new Error(
       `Falta el binario o el modelo de whisper.cpp.\n` +
@@ -124,6 +131,7 @@ export async function transcribePcm(
       text: text.trim(),
       language: opts.language === 'auto' ? null : opts.language,
       durationMs,
+      modelFile: modelFileForPrecision(opts.precision),
     };
   } finally {
     try { fs.unlinkSync(wavPath); } catch {}

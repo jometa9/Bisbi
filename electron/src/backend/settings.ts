@@ -9,8 +9,10 @@ const SETTINGS_FILE = 'settings.json';
 const DEFAULT_SETTINGS: AppSettings = {
   hotkey: BUILD_CONFIG.DEFAULT_HOTKEY,
   language: 'auto',
+  uiLanguage: 'system',
   pasteMode: 'paste',
   saveHistory: true,
+  precision: 'balanced',
 };
 
 function settingsPath(): string {

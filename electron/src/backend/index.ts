@@ -26,6 +26,8 @@ import {
   initUpdater,
   installUpdateAndRestart,
 } from './updater';
+import { getSystemLocale, resolveUiLanguage, tBackend } from './i18n';
+import { rebuildTrayLabels } from './tray';
 import type { RecordingState, AppSettings, TranscriptionResult } from './types';
 
 interface BackendOptions {
@@ -63,7 +65,9 @@ export async function registerBackend(opts: BackendOptions): Promise<void> {
 
   initUpdater(broadcast);
 
+  const settings = getSettings();
   initTray({
+    uiLanguage: resolveUiLanguage(settings.uiLanguage),
     onOpenSettings: opts.onOpenSettings,
     onShowHistory: () => {
       opts.onOpenSettings();
@@ -73,7 +77,6 @@ export async function registerBackend(opts: BackendOptions): Promise<void> {
     onQuit: opts.onQuit,
   });
 
-  const settings = getSettings();
   applyHotkey(settings.hotkey, onHotkeyPressed);
 
   // ---------- IPC: settings ----------
@@ -89,8 +92,15 @@ export async function registerBackend(opts: BackendOptions): Promise<void> {
           // Revert to previous hotkey if the new one couldn't register.
           const reverted = updateSettings({ hotkey: prev.hotkey });
           applyHotkey(reverted.hotkey, onHotkeyPressed);
-          throw new Error(`No se pudo registrar el atajo "${next.hotkey}". Probá otro.`);
+          const lang = resolveUiLanguage(next.uiLanguage);
+          throw new Error(tBackend(lang, 'errors.hotkeyRegister', { accel: next.hotkey }));
         }
+      }
+      if (
+        patch.uiLanguage !== undefined &&
+        patch.uiLanguage !== prev.uiLanguage
+      ) {
+        rebuildTrayLabels(resolveUiLanguage(next.uiLanguage));
       }
       broadcast('settings:changed', next);
       return next;
@@ -99,6 +109,7 @@ export async function registerBackend(opts: BackendOptions): Promise<void> {
   ipcMain.handle('settings:reset', (): AppSettings => {
     const next = resetSettings();
     applyHotkey(next.hotkey, onHotkeyPressed);
+    rebuildTrayLabels(resolveUiLanguage(next.uiLanguage));
     broadcast('settings:changed', next);
     return next;
   });
@@ -120,6 +131,7 @@ export async function registerBackend(opts: BackendOptions): Promise<void> {
         const cfg = getSettings();
         const out = await transcribePcm(buf, payload.sampleRate, payload.channels, {
           language: cfg.language,
+          precision: cfg.precision,
         });
         const result: TranscriptionResult = {
           id: randomUUID(),
@@ -139,7 +151,7 @@ export async function registerBackend(opts: BackendOptions): Promise<void> {
             text: result.text,
             language: result.language,
             durationMs: result.durationMs,
-            model: 'ggml-base-q5_1',
+            model: out.modelFile.replace(/\.bin$/, ''),
           });
           broadcast('history:changed');
         }
@@ -172,9 +184,10 @@ export async function registerBackend(opts: BackendOptions): Promise<void> {
   });
 
   // ---------- IPC: resources / system ----------
-  ipcMain.handle('resources:check', () => checkResources());
+  ipcMain.handle('resources:check', () => checkResources(getSettings().precision));
   ipcMain.handle('app:getVersion', () => app.getVersion());
   ipcMain.handle('app:getPlatform', () => process.platform);
+  ipcMain.handle('app:getSystemLocale', () => getSystemLocale());
   ipcMain.handle('app:openSettings', () => activeMainWindowOpener?.());
 
   // ---------- IPC: updater ----------
