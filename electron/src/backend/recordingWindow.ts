@@ -5,12 +5,14 @@ import type { RecordingState } from './types';
 
 let win: BrowserWindow | null = null;
 
-const WIDTH = 100;
-const HEIGHT = 28;
+const WIDTH = 130;
+const HEIGHT = 22;
 const MARGIN_BOTTOM = 15;
 
 let followTimer: NodeJS.Timeout | null = null;
 let lastDisplayId: number | null = null;
+let fadeTimer: NodeJS.Timeout | null = null;
+const FADE_MS = 180;
 
 function frontendUrl(route: string): string {
   if (app.isPackaged) {
@@ -70,6 +72,30 @@ function stopFollowingActiveDisplay(): void {
   followTimer = null;
 }
 
+function cancelFade(): void {
+  if (!fadeTimer) return;
+  clearInterval(fadeTimer);
+  fadeTimer = null;
+}
+
+function fade(target: number, onDone?: () => void): void {
+  cancelFade();
+  if (!win || win.isDestroyed()) return;
+  const from = win.getOpacity();
+  if (from === target) { onDone?.(); return; }
+  const start = Date.now();
+  fadeTimer = setInterval(() => {
+    if (!win || win.isDestroyed()) { cancelFade(); return; }
+    const t = Math.min(1, (Date.now() - start) / FADE_MS);
+    const v = from + (target - from) * t;
+    try { win.setOpacity(v); } catch {}
+    if (t >= 1) {
+      cancelFade();
+      onDone?.();
+    }
+  }, 16);
+}
+
 export function showRecordingWindow(state: RecordingState): void {
   if (!win || win.isDestroyed()) {
     win = new BrowserWindow({
@@ -106,7 +132,11 @@ export function showRecordingWindow(state: RecordingState): void {
     });
   }
   placeBottomCenter(win);
-  if (!win.isVisible()) win.showInactive();
+  if (!win.isVisible()) {
+    try { win.setOpacity(0); } catch {}
+    win.showInactive();
+  }
+  fade(1);
   startFollowingActiveDisplay();
   setState(state);
 }
@@ -125,5 +155,7 @@ export function setLevel(level: number): void {
 export function hideRecordingWindow(): void {
   stopFollowingActiveDisplay();
   if (!win || win.isDestroyed()) return;
-  win.hide();
+  // Don't actually hide() — keep the window alive at opacity 0 so the next
+  // show is a pure opacity fade with no native macOS show animation.
+  fade(0);
 }

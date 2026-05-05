@@ -7,6 +7,7 @@ const FALLOFF = 0.78;
 export function RecordingApp() {
   const [state, setState] = useState<RecordingState>('recording');
   const [bars, setBars] = useState<number[]>(() => new Array(BARS).fill(0));
+  const [seconds, setSeconds] = useState(0);
   const lastLevelRef = useRef(0);
 
   useEffect(() => {
@@ -35,6 +36,19 @@ export function RecordingApp() {
     return () => window.clearInterval(id);
   }, [state]);
 
+  useEffect(() => {
+    if (state === 'idle') {
+      setSeconds(0);
+      return;
+    }
+    if (state === 'recording') {
+      setSeconds(0);
+      const id = window.setInterval(() => setSeconds((s) => s + 1), 1000);
+      return () => window.clearInterval(id);
+    }
+    // 'transcribing' freezes the counter at the value reached during recording
+  }, [state]);
+
   return (
     <div className={`recording-pill state-${state}`}>
       <div className="rec-indicator" aria-hidden="true" />
@@ -43,10 +57,19 @@ export function RecordingApp() {
           <span
             key={i}
             className="rec-bar"
-            style={{ transform: `scaleY(${0.12 + Math.min(1, v) * 0.88})` }}
+            style={{ transform: `scaleY(${0.12 + Math.min(1, v) * 0.68})` }}
           />
         ))}
       </div>
+      {state !== 'idle' && (
+        <span className="rec-time">{formatTime(seconds)}</span>
+      )}
     </div>
   );
+}
+
+function formatTime(s: number): string {
+  const m = Math.floor(s / 60);
+  const sec = (s % 60).toString().padStart(2, '0');
+  return `${m}:${sec}`;
 }

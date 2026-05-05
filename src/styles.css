@@ -558,16 +558,15 @@ html.recording-window #root {
 .recording-pill {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   background: rgba(20, 20, 22, 0.5);
-  padding: 0 10px;
+  padding: 0 7px;
   border-radius: 999px;
   -webkit-app-region: no-drag;
   height: 100%;
   border: 1px solid rgba(255, 255, 255, 0.08);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
   backdrop-filter: blur(12px);
-  animation: rec-fade-in 180ms ease-out;
 }
 
 .rec-indicator {
@@ -584,7 +583,7 @@ html.recording-window #root {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 16px;
+  height: 12px;
 }
 
 .rec-bar {
@@ -597,7 +596,20 @@ html.recording-window #root {
   transition: transform 90ms linear;
 }
 
+.rec-time {
+  flex: 0 0 auto;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 10px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  color: rgba(255, 255, 255, 0.85);
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
 .recording-pill.state-transcribing .rec-indicator {
+  width: 8px;
+  height: 8px;
   background: var(--transcribing);
 }
 
@@ -627,13 +639,8 @@ html.recording-window #root {
 }
 
 @keyframes rec-scan {
-  0%, 100% { transform: scaleY(0.18); }
-  50% { transform: scaleY(0.7); }
-}
-
-@keyframes rec-fade-in {
-  from { opacity: 0; transform: translateY(4px); }
-  to { opacity: 1; transform: translateY(0); }
+  0%, 100% { transform: scaleY(0.12); }
+  50% { transform: scaleY(0.60); }
 }
 
 /* RTL adjustments. Most of the layout is flex-based and flips automatically
