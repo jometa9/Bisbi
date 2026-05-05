@@ -99,8 +99,9 @@
       }
     ],
     "publish": {
-      "provider": "generic",
-      "url": "https://bisbi.app/updates/"
+      "provider": "github",
+      "owner": "jometa9",
+      "repo": "Bisbi"
     },
     "mac": {
       "category": "public.app-category.productivity",

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { Fragment, useMemo, useState, type ReactNode } from 'react';
 import type { TranscriptionRow } from '../types';
 import { useTranslation, type UiLanguage } from '../i18n';
 
@@ -35,6 +35,7 @@ export function TranscriptionList({ rows, emptyLabel }: Props) {
 function TranscriptionItem({ row, language }: { row: TranscriptionRow; language: UiLanguage }) {
   const { t } = useTranslation();
   const [copied, setCopied] = useState(false);
+  const formatted = useMemo(() => formatTranscript(row.text), [row.text]);
 
   const handleCopy = async () => {
     try {
@@ -54,7 +55,7 @@ function TranscriptionItem({ row, language }: { row: TranscriptionRow; language:
     <li className="tx-item">
       <span className="tx-time">{formatTime(row.createdAt, language)}</span>
       <div className="tx-body">
-        <p className="tx-text">{row.text}</p>
+        <p className="tx-text">{formatted}</p>
         <div className="tx-actions">
           <button
             type="button"
@@ -171,4 +172,31 @@ function localeForLang(lang: UiLanguage): string {
     case 'hi': return 'hi-IN';
     case 'ar': return 'ar';
   }
+}
+
+// Whisper.cpp returns plain text, but it does emit two cues we can lean on:
+//   - non-speech annotations like [Music], [Applause], (laughter)
+//   - emphasized phrases that come back fully capitalized
+// Render the first as muted italics and the second as bold, leave the rest as-is.
+const TRANSCRIPT_TOKEN_RE = /\[[^\]\n]+\]|\([^)\n]+\)|\b[\p{Lu}\p{N}][\p{Lu}\p{N}'’\-]{2,}\b/gu;
+
+function formatTranscript(text: string): ReactNode {
+  if (!text) return text;
+  const nodes: ReactNode[] = [];
+  let lastIndex = 0;
+  let key = 0;
+  for (const match of text.matchAll(TRANSCRIPT_TOKEN_RE)) {
+    const start = match.index ?? 0;
+    if (start > lastIndex) nodes.push(text.slice(lastIndex, start));
+    const token = match[0];
+    const first = token[0];
+    if (first === '[' || first === '(') {
+      nodes.push(<em key={key++} className="tx-annotation">{token}</em>);
+    } else {
+      nodes.push(<strong key={key++} className="tx-emphasis">{token}</strong>);
+    }
+    lastIndex = start + token.length;
+  }
+  if (lastIndex < text.length) nodes.push(text.slice(lastIndex));
+  return <Fragment>{nodes}</Fragment>;
 }

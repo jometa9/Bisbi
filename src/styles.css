@@ -578,6 +578,15 @@ button { font-family: inherit; }
   overflow-wrap: anywhere;
 }
 
+.tx-text .tx-annotation {
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.tx-text .tx-emphasis {
+  font-weight: 600;
+}
+
 .tx-actions {
   display: flex;
   gap: 6px;
