@@ -7,14 +7,22 @@ interface Props {
   recState: RecordingState;
 }
 
+type KeyStyle = 'mac' | 'win';
+
 export function Home({ settings, recState }: Props) {
   const { t, language } = useTranslation();
   const [rows, setRows] = useState<TranscriptionRow[]>([]);
+  const [keyStyle, setKeyStyle] = useState<KeyStyle>(() =>
+    typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.userAgent) ? 'mac' : 'win'
+  );
 
   useEffect(() => {
     void window.bisbi.listHistory(50).then(setRows);
     const off = window.bisbi.onHistoryChange(() => {
       void window.bisbi.listHistory(50).then(setRows);
+    });
+    void window.bisbi.getPlatform().then((p) => {
+      setKeyStyle(p === 'darwin' ? 'mac' : 'win');
     });
     return off;
   }, []);
@@ -42,7 +50,9 @@ export function Home({ settings, recState }: Props) {
 
       <div className="home-hotkey">
         <span className="home-hotkey-label">{t('home.hotkeyLabel')}</span>
-        <div className="home-hotkey-keys">{renderHotkey(settings.hotkey)}</div>
+        <div className="home-hotkey-keys">
+          {renderHotkey(settings.hotkey, keyStyle, hotkeyVisualState(recState, settings.handsFreeMode))}
+        </div>
         <span className="home-hotkey-hint">
           {settings.pasteMode === 'paste'
             ? t('home.hotkeyHintPaste')
@@ -91,11 +101,19 @@ function Stat({ value, label }: { value: string | number; label: string }) {
   );
 }
 
-function renderHotkey(accel: string) {
+type HotkeyVisualState = 'idle' | 'pressed' | 'lit';
+
+function hotkeyVisualState(rec: RecordingState, handsFree: boolean): HotkeyVisualState {
+  if (rec !== 'recording') return 'idle';
+  return handsFree ? 'lit' : 'pressed';
+}
+
+function renderHotkey(accel: string, style: KeyStyle, visual: HotkeyVisualState) {
   const parts = accel.split('+').filter(Boolean);
+  const stateClass = visual === 'idle' ? '' : ` kbd-${visual}`;
   return parts.flatMap((part, i) => {
     const node = (
-      <kbd key={`k-${i}`} className="kbd">
+      <kbd key={`k-${i}`} className={`kbd kbd-${style}${stateClass}`}>
         {prettyKey(part)}
       </kbd>
     );

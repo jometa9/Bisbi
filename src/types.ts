@@ -7,6 +7,7 @@ export type Precision = 'fast' | 'balanced' | 'high';
 
 export interface AppSettings {
   hotkey: string;
+  handsFreeMode: boolean;
   language: string;
   uiLanguage: UiLanguageSetting;
   pasteMode: 'paste' | 'clipboard';

@@ -25,5 +25,9 @@ export const BUILD_CONFIG = {
   PRODUCT_NAME: 'Bisbi',
   WHISPER_MODELS,
   DEFAULT_PRECISION: 'balanced' as const,
-  DEFAULT_HOTKEY: process.platform === 'darwin' ? 'Cmd+Shift+Space' : 'Ctrl+Shift+Space',
+  // Single-key defaults so the hotkey works in push-to-talk: hold one thumb-
+  // reachable key. Fn on Mac (libuiohook reports it as VC_FUNCTION); Right Alt
+  // elsewhere because Fn isn't a reportable keycode on most non-Mac keyboards.
+  DEFAULT_HOTKEY: process.platform === 'darwin' ? 'Fn' : 'AltRight',
+  DEFAULT_HANDS_FREE: false,
 } as const;

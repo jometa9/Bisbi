@@ -8,6 +8,7 @@ const SETTINGS_FILE = 'settings.json';
 
 const DEFAULT_SETTINGS: AppSettings = {
   hotkey: BUILD_CONFIG.DEFAULT_HOTKEY,
+  handsFreeMode: BUILD_CONFIG.DEFAULT_HANDS_FREE,
   language: 'auto',
   uiLanguage: 'system',
   pasteMode: 'paste',

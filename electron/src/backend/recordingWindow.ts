@@ -1,6 +1,7 @@
 import { BrowserWindow, screen, app } from 'electron';
 import path from 'path';
 import { resolveDevFrontendPort } from '../devPort';
+import { hardenWindow } from '../windowHardening';
 import type { RecordingState } from './types';
 
 let win: BrowserWindow | null = null;

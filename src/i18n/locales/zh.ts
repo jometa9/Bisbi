@@ -69,6 +69,13 @@ export const zh: Translations = {
       change: '更改',
       cancel: '取消',
     },
+    handsFree: {
+      title: '免提模式',
+      description: '关闭时,按住快捷键进行录音(按住说话)。快速双击会锁定录音,直到你再次点击。',
+      label: '点击开始,再次点击结束',
+      hintOn: '已开启:点击快捷键一次开始,再次点击结束。',
+      hintOff: '已关闭:按住快捷键即可录音。快速双击会锁定录音,这样你就可以松开按键。',
+    },
     transcriptionLanguage: {
       title: '转写语言',
       description: 'Whisper 会自动检测语言。固定它可以提速。',

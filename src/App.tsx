@@ -104,43 +104,48 @@ export function App() {
 
   return (
     <div className="app">
-      <header className="titlebar">
-        <div className="brand">{t('app.brand')}</div>
-        <nav className="tabs">
+      <aside className="sidebar">
+        <div className="sidebar-top">
+          <div className="sidebar-brand">{t('app.brand')}</div>
+        </div>
+        <nav className="sidebar-nav">
           <button
             className={tab === 'home' ? 'active' : ''}
             onClick={() => setTab('home')}
           >
+            <HomeIcon />
             {t('app.tabs.home')}
           </button>
           <button
             className={tab === 'history' ? 'active' : ''}
             onClick={() => setTab('history')}
           >
+            <HistoryIcon />
             {t('app.tabs.history')}
           </button>
           <button
             className={tab === 'settings' ? 'active' : ''}
             onClick={() => setTab('settings')}
           >
+            <SettingsIcon />
             {t('app.tabs.settings')}
           </button>
         </nav>
-        <div className="status">
+        <div className="sidebar-bottom">
           <StatusBadge state={recState} />
+          <span className="sidebar-version">v{appVersion}</span>
         </div>
-      </header>
-
-      {resourcesOk === false && (
-        <div className="banner banner-error">
-          {renderWithTokens(
-            t('app.resourcesMissing', { path: '__PATH__' }),
-            { __PATH__: <code key="path">resources/whisper</code> }
-          )}
-        </div>
-      )}
+      </aside>
 
       <main className="content">
+        {resourcesOk === false && (
+          <div className="banner banner-error">
+            {renderWithTokens(
+              t('app.resourcesMissing', { path: '__PATH__' }),
+              { __PATH__: <code key="path">resources/whisper</code> }
+            )}
+          </div>
+        )}
         <div className="content-inner">
           {tab === 'home' && <Home settings={settings} recState={recState} />}
           {tab === 'settings' && (
@@ -163,11 +168,67 @@ export function App() {
           {tab === 'history' && <History />}
         </div>
       </main>
-
-      <footer className="footer">
-        <span>v{appVersion}</span>
-      </footer>
     </div>
+  );
+}
+
+function HomeIcon() {
+  return (
+    <svg
+      className="nav-icon"
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-7h-6v7H4a1 1 0 0 1-1-1z" />
+    </svg>
+  );
+}
+
+function HistoryIcon() {
+  return (
+    <svg
+      className="nav-icon"
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M3 12a9 9 0 1 0 3-6.7" />
+      <path d="M3 4v5h5" />
+      <path d="M12 7v5l3 2" />
+    </svg>
+  );
+}
+
+function SettingsIcon() {
+  return (
+    <svg
+      className="nav-icon"
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <circle cx="12" cy="12" r="3" />
+      <path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3h.1a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8v.1a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z" />
+    </svg>
   );
 }
 

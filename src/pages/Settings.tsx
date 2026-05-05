@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import type { AppSettings, Precision } from '../types';
 import {
   SUPPORTED_UI_LANGUAGES,
@@ -48,6 +48,25 @@ export function Settings({ settings, onChange, onReset }: Props) {
           value={settings.hotkey}
           onChange={(hotkey) => onChange({ hotkey })}
         />
+      </Section>
+
+      <Section
+        title={t('settings.handsFree.title')}
+        description={t('settings.handsFree.description')}
+      >
+        <label className="checkbox">
+          <input
+            type="checkbox"
+            checked={settings.handsFreeMode}
+            onChange={(e) => onChange({ handsFreeMode: e.target.checked })}
+          />
+          <span>{t('settings.handsFree.label')}</span>
+        </label>
+        <small style={{ display: 'block', opacity: 0.7, marginTop: 6 }}>
+          {settings.handsFreeMode
+            ? t('settings.handsFree.hintOn')
+            : t('settings.handsFree.hintOff')}
+        </small>
       </Section>
 
       <Section
@@ -182,24 +201,63 @@ function HotkeyInput({
   const [capturing, setCapturing] = useState(false);
   const [draft, setDraft] = useState(value);
   const ref = useRef<HTMLDivElement>(null);
+  // Tracks whether a non-modifier key was pressed during this capture
+  // session. If only modifiers were pressed and then released, we accept
+  // the modifier itself as a bare-modifier hotkey (e.g. AltRight).
+  const sawNonModifierRef = useRef(false);
+  const isMac = useMemo(
+    () =>
+      typeof navigator !== 'undefined' &&
+      /Mac|iPhone|iPod|iPad/.test(navigator.platform),
+    []
+  );
 
   useEffect(() => setDraft(value), [value]);
 
   useEffect(() => {
     if (!capturing) return;
-    const handler = (e: KeyboardEvent) => {
+    sawNonModifierRef.current = false;
+
+    const onKeyDown = (e: KeyboardEvent) => {
       e.preventDefault();
+      const isMod =
+        e.key === 'Control' ||
+        e.key === 'Shift' ||
+        e.key === 'Alt' ||
+        e.key === 'Meta';
+      if (!isMod) sawNonModifierRef.current = true;
       const accel = keyEventToAccelerator(e);
       if (accel) {
         setDraft(accel);
         if (isFinalAccelerator(accel)) {
-          setCapturing(false);
-          onChange(accel);
+          finish(accel);
         }
       }
     };
-    window.addEventListener('keydown', handler, true);
-    return () => window.removeEventListener('keydown', handler, true);
+
+    const onKeyUp = (e: KeyboardEvent) => {
+      // If the user released a modifier without ever pressing a non-modifier,
+      // treat the modifier itself as a bare-modifier accelerator (handy for
+      // single-key hotkeys like Right Alt / Right Cmd).
+      if (sawNonModifierRef.current) return;
+      const bare = bareModifierFromCode(e.code);
+      if (!bare) return;
+      e.preventDefault();
+      finish(bare);
+    };
+
+    const finish = (accel: string) => {
+      setDraft(accel);
+      setCapturing(false);
+      onChange(accel);
+    };
+
+    window.addEventListener('keydown', onKeyDown, true);
+    window.addEventListener('keyup', onKeyUp, true);
+    return () => {
+      window.removeEventListener('keydown', onKeyDown, true);
+      window.removeEventListener('keyup', onKeyUp, true);
+    };
   }, [capturing, onChange]);
 
   return (
@@ -213,6 +271,32 @@ function HotkeyInput({
       >
         {capturing ? t('settings.hotkey.cancel') : t('settings.hotkey.change')}
       </button>
+      <div className="hotkey-presets">
+        {isMac && (
+          <button
+            type="button"
+            className="btn-link"
+            onClick={() => {
+              setDraft('Fn');
+              onChange('Fn');
+              setCapturing(false);
+            }}
+          >
+            Fn
+          </button>
+        )}
+        <button
+          type="button"
+          className="btn-link"
+          onClick={() => {
+            setDraft('AltRight');
+            onChange('AltRight');
+            setCapturing(false);
+          }}
+        >
+          {isMac ? 'Right Option' : 'Right Alt'}
+        </button>
+      </div>
     </div>
   );
 }
@@ -230,9 +314,33 @@ function keyEventToAccelerator(e: KeyboardEvent): string | null {
 }
 
 function isFinalAccelerator(accel: string): boolean {
-  // Require at least one non-modifier key.
   const lastPart = accel.split('+').pop() ?? '';
   return !['Cmd', 'Ctrl', 'Alt', 'Shift'].includes(lastPart);
+}
+
+function bareModifierFromCode(code: string): string | null {
+  switch (code) {
+    case 'AltRight':
+      return 'AltRight';
+    case 'AltLeft':
+      return 'AltLeft';
+    case 'ControlRight':
+      return 'CtrlRight';
+    case 'ControlLeft':
+      return 'CtrlLeft';
+    case 'ShiftRight':
+      return 'ShiftRight';
+    case 'ShiftLeft':
+      return 'ShiftLeft';
+    case 'MetaRight':
+    case 'OSRight':
+      return 'MetaRight';
+    case 'MetaLeft':
+    case 'OSLeft':
+      return 'MetaLeft';
+    default:
+      return null;
+  }
 }
 
 function normalizeKey(key: string, code: string): string | null {

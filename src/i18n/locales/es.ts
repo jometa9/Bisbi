@@ -69,6 +69,15 @@ export const es: Translations = {
       change: 'Cambiar',
       cancel: 'Cancelar',
     },
+    handsFree: {
+      title: 'Modo manos libres',
+      description:
+        'Si está apagado, mantené apretado el atajo para grabar (push-to-talk). Un doble toque rápido fija la grabación hasta que vuelvas a tocar.',
+      label: 'Tocar para empezar, tocar para detener',
+      hintOn: 'Activado: tocá el atajo una vez para empezar, tocá de nuevo para detener.',
+      hintOff:
+        'Desactivado: mantené apretado el atajo para grabar. Un doble toque rápido fija la grabación para que puedas soltar la tecla.',
+    },
     transcriptionLanguage: {
       title: 'Idioma de transcripción',
       description: 'Whisper detecta el idioma automáticamente. Fijalo si querés más velocidad.',

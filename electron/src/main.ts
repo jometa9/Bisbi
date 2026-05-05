@@ -6,6 +6,7 @@ import { BUILD_CONFIG } from './buildConfig';
 import { resolveDevFrontendPort } from './devPort';
 import { appendLogLineWithRetention, trimLogFileToRetention } from './logRetention';
 import { registerBackend } from './backend';
+import { hardenWindow } from './windowHardening';
 
 const appRoot = path.resolve(__dirname, '..', '..');
 const PRODUCT_NAME = BUILD_CONFIG.PRODUCT_NAME;
@@ -187,8 +188,11 @@ function openSettingsWindow(): void {
       contextIsolation: true,
       nodeIntegration: false,
       backgroundThrottling: false,
+      devTools: !app.isPackaged,
     },
   });
+
+  hardenWindow(settingsWindow);
 
   if (process.platform === 'darwin' && app.dock) app.dock.show();
 

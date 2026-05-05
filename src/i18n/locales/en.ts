@@ -37,6 +37,13 @@ export const en: {
   };
   settings: {
     hotkey: { title: string; description: string; change: string; cancel: string };
+    handsFree: {
+      title: string;
+      description: string;
+      label: string;
+      hintOn: string;
+      hintOff: string;
+    };
     transcriptionLanguage: { title: string; description: string };
     uiLanguage: { title: string; description: string; system: string };
     pasteMode: { title: string; description: string; paste: string; clipboard: string };
@@ -142,6 +149,15 @@ export const en: {
       description: 'Press it from any app to start and stop recording.',
       change: 'Change',
       cancel: 'Cancel',
+    },
+    handsFree: {
+      title: 'Hands-free mode',
+      description:
+        'When off, hold the hotkey to record (push-to-talk). Quick double-tap locks the recording until you tap again.',
+      label: 'Tap to start, tap to stop',
+      hintOn: 'On: tap the hotkey once to start, tap again to stop.',
+      hintOff:
+        'Off: hold the hotkey to record. A quick double-tap locks the current recording so you can let go.',
     },
     transcriptionLanguage: {
       title: 'Transcription language',
