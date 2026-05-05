@@ -1,0 +1,6 @@
+{
+  "name": "bisbi-electron",
+  "private": true,
+  "type": "commonjs",
+  "main": "dist/main.js"
+}
