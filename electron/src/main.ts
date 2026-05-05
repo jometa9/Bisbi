@@ -7,6 +7,12 @@ import { resolveDevFrontendPort } from './devPort';
 import { appendLogLineWithRetention, trimLogFileToRetention } from './logRetention';
 import { registerBackend } from './backend';
 import { hardenWindow } from './windowHardening';
+import {
+  PROTOCOL,
+  findProtocolUrl,
+  handleDeepLink,
+  setMainWindowGetter,
+} from './backend/deepLink';
 
 const appRoot = path.resolve(__dirname, '..', '..');
 const PRODUCT_NAME = BUILD_CONFIG.PRODUCT_NAME;
@@ -104,12 +110,47 @@ if (!app.isPackaged) {
   app.setPath('userData', path.join(app.getPath('appData'), PRODUCT_NAME));
 }
 
+setMainWindowGetter(() => settingsWindow);
+
+// Capture a deep link if the OS launched the app via the bisbi:// protocol
+// directly (Windows / Linux pass it as a process argument).
+{
+  const initial = findProtocolUrl(process.argv);
+  if (initial) handleDeepLink(initial);
+}
+
 const gotTheLock = app.requestSingleInstanceLock();
 if (!gotTheLock) {
   app.quit();
 } else {
-  app.on('second-instance', () => {
-    openSettingsWindow();
+  // Register the bisbi:// protocol so the OS sends us back here when the
+  // landing page redirects after Google sign-in. On Windows in dev we have
+  // to point the OS at electron.exe + the app entry, so the relaunched
+  // instance can re-attach to this one via the single-instance lock.
+  if (process.platform === 'win32' && !app.isPackaged) {
+    app.setAsDefaultProtocolClient(PROTOCOL, process.execPath, [appRoot]);
+  } else {
+    app.setAsDefaultProtocolClient(PROTOCOL);
+  }
+
+  app.on('second-instance', (_event, commandLine) => {
+    const url = findProtocolUrl(commandLine);
+    if (url) {
+      // Defer slightly so the relaunched instance has time to bring the
+      // existing window to the front before we push the deep link payload.
+      setTimeout(() => handleDeepLink(url), 200);
+    } else {
+      openSettingsWindow();
+    }
+  });
+
+  // macOS delivers protocol URLs through this event instead of argv.
+  app.on('open-url', (event, url) => {
+    event.preventDefault();
+    if (!settingsWindow || settingsWindow.isDestroyed()) {
+      openSettingsWindow();
+    }
+    handleDeepLink(url);
   });
 
   app.whenReady().then(async () => {

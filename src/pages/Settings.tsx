@@ -7,11 +7,14 @@ import {
   type UiLanguage,
   type UiLanguageSetting,
 } from '../i18n';
+import { Select } from '../components/Select';
+import { ConfirmButton } from '../components/ConfirmButton';
 
 interface Props {
   settings: AppSettings;
   onChange: (patch: Partial<AppSettings>) => Promise<void>;
   onReset: () => Promise<void>;
+  onClearHistory: () => Promise<void>;
 }
 
 const TRANSCRIPTION_LANGUAGES: { value: string; key: string }[] = [
@@ -29,7 +32,7 @@ const TRANSCRIPTION_LANGUAGES: { value: string; key: string }[] = [
 
 const PRECISION_OPTIONS: Precision[] = ['fast', 'balanced', 'high'];
 
-export function Settings({ settings, onChange, onReset }: Props) {
+export function Settings({ settings, onChange, onReset, onClearHistory }: Props) {
   const { t, systemLocale } = useTranslation();
 
   const detectedSystemLang: UiLanguage =
@@ -54,118 +57,134 @@ export function Settings({ settings, onChange, onReset }: Props) {
         title={t('settings.handsFree.title')}
         description={t('settings.handsFree.description')}
       >
-        <label className="checkbox">
-          <input
-            type="checkbox"
-            checked={settings.handsFreeMode}
-            onChange={(e) => onChange({ handsFreeMode: e.target.checked })}
+        <div className="option-cards">
+          <OptionCard
+            name="handsFreeMode"
+            selected={!settings.handsFreeMode}
+            title={t('settings.handsFree.pushToTalk.label')}
+            hint={t('settings.handsFree.pushToTalk.hint')}
+            onSelect={() => onChange({ handsFreeMode: false })}
           />
-          <span>{t('settings.handsFree.label')}</span>
-        </label>
-        <small style={{ display: 'block', opacity: 0.7, marginTop: 6 }}>
-          {settings.handsFreeMode
-            ? t('settings.handsFree.hintOn')
-            : t('settings.handsFree.hintOff')}
-        </small>
+          <OptionCard
+            name="handsFreeMode"
+            selected={settings.handsFreeMode}
+            title={t('settings.handsFree.tapToToggle.label')}
+            hint={t('settings.handsFree.tapToToggle.hint')}
+            onSelect={() => onChange({ handsFreeMode: true })}
+          />
+        </div>
       </Section>
 
       <Section
         title={t('settings.uiLanguage.title')}
         description={t('settings.uiLanguage.description')}
       >
-        <select
+        <Select<UiLanguageSetting>
           value={settings.uiLanguage}
-          onChange={(e) =>
-            onChange({ uiLanguage: e.target.value as UiLanguageSetting })
-          }
-        >
-          <option value="system">{systemLabel}</option>
-          {SUPPORTED_UI_LANGUAGES.map((lang) => (
-            <option key={lang} value={lang}>
-              {t(`uiLanguageOption.${lang}` as const)}
-            </option>
-          ))}
-        </select>
+          onChange={(uiLanguage) => onChange({ uiLanguage })}
+          ariaLabel={t('settings.uiLanguage.title')}
+          options={[
+            { value: 'system', label: systemLabel },
+            ...SUPPORTED_UI_LANGUAGES.map((lang) => ({
+              value: lang,
+              label: t(`uiLanguageOption.${lang}` as const),
+            })),
+          ]}
+        />
       </Section>
 
       <Section
         title={t('settings.transcriptionLanguage.title')}
         description={t('settings.transcriptionLanguage.description')}
       >
-        <select
+        <Select<string>
           value={settings.language}
-          onChange={(e) => onChange({ language: e.target.value })}
-        >
-          {TRANSCRIPTION_LANGUAGES.map((l) => (
-            <option key={l.value} value={l.value}>
-              {t(l.key as Parameters<typeof t>[0])}
-            </option>
-          ))}
-        </select>
+          onChange={(language) => onChange({ language })}
+          ariaLabel={t('settings.transcriptionLanguage.title')}
+          options={TRANSCRIPTION_LANGUAGES.map((l) => ({
+            value: l.value,
+            label: t(l.key as Parameters<typeof t>[0]),
+          }))}
+        />
       </Section>
 
       <Section
         title={t('settings.precision.title')}
         description={t('settings.precision.description')}
       >
-        {PRECISION_OPTIONS.map((opt) => (
-          <label className="radio" key={opt}>
-            <input
-              type="radio"
-              checked={settings.precision === opt}
-              onChange={() => onChange({ precision: opt })}
+        <div className="option-cards">
+          {PRECISION_OPTIONS.map((opt) => (
+            <OptionCard
+              key={opt}
+              name="precision"
+              selected={settings.precision === opt}
+              title={t(`settings.precision.${opt}.label` as const)}
+              hint={t(`settings.precision.${opt}.hint` as const)}
+              onSelect={() => onChange({ precision: opt })}
             />
-            <span>
-              <strong>{t(`settings.precision.${opt}.label` as const)}</strong>
-              <small style={{ display: 'block', opacity: 0.7 }}>
-                {t(`settings.precision.${opt}.hint` as const)}
-              </small>
-            </span>
-          </label>
-        ))}
+          ))}
+        </div>
       </Section>
 
       <Section
         title={t('settings.pasteMode.title')}
         description={t('settings.pasteMode.description')}
       >
-        <label className="radio">
-          <input
-            type="radio"
-            checked={settings.pasteMode === 'paste'}
-            onChange={() => onChange({ pasteMode: 'paste' })}
+        <div className="option-cards">
+          <OptionCard
+            name="pasteMode"
+            selected={settings.pasteMode === 'paste'}
+            title={t('settings.pasteMode.paste')}
+            onSelect={() => onChange({ pasteMode: 'paste' })}
           />
-          <span>{t('settings.pasteMode.paste')}</span>
-        </label>
-        <label className="radio">
-          <input
-            type="radio"
-            checked={settings.pasteMode === 'clipboard'}
-            onChange={() => onChange({ pasteMode: 'clipboard' })}
+          <OptionCard
+            name="pasteMode"
+            selected={settings.pasteMode === 'clipboard'}
+            title={t('settings.pasteMode.clipboard')}
+            onSelect={() => onChange({ pasteMode: 'clipboard' })}
           />
-          <span>{t('settings.pasteMode.clipboard')}</span>
-        </label>
+        </div>
       </Section>
 
       <Section
         title={t('settings.saveHistory.title')}
         description={t('settings.saveHistory.description')}
       >
-        <label className="checkbox">
-          <input
-            type="checkbox"
-            checked={settings.saveHistory}
-            onChange={(e) => onChange({ saveHistory: e.target.checked })}
+        <div className="option-cards">
+          <OptionCard
+            name="saveHistory"
+            selected={settings.saveHistory}
+            title={t('settings.saveHistory.enabled.label')}
+            hint={t('settings.saveHistory.enabled.hint')}
+            onSelect={() => onChange({ saveHistory: true })}
           />
-          <span>{t('settings.saveHistory.label')}</span>
-        </label>
+          <OptionCard
+            name="saveHistory"
+            selected={!settings.saveHistory}
+            title={t('settings.saveHistory.disabled.label')}
+            hint={t('settings.saveHistory.disabled.hint')}
+            onSelect={() => onChange({ saveHistory: false })}
+          />
+        </div>
       </Section>
 
-      <div className="actions">
-        <button className="btn-secondary" onClick={onReset}>
-          {t('settings.reset')}
-        </button>
-      </div>
+      <Section
+        title={t('settings.dangerZone.title')}
+        description={t('settings.dangerZone.description')}
+      >
+        <div className="actions">
+          <ConfirmButton
+            label={t('settings.reset')}
+            question={t('settings.confirmReset')}
+            onConfirm={onReset}
+          />
+          <ConfirmButton
+            label={t('settings.clearHistory')}
+            question={t('history.confirmClear')}
+            onConfirm={onClearHistory}
+          />
+        </div>
+      </Section>
     </div>
   );
 }
@@ -187,6 +206,37 @@ function Section({
       </header>
       <div className="section-body">{children}</div>
     </section>
+  );
+}
+
+function OptionCard({
+  name,
+  selected,
+  title,
+  hint,
+  onSelect,
+}: {
+  name: string;
+  selected: boolean;
+  title: string;
+  hint?: string;
+  onSelect: () => void;
+}) {
+  return (
+    <label className={`option-card${selected ? ' selected' : ''}`}>
+      <input
+        type="radio"
+        name={name}
+        checked={selected}
+        onChange={onSelect}
+        className="option-card-input"
+      />
+      <span className="option-card-radio" aria-hidden="true" />
+      <span className="option-card-body">
+        <span className="option-card-title">{title}</span>
+        {hint && <span className="option-card-hint">{hint}</span>}
+      </span>
+    </label>
   );
 }
 
@@ -260,9 +310,22 @@ function HotkeyInput({
     };
   }, [capturing, onChange]);
 
+  const showCapturePreview = capturing && draft && draft !== value;
+
   return (
     <div className="hotkey-input" ref={ref}>
-      <code className={capturing ? 'capturing' : ''}>{draft}</code>
+      <div className={`hotkey-display${capturing ? ' capturing' : ''}`}>
+        {capturing ? (
+          <>
+            <span className="hotkey-display-pulse" aria-hidden="true" />
+            <span className="hotkey-display-text">
+              {showCapturePreview ? draft : t('settings.hotkey.waiting')}
+            </span>
+          </>
+        ) : (
+          <span className="hotkey-display-text">{draft}</span>
+        )}
+      </div>
       <button
         className="btn-secondary"
         onClick={() => {

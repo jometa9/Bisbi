@@ -7,6 +7,7 @@ export const es: Translations = {
       home: 'Inicio',
       history: 'Historial',
       settings: 'Ajustes',
+      account: 'Cuenta',
     },
     status: {
       idle: 'Listo',
@@ -24,6 +25,32 @@ export const es: Translations = {
     micError:
       'No se pudo acceder al micrófono. Asegurate de que Bisbi tenga permiso en los ajustes del sistema.',
   },
+  auth: {
+    welcome: 'Bienvenido a Bisbi',
+    tagline: 'La forma más rápida de dictar en cualquier app.',
+    signIn: 'Iniciar sesión con Google',
+    authenticating: 'Autenticando en el navegador…',
+    redirecting: 'Volviendo a la aplicación…',
+    validating: 'Validando sesión…',
+    tryAgain: 'Reintentar',
+    invalidToken: 'No pudimos validar la sesión. Iniciá sesión de nuevo.',
+    connectionError: 'Error de conexión. Revisá tu internet e intentá de nuevo.',
+    noAccount: '¿No tenés cuenta?',
+    signUp: 'Registrate',
+  },
+  account: {
+    title: 'Cuenta',
+    plan: 'Plan',
+    planFree: 'Free',
+    planPro: 'Pro',
+    email: 'Email',
+    name: 'Nombre',
+    userId: 'ID de usuario',
+    manageSubscription: 'Gestionar suscripción',
+    upgradeToPro: 'Pasar a Pro',
+    logout: 'Cerrar sesión',
+    confirmLogout: '¿Cerrar sesión en Bisbi?',
+  },
   home: {
     greeting: {
       lateNight: 'Buenas noches',
@@ -40,27 +67,33 @@ export const es: Translations = {
     hotkeyLabel: 'Atajo',
     hotkeyHintPaste: 'El texto se pega automáticamente donde estés escribiendo.',
     hotkeyHintClipboard: 'El texto se copia al portapapeles.',
-    todaySection: 'Hoy',
+    activitySection: 'Tu actividad',
     transcriptionsOne: 'transcripción',
     transcriptionsOther: 'transcripciones',
     dictated: 'dictado',
-    lastLanguage: 'último idioma',
-    lastTranscriptionSection: 'Última transcripción',
+    wordsOne: 'palabra transcrita',
+    wordsOther: 'palabras transcritas',
+    wpmLabel: 'palabras por minuto',
+    recentSection: 'Transcripciones recientes',
     empty: 'Todavía no hay transcripciones. Probá tu atajo.',
-    relative: {
-      justNow: 'hace un momento',
-      minutes: 'hace {n} min',
-      hours: 'hace {n} h',
-      days: 'hace {n} d',
-    },
+    seeMore: 'Ver todas en Historial',
+  },
+  dateGroups: {
+    today: 'Hoy',
+    yesterday: 'Ayer',
   },
   history: {
-    title: 'Transcripciones recientes',
+    title: 'Historial',
     clearAll: 'Borrar todo',
     confirmClear: '¿Borrar todo el historial?',
     empty: 'Todavía no hay transcripciones. Probá tu atajo.',
     copy: 'Copiar',
+    copied: 'Copiado',
     delete: 'Eliminar',
+    savingDisabledTitle: 'El guardado del historial está apagado',
+    savingDisabledHint:
+      'Tus transcripciones no se están guardando, así que no aparecen acá. Volvelo a activar desde Ajustes para verlas de nuevo.',
+    savingDisabledCta: 'Ir a ajustes',
   },
   settings: {
     hotkey: {
@@ -68,15 +101,20 @@ export const es: Translations = {
       description: 'Apretalo desde cualquier app para empezar y detener la grabación.',
       change: 'Cambiar',
       cancel: 'Cancelar',
+      waiting: 'Apretá las teclas que querés usar…',
     },
     handsFree: {
-      title: 'Modo manos libres',
+      title: 'Modo de grabación',
       description:
-        'Si está apagado, mantené apretado el atajo para grabar (push-to-talk). Un doble toque rápido fija la grabación hasta que vuelvas a tocar.',
-      label: 'Tocar para empezar, tocar para detener',
-      hintOn: 'Activado: tocá el atajo una vez para empezar, tocá de nuevo para detener.',
-      hintOff:
-        'Desactivado: mantené apretado el atajo para grabar. Un doble toque rápido fija la grabación para que puedas soltar la tecla.',
+        'Elegí cómo querés que el atajo arranque y detenga la grabación.',
+      pushToTalk: {
+        label: 'Mantener apretado para hablar',
+        hint: 'Dejás apretado el atajo mientras hablás y lo soltás para que se detenga. Tip: si hacés un doble toque rápido, la grabación queda fija y podés soltar la tecla.',
+      },
+      tapToToggle: {
+        label: 'Manos libres',
+        hint: 'Tocás el atajo una vez para empezar a grabar y lo tocás de nuevo para detener. Ideal para dictados largos en los que no querés tener una tecla apretada.',
+      },
     },
     transcriptionLanguage: {
       title: 'Idioma de transcripción',
@@ -96,8 +134,15 @@ export const es: Translations = {
     },
     saveHistory: {
       title: 'Historial',
-      description: 'Guarda las transcripciones en una base local.',
-      label: 'Guardar transcripciones en el historial',
+      description: 'Decidí si guardamos tus transcripciones para que puedas revisarlas más tarde.',
+      enabled: {
+        label: 'Guardar transcripciones',
+        hint: 'Quedan en una base local en tu computadora. Las podés ver después desde la pestaña Historial.',
+      },
+      disabled: {
+        label: 'No guardar',
+        hint: 'Cada transcripción se descarta apenas se inserta el texto. No queda registro en ningún lado.',
+      },
     },
     precision: {
       title: 'Precisión de la transcripción',
@@ -116,7 +161,13 @@ export const es: Translations = {
         hint: 'Mayor esfuerzo y demora, pero mejor con mezcla de idiomas, términos técnicos o audios ruidosos.',
       },
     },
+    dangerZone: {
+      title: 'Restablecer y datos',
+      description: 'Estas acciones son permanentes y no se pueden deshacer.',
+    },
     reset: 'Restablecer ajustes',
+    clearHistory: 'Borrar historial',
+    confirmReset: '¿Restablecer todos los ajustes a sus valores por defecto?',
   },
   recording: {
     recording: 'Grabando',
@@ -154,5 +205,9 @@ export const es: Translations = {
   },
   errors: {
     hotkeyRegister: 'No se pudo registrar el atajo "{accel}". Probá otro.',
+  },
+  common: {
+    yes: 'Sí',
+    no: 'No',
   },
 };

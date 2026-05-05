@@ -7,6 +7,7 @@ export const ar: Translations = {
       home: 'الرئيسية',
       history: 'السجل',
       settings: 'الإعدادات',
+      account: 'الحساب',
     },
     status: {
       idle: 'جاهز',
@@ -24,6 +25,32 @@ export const ar: Translations = {
     micError:
       'تعذّر الوصول إلى الميكروفون. تأكد من أن Bisbi يملك إذن الوصول في إعدادات النظام.',
   },
+  auth: {
+    welcome: 'مرحبًا بك في Bisbi',
+    tagline: 'أسرع طريقة للإملاء في أي تطبيق.',
+    signIn: 'تسجيل الدخول بحساب Google',
+    authenticating: 'جارٍ المصادقة في المتصفح…',
+    redirecting: 'العودة إلى التطبيق…',
+    validating: 'جارٍ التحقق من الجلسة…',
+    tryAgain: 'إعادة المحاولة',
+    invalidToken: 'تعذّر التحقق من الجلسة. يرجى تسجيل الدخول مرة أخرى.',
+    connectionError: 'خطأ في الاتصال. تحقق من الإنترنت وحاول مرة أخرى.',
+    noAccount: 'ليس لديك حساب؟',
+    signUp: 'إنشاء حساب',
+  },
+  account: {
+    title: 'الحساب',
+    plan: 'الخطة',
+    planFree: 'مجاني',
+    planPro: 'Pro',
+    email: 'البريد الإلكتروني',
+    name: 'الاسم',
+    userId: 'معرّف المستخدم',
+    manageSubscription: 'إدارة الاشتراك',
+    upgradeToPro: 'الترقية إلى Pro',
+    logout: 'تسجيل الخروج',
+    confirmLogout: 'تسجيل الخروج من Bisbi؟',
+  },
   home: {
     greeting: {
       lateNight: 'تصبح على خير',
@@ -40,27 +67,32 @@ export const ar: Translations = {
     hotkeyLabel: 'الاختصار',
     hotkeyHintPaste: 'يتم لصق النص تلقائيًا حيث تكتب.',
     hotkeyHintClipboard: 'يتم نسخ النص إلى الحافظة.',
-    todaySection: 'اليوم',
+    activitySection: 'نشاطك',
     transcriptionsOne: 'كتابة',
     transcriptionsOther: 'كتابات',
     dictated: 'إملاء',
-    lastLanguage: 'آخر لغة',
-    lastTranscriptionSection: 'آخر كتابة',
+    wordsOne: 'كلمة مكتوبة',
+    wordsOther: 'كلمة مكتوبة',
+    wpmLabel: 'كلمة في الدقيقة',
+    recentSection: 'الكتابات الأخيرة',
     empty: 'لا توجد كتابات بعد. جرّب الاختصار.',
-    relative: {
-      justNow: 'الآن',
-      minutes: 'منذ {n} دقيقة',
-      hours: 'منذ {n} ساعة',
-      days: 'منذ {n} يوم',
-    },
+    seeMore: 'عرض الكل في السجل',
+  },
+  dateGroups: {
+    today: 'اليوم',
+    yesterday: 'أمس',
   },
   history: {
-    title: 'الكتابات الأخيرة',
+    title: 'السجل',
     clearAll: 'مسح الكل',
     confirmClear: 'هل تريد مسح كامل السجل؟',
     empty: 'لا توجد كتابات بعد. جرّب الاختصار.',
     copy: 'نسخ',
+    copied: 'تم النسخ',
     delete: 'حذف',
+    savingDisabledTitle: 'حفظ السجل متوقف',
+    savingDisabledHint: 'لا يتم حفظ كتاباتك، لذلك لا يمكن أن تظهر هنا. أعد تفعيل السجل من الإعدادات لرؤيتها مرة أخرى.',
+    savingDisabledCta: 'فتح الإعدادات',
   },
   settings: {
     hotkey: {
@@ -68,15 +100,19 @@ export const ar: Translations = {
       description: 'اضغطه من أي تطبيق لبدء التسجيل وإيقافه.',
       change: 'تغيير',
       cancel: 'إلغاء',
+      waiting: 'اضغط على المفاتيح التي تريد استخدامها…',
     },
     handsFree: {
-      title: 'وضع التسجيل التلقائي',
-      description:
-        'عند إيقاف التشغيل، استمر في الضغط على الاختصار للتسجيل (اضغط للتحدث). النقر المزدوج السريع يثبّت التسجيل حتى تنقر مرة أخرى.',
-      label: 'انقر للبدء، انقر للإيقاف',
-      hintOn: 'مفعّل: انقر الاختصار مرة للبدء، انقر مرة أخرى للإيقاف.',
-      hintOff:
-        'متوقف: استمر في الضغط على الاختصار للتسجيل. النقر المزدوج السريع يثبّت التسجيل حتى تتمكن من ترك المفتاح.',
+      title: 'وضع التسجيل',
+      description: 'اختر كيف يبدأ الاختصار التسجيل ويوقفه.',
+      pushToTalk: {
+        label: 'اضغط مع الاستمرار للتحدث',
+        hint: 'استمر في الضغط على الاختصار أثناء التحدث، واتركه ليتوقف. نصيحة: انقر نقرتين سريعتين لتثبيت التسجيل حتى تتمكن من ترك المفتاح.',
+      },
+      tapToToggle: {
+        label: 'وضع حر اليدين',
+        hint: 'انقر الاختصار مرة لبدء التسجيل، وانقر مرة أخرى لإيقافه. مناسب للإملاءات الطويلة عندما لا تريد إبقاء أي مفتاح مضغوطًا.',
+      },
     },
     transcriptionLanguage: {
       title: 'لغة الكتابة',
@@ -95,8 +131,15 @@ export const ar: Translations = {
     },
     saveHistory: {
       title: 'السجل',
-      description: 'يحفظ الكتابات في قاعدة بيانات محلية.',
-      label: 'حفظ الكتابات في السجل',
+      description: 'حدّد ما إذا كنا سنحتفظ بكتاباتك لتراجعها لاحقًا.',
+      enabled: {
+        label: 'حفظ الكتابات',
+        hint: 'تُخزَّن محليًا على جهازك فقط. يمكنك العثور عليها لاحقًا في تبويب السجل.',
+      },
+      disabled: {
+        label: 'عدم الحفظ',
+        hint: 'تُهمل كل كتابة بمجرد إدراج النص. لا يبقى أي سجل.',
+      },
     },
     precision: {
       title: 'دقة الكتابة',
@@ -115,7 +158,13 @@ export const ar: Translations = {
         hint: 'جهد أكبر وأبطأ، لكن أفضل مع لغات مختلطة أو مصطلحات تقنية أو صوت مزعج.',
       },
     },
+    dangerZone: {
+      title: 'إعادة الضبط والبيانات',
+      description: 'هذه الإجراءات نهائية ولا يمكن التراجع عنها.',
+    },
     reset: 'إعادة ضبط الإعدادات',
+    clearHistory: 'مسح السجل',
+    confirmReset: 'إعادة جميع الإعدادات إلى قيمها الافتراضية؟',
   },
   recording: {
     recording: 'يسجل',
@@ -153,5 +202,9 @@ export const ar: Translations = {
   },
   errors: {
     hotkeyRegister: 'تعذّر تسجيل الاختصار "{accel}". جرّب اختصارًا آخر.',
+  },
+  common: {
+    yes: 'نعم',
+    no: 'لا',
   },
 };

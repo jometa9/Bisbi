@@ -31,7 +31,7 @@ const bisbi = {
   getRecordingState: () =>
     invoke<import('./backend/types').RecordingState>('recording:getState'),
   submitAudio: (pcm: ArrayBuffer, sampleRate: number, channels: number) =>
-    invoke<import('./backend/types').TranscriptionResult>('recording:submitAudio', {
+    invoke<void>('recording:submitAudio', {
       pcm,
       sampleRate,
       channels,
@@ -43,6 +43,8 @@ const bisbi = {
     listen<void>('recording:stop', () => cb()),
   onRecordingState: (cb: (s: import('./backend/types').RecordingState) => void) =>
     listen<import('./backend/types').RecordingState>('recording:state', cb),
+  onPillState: (cb: (s: import('./backend/types').RecordingState) => void) =>
+    listen<import('./backend/types').RecordingState>('recording:pillState', cb),
   sendRecordingLevel: (level: number) => ipcRenderer.send('recording:level', level),
   onRecordingLevel: (cb: (level: number) => void) =>
     listen<number>('recording:level', cb),
@@ -53,6 +55,12 @@ const bisbi = {
   deleteHistory: (id: string) => invoke<void>('history:delete', id),
   clearHistory: () => invoke<void>('history:clear'),
   onHistoryChange: (cb: () => void) => listen<void>('history:changed', () => cb()),
+
+  // Stats
+  getStatsTotals: () =>
+    invoke<import('./backend/db').StatsTotals>('stats:totals'),
+  onStatsTotalsChange: (cb: (s: import('./backend/db').StatsTotals) => void) =>
+    listen<import('./backend/db').StatsTotals>('stats:totals', cb),
 
   // Resources / diagnostics
   checkResources: () =>
@@ -74,6 +82,26 @@ const bisbi = {
   // Routing helper for tray-driven navigation
   onNavigate: (cb: (payload: { to: string }) => void) =>
     listen<{ to: string }>('navigate', cb),
+
+  // Auth
+  auth: {
+    getSession: () =>
+      invoke<import('./backend/auth').AuthSession>('auth:getSession'),
+    loginWithToken: (token: string) =>
+      invoke<import('./backend/auth').AuthSession>('auth:loginWithToken', token),
+    logout: () => invoke<import('./backend/auth').AuthSession>('auth:logout'),
+    onChange: (cb: (s: import('./backend/auth').AuthSession) => void) =>
+      listen<import('./backend/auth').AuthSession>('auth:changed', cb),
+  },
+
+  // Deep link / external links
+  deepLink: {
+    getPending: () => invoke<string | null>('deepLink:getPending'),
+    clearPending: (url?: string) => invoke<void>('deepLink:clearPending', url),
+    onLink: (cb: (payload: { url: string }) => void) =>
+      listen<{ url: string }>('deep-link', cb),
+  },
+  openExternal: (url: string) => invoke<void>('app:openExternal', url),
 };
 
 contextBridge.exposeInMainWorld('bisbi', bisbi);

@@ -17,6 +17,7 @@ export interface TranscribeOutput {
   text: string;
   language: string | null;
   durationMs: number;
+  audioDurationMs: number;
   modelFile: string;
 }
 
@@ -114,6 +115,10 @@ export async function transcribePcm(
 
   const wavPath = writeWavFile(pcm, sampleRate, channels);
   const startedAt = Date.now();
+  // 16-bit PCM ⇒ 2 bytes per sample per channel. This is the *spoken* duration
+  // of the clip, distinct from durationMs below which times the whisper run.
+  const bytesPerFrame = 2 * Math.max(1, channels);
+  const audioDurationMs = Math.round((pcm.length / (sampleRate * bytesPerFrame)) * 1000);
 
   try {
     const args = [
@@ -131,6 +136,7 @@ export async function transcribePcm(
       text: text.trim(),
       language: opts.language === 'auto' ? null : opts.language,
       durationMs,
+      audioDurationMs,
       modelFile: modelFileForPrecision(opts.precision),
     };
   } finally {
@@ -153,6 +159,13 @@ function runWhisper(bin: string, args: string[], wavPath: string): Promise<strin
         return;
       }
       const txtPath = `${wavPath}.txt`;
+      // whisper-cli skips writing the .txt file when no speech is detected
+      // (e.g. the user tapped the hotkey without speaking). Treat that as
+      // an empty transcript instead of crashing.
+      if (!fs.existsSync(txtPath)) {
+        resolve('');
+        return;
+      }
       try {
         const text = fs.readFileSync(txtPath, 'utf8');
         resolve(text);

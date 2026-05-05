@@ -22,6 +22,14 @@ export interface TranscriptionRow {
   language: string | null;
   durationMs: number | null;
   model: string | null;
+  audioDurationMs: number | null;
+  wordCount: number | null;
+}
+
+export interface StatsTotals {
+  totalTranscriptions: number;
+  totalAudioMs: number;
+  totalWords: number;
 }
 
 export interface UpdateStatus {
@@ -36,6 +44,21 @@ export interface ResourceCheck {
   binaryPath: string;
   modelPath: string;
   missing: string[];
+}
+
+export type Plan = 'free' | 'pro';
+
+export interface UserInfo {
+  userId: string;
+  email: string;
+  name: string;
+  plan: Plan;
+  avatarUrl?: string | null;
+}
+
+export interface AuthSession {
+  isAuthenticated: boolean;
+  userInfo: UserInfo | null;
 }
 
 declare global {
@@ -54,17 +77,20 @@ declare global {
         pcm: ArrayBuffer,
         sampleRate: number,
         channels: number
-      ) => Promise<{ id: string; text: string; language: string | null; durationMs: number; createdAt: number }>;
+      ) => Promise<void>;
       cancelRecording: () => Promise<void>;
       onRecordingStart: (cb: () => void) => () => void;
       onRecordingStop: (cb: () => void) => () => void;
       onRecordingState: (cb: (s: RecordingState) => void) => () => void;
+      onPillState: (cb: (s: RecordingState) => void) => () => void;
       sendRecordingLevel: (level: number) => void;
       onRecordingLevel: (cb: (level: number) => void) => () => void;
       listHistory: (limit?: number) => Promise<TranscriptionRow[]>;
       deleteHistory: (id: string) => Promise<void>;
       clearHistory: () => Promise<void>;
       onHistoryChange: (cb: () => void) => () => void;
+      getStatsTotals: () => Promise<StatsTotals>;
+      onStatsTotalsChange: (cb: (s: StatsTotals) => void) => () => void;
       checkResources: () => Promise<ResourceCheck>;
       updater: {
         getState: () => Promise<UpdateStatus>;
@@ -73,6 +99,18 @@ declare global {
         onStateChange: (cb: (s: UpdateStatus) => void) => () => void;
       };
       onNavigate: (cb: (payload: { to: string }) => void) => () => void;
+      auth: {
+        getSession: () => Promise<AuthSession>;
+        loginWithToken: (token: string) => Promise<AuthSession>;
+        logout: () => Promise<AuthSession>;
+        onChange: (cb: (s: AuthSession) => void) => () => void;
+      };
+      deepLink: {
+        getPending: () => Promise<string | null>;
+        clearPending: (url?: string) => Promise<void>;
+        onLink: (cb: (payload: { url: string }) => void) => () => void;
+      };
+      openExternal: (url: string) => Promise<void>;
     };
   }
 }

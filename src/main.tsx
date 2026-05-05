@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import { App } from './App';
 import { RecordingApp } from './RecordingApp';
 import { I18nGate } from './i18n/I18nGate';
+import { AuthProvider } from './context/AuthContext';
 import './styles.css';
 
 const root = createRoot(document.getElementById('root')!);
@@ -18,7 +19,13 @@ if (isRecordingWindow) {
 root.render(
   <React.StrictMode>
     <I18nGate>
-      {isRecordingWindow ? <RecordingApp /> : <App />}
+      {isRecordingWindow ? (
+        <RecordingApp />
+      ) : (
+        <AuthProvider>
+          <App />
+        </AuthProvider>
+      )}
     </I18nGate>
   </React.StrictMode>
 );

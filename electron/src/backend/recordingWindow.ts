@@ -120,8 +120,10 @@ export function showRecordingWindow(state: RecordingState): void {
         contextIsolation: true,
         nodeIntegration: false,
         backgroundThrottling: false,
+        devTools: !app.isPackaged,
       },
     });
+    hardenWindow(win);
     win.setAlwaysOnTop(true, 'screen-saver');
     win.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
     if (process.platform === 'darwin') {
@@ -144,7 +146,7 @@ export function showRecordingWindow(state: RecordingState): void {
 
 export function setState(state: RecordingState): void {
   if (!win || win.isDestroyed()) return;
-  win.webContents.send('recording:state', state);
+  win.webContents.send('recording:pillState', state);
 }
 
 export function setLevel(level: number): void {

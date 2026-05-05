@@ -7,6 +7,7 @@ export const zh: Translations = {
       home: '首页',
       history: '历史记录',
       settings: '设置',
+      account: '账户',
     },
     status: {
       idle: '就绪',
@@ -24,6 +25,32 @@ export const zh: Translations = {
     micError:
       '无法访问麦克风。请确保 Bisbi 在系统设置中拥有权限。',
   },
+  auth: {
+    welcome: '欢迎使用 Bisbi',
+    tagline: '在任何应用中最快的口述方式。',
+    signIn: '使用 Google 登录',
+    authenticating: '正在浏览器中验证…',
+    redirecting: '正在返回应用…',
+    validating: '正在验证会话…',
+    tryAgain: '重试',
+    invalidToken: '无法验证该会话,请重新登录。',
+    connectionError: '连接错误。请检查网络后重试。',
+    noAccount: '还没有账户?',
+    signUp: '注册',
+  },
+  account: {
+    title: '账户',
+    plan: '套餐',
+    planFree: '免费版',
+    planPro: 'Pro',
+    email: '邮箱',
+    name: '姓名',
+    userId: '用户 ID',
+    manageSubscription: '管理订阅',
+    upgradeToPro: '升级到 Pro',
+    logout: '退出登录',
+    confirmLogout: '退出 Bisbi 账户?',
+  },
   home: {
     greeting: {
       lateNight: '晚安',
@@ -40,27 +67,32 @@ export const zh: Translations = {
     hotkeyLabel: '快捷键',
     hotkeyHintPaste: '文本会自动粘贴到你正在输入的位置。',
     hotkeyHintClipboard: '文本会复制到剪贴板。',
-    todaySection: '今天',
+    activitySection: '你的活动',
     transcriptionsOne: '条转写',
     transcriptionsOther: '条转写',
     dictated: '已口述',
-    lastLanguage: '上次语言',
-    lastTranscriptionSection: '最近一次转写',
+    wordsOne: '个已转写字词',
+    wordsOther: '个已转写字词',
+    wpmLabel: '每分钟字词数',
+    recentSection: '最近的转写',
     empty: '还没有转写记录。试试你的快捷键。',
-    relative: {
-      justNow: '刚刚',
-      minutes: '{n} 分钟前',
-      hours: '{n} 小时前',
-      days: '{n} 天前',
-    },
+    seeMore: '在历史记录中查看全部',
+  },
+  dateGroups: {
+    today: '今天',
+    yesterday: '昨天',
   },
   history: {
-    title: '最近的转写',
+    title: '历史记录',
     clearAll: '全部清除',
     confirmClear: '确认清除所有历史记录吗?',
     empty: '还没有转写记录。试试你的快捷键。',
     copy: '复制',
+    copied: '已复制',
     delete: '删除',
+    savingDisabledTitle: '历史记录保存已关闭',
+    savingDisabledHint: '你的转写没有被保存,因此无法在此显示。在“设置”中重新开启历史记录后即可再次看到它们。',
+    savingDisabledCta: '打开设置',
   },
   settings: {
     hotkey: {
@@ -68,13 +100,19 @@ export const zh: Translations = {
       description: '在任何应用中按下它即可开始和停止录音。',
       change: '更改',
       cancel: '取消',
+      waiting: '请按下你想使用的按键…',
     },
     handsFree: {
-      title: '免提模式',
-      description: '关闭时,按住快捷键进行录音(按住说话)。快速双击会锁定录音,直到你再次点击。',
-      label: '点击开始,再次点击结束',
-      hintOn: '已开启:点击快捷键一次开始,再次点击结束。',
-      hintOff: '已关闭:按住快捷键即可录音。快速双击会锁定录音,这样你就可以松开按键。',
+      title: '录音模式',
+      description: '选择快捷键如何开始和结束录音。',
+      pushToTalk: {
+        label: '按住说话',
+        hint: '说话时按住快捷键,松开即停止。小技巧:快速双击可以锁定录音,这样你就可以松开按键。',
+      },
+      tapToToggle: {
+        label: '免手模式',
+        hint: '点击快捷键一次开始录音,再次点击结束录音。适合较长的口述,你不想一直按着按键。',
+      },
     },
     transcriptionLanguage: {
       title: '转写语言',
@@ -93,8 +131,15 @@ export const zh: Translations = {
     },
     saveHistory: {
       title: '历史记录',
-      description: '将转写保存到本地数据库中。',
-      label: '在历史记录中保存转写',
+      description: '决定是否保留你的转写,以便稍后查看。',
+      enabled: {
+        label: '保存转写',
+        hint: '只在你的电脑本地保存。可在历史记录标签中查看。',
+      },
+      disabled: {
+        label: '不保存',
+        hint: '插入文本后立即丢弃每一条转写。不会留下任何记录。',
+      },
     },
     precision: {
       title: '转写精度',
@@ -112,7 +157,13 @@ export const zh: Translations = {
         hint: '处理更多、速度更慢,但对多语言混合、专业术语或嘈杂音频效果更好。',
       },
     },
+    dangerZone: {
+      title: '重置与数据',
+      description: '这些操作不可撤销,执行后无法恢复。',
+    },
     reset: '重置设置',
+    clearHistory: '清除历史记录',
+    confirmReset: '将所有设置重置为默认值?',
   },
   recording: {
     recording: '录音中',
@@ -150,5 +201,9 @@ export const zh: Translations = {
   },
   errors: {
     hotkeyRegister: '无法注册快捷键 “{accel}”。请尝试其他组合。',
+  },
+  common: {
+    yes: '是',
+    no: '否',
   },
 };

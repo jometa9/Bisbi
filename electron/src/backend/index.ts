@@ -1,11 +1,23 @@
-import { BrowserWindow, ipcMain, app } from 'electron';
+import { BrowserWindow, ipcMain, app, shell } from 'electron';
 import { randomUUID } from 'crypto';
 import {
   insertTranscription,
   listTranscriptions,
   deleteTranscription,
   clearTranscriptions,
+  getStatsTotals,
+  countWords,
 } from './db';
+import {
+  getSession,
+  loginWithToken,
+  logout as authLogout,
+  type AuthSession,
+} from './auth';
+import {
+  getPendingDeepLink,
+  clearPendingDeepLink,
+} from './deepLink';
 import { getSettings, updateSettings, resetSettings } from './settings';
 import { registerHotkey, unregisterAll } from './hotkey';
 import { transcribePcm, checkResources } from './transcriber';
@@ -17,9 +29,9 @@ import {
 } from './tray';
 import {
   showRecordingWindow,
-  hideRecordingWindow,
   setState as setRecordingWindowState,
   setLevel as setRecordingWindowLevel,
+  hideRecordingWindow,
 } from './recordingWindow';
 import {
   checkForUpdatesManual,
@@ -29,7 +41,7 @@ import {
 } from './updater';
 import { getSystemLocale, resolveUiLanguage, tBackend } from './i18n';
 import { rebuildTrayLabels } from './tray';
-import type { RecordingState, AppSettings, TranscriptionResult } from './types';
+import type { RecordingState, AppSettings } from './types';
 
 interface BackendOptions {
   onOpenSettings: () => void;
@@ -73,10 +85,15 @@ function syncState(): void {
   if (next === recordingState) return;
   recordingState = next;
   setTrayState(next);
-  setRecordingWindowState(next);
   broadcast('recording:state', next);
   if (next === 'idle') {
     hideRecordingWindow();
+  } else {
+    // Use showRecordingWindow (not just setState) so that if the pill was
+    // mid fade-out — e.g. we briefly hit `idle` between releasing the
+    // hotkey and the renderer shipping the PCM buffer — it fades back in
+    // for the transcribing phase instead of staying invisible.
+    showRecordingWindow(next);
   }
 }
 
@@ -102,11 +119,14 @@ async function processQueue(): Promise<void> {
             id: randomUUID(),
             createdAt: Date.now(),
             text: out.text,
-            language: out.language,
+            language: null,
             durationMs: out.durationMs,
             model: out.modelFile.replace(/\.bin$/, ''),
+            audioDurationMs: out.audioDurationMs,
+            wordCount: countWords(out.text),
           });
           broadcast('history:changed');
+          broadcast('stats:totals', getStatsTotals());
         }
       } catch (err) {
         console.error('[backend] transcription job failed:', err);
@@ -210,8 +230,17 @@ export async function registerBackend(opts: BackendOptions): Promise<void> {
       _e,
       payload: { pcm: ArrayBuffer; sampleRate: number; channels: number }
     ): void => {
+      const pcm = Buffer.from(payload.pcm);
+      // Drop clips shorter than ~100ms — whisper-cli skips the .txt output
+      // for empty/near-empty audio, and there is nothing to transcribe anyway.
+      const bytesPerSample = 2 * Math.max(1, payload.channels);
+      const minBytes = Math.floor(payload.sampleRate * 0.1) * bytesPerSample;
+      if (pcm.length < minBytes) {
+        syncState();
+        return;
+      }
       transcriptionQueue.push({
-        pcm: Buffer.from(payload.pcm),
+        pcm,
         sampleRate: payload.sampleRate,
         channels: payload.channels,
       });
@@ -232,11 +261,16 @@ export async function registerBackend(opts: BackendOptions): Promise<void> {
   ipcMain.handle('history:delete', (_e, id: string) => {
     deleteTranscription(id);
     broadcast('history:changed');
+    broadcast('stats:totals', getStatsTotals());
   });
   ipcMain.handle('history:clear', () => {
     clearTranscriptions();
     broadcast('history:changed');
+    broadcast('stats:totals', getStatsTotals());
   });
+
+  // ---------- IPC: stats ----------
+  ipcMain.handle('stats:totals', () => getStatsTotals());
 
   // ---------- IPC: resources / system ----------
   ipcMain.handle('resources:check', () => checkResources(getSettings().precision));
@@ -249,6 +283,29 @@ export async function registerBackend(opts: BackendOptions): Promise<void> {
   ipcMain.handle('updater:getState', () => getUpdateStatus());
   ipcMain.handle('updater:check', () => checkForUpdatesManual());
   ipcMain.handle('updater:install', () => installUpdateAndRestart());
+
+  // ---------- IPC: auth ----------
+  ipcMain.handle('auth:getSession', (): AuthSession => getSession());
+  ipcMain.handle(
+    'auth:loginWithToken',
+    async (_e, token: string): Promise<AuthSession> => {
+      const session = await loginWithToken(token);
+      broadcast('auth:changed', session);
+      return session;
+    }
+  );
+  ipcMain.handle('auth:logout', (): AuthSession => {
+    const session = authLogout();
+    broadcast('auth:changed', session);
+    return session;
+  });
+
+  // ---------- IPC: deep link / external links ----------
+  ipcMain.handle('deepLink:getPending', () => getPendingDeepLink());
+  ipcMain.handle('deepLink:clearPending', (_e, url?: string) => {
+    clearPendingDeepLink(url);
+  });
+  ipcMain.handle('app:openExternal', (_e, url: string) => shell.openExternal(url));
 
   app.on('before-quit', () => {
     unregisterAll();

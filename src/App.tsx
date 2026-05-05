@@ -2,14 +2,18 @@ import { useEffect, useState } from 'react';
 import { Home } from './pages/Home';
 import { Settings } from './pages/Settings';
 import { History } from './pages/History';
+import { Account } from './pages/Account';
+import { Login } from './pages/Login';
 import { startRecording, type RecordingHandle } from './audio';
 import type { AppSettings, RecordingState } from './types';
 import { useTranslation } from './i18n';
+import { useAuth } from './context/AuthContext';
 
-type Tab = 'home' | 'settings' | 'history';
+type Tab = 'home' | 'settings' | 'history' | 'account';
 
 export function App() {
   const { t } = useTranslation();
+  const { isLoading: isAuthLoading, isAuthenticated, userInfo } = useAuth();
   const [tab, setTab] = useState<Tab>('home');
   const [settings, setSettings] = useState<AppSettings | null>(null);
   const [recState, setRecState] = useState<RecordingState>('idle');
@@ -28,6 +32,7 @@ export function App() {
     const offNav = window.bisbi.onNavigate(({ to }) => {
       if (to === '/history') setTab('history');
       else if (to === '/settings') setTab('settings');
+      else if (to === '/account') setTab('account');
       else if (to === '/home' || to === '/') setTab('home');
     });
     return () => {
@@ -38,36 +43,44 @@ export function App() {
   }, []);
 
   // The hotkey lives in the main process. When it fires, main asks the
-  // renderer to start/stop the mic capture via these IPC events.
+  // renderer to start/stop the mic capture via these IPC events. We
+  // serialize start/stop through a promise chain so a fast re-tap can't
+  // open a new mic handle before the previous one finishes flushing.
   useEffect(() => {
     if (!window.bisbi) return;
     let handle: RecordingHandle | null = null;
+    let chain: Promise<void> = Promise.resolve();
 
-    const offStart = window.bisbi.onRecordingStart(async () => {
-      try {
-        handle = await startRecording({
-          onLevel: (level) => window.bisbi.sendRecordingLevel(level),
-        });
-      } catch (err) {
-        console.error('[App] mic access failed:', err);
-        await window.bisbi.cancelRecording();
-        alert(t('app.micError'));
-      }
+    const offStart = window.bisbi.onRecordingStart(() => {
+      chain = chain.then(async () => {
+        try {
+          handle = await startRecording({
+            onLevel: (level) => window.bisbi.sendRecordingLevel(level),
+          });
+        } catch (err) {
+          console.error('[App] mic access failed:', err);
+          await window.bisbi.cancelRecording();
+          alert(t('app.micError'));
+        }
+      });
     });
 
-    const offStop = window.bisbi.onRecordingStop(async () => {
-      if (!handle) {
-        await window.bisbi.cancelRecording();
-        return;
-      }
-      try {
-        const { pcm, sampleRate, channels } = await handle.stop();
+    const offStop = window.bisbi.onRecordingStop(() => {
+      chain = chain.then(async () => {
+        const cur = handle;
         handle = null;
-        await window.bisbi.submitAudio(pcm, sampleRate, channels);
-      } catch (err) {
-        console.error('[App] transcription failed:', err);
-        await window.bisbi.cancelRecording();
-      }
+        if (!cur) {
+          await window.bisbi.cancelRecording();
+          return;
+        }
+        try {
+          const { pcm, sampleRate, channels } = await cur.stop();
+          await window.bisbi.submitAudio(pcm, sampleRate, channels);
+        } catch (err) {
+          console.error('[App] mic stop failed:', err);
+          await window.bisbi.cancelRecording();
+        }
+      });
     });
 
     return () => {
@@ -98,9 +111,17 @@ export function App() {
     );
   }
 
-  if (!settings) {
+  if (isAuthLoading || !settings) {
     return <div className="loading">{t('app.loading')}</div>;
   }
+
+  if (!isAuthenticated) {
+    return <Login />;
+  }
+
+  const accountInitial = (
+    userInfo?.name || userInfo?.email || '?'
+  ).trim().charAt(0).toUpperCase();
 
   return (
     <div className="app">
@@ -132,6 +153,28 @@ export function App() {
           </button>
         </nav>
         <div className="sidebar-bottom">
+          <button
+            className={`sidebar-account${tab === 'account' ? ' active' : ''}`}
+            onClick={() => setTab('account')}
+          >
+            <span className="sidebar-account-avatar" aria-hidden="true">
+              {userInfo?.avatarUrl ? (
+                <img src={userInfo.avatarUrl} alt="" />
+              ) : (
+                accountInitial
+              )}
+            </span>
+            <span className="sidebar-account-text">
+              <span className="sidebar-account-name">
+                {userInfo?.name || userInfo?.email || t('app.tabs.account')}
+              </span>
+              <span className={`sidebar-account-plan plan-${userInfo?.plan ?? 'free'}`}>
+                {userInfo?.plan === 'pro'
+                  ? t('account.planPro')
+                  : t('account.planFree')}
+              </span>
+            </span>
+          </button>
           <StatusBadge state={recState} />
           <span className="sidebar-version">v{appVersion}</span>
         </div>
@@ -147,7 +190,13 @@ export function App() {
           </div>
         )}
         <div className="content-inner">
-          {tab === 'home' && <Home settings={settings} recState={recState} />}
+          {tab === 'home' && (
+            <Home
+              settings={settings}
+              recState={recState}
+              onNavigateToHistory={() => setTab('history')}
+            />
+          )}
           {tab === 'settings' && (
             <Settings
               settings={settings}
@@ -163,9 +212,18 @@ export function App() {
                 const next = await window.bisbi.resetSettings();
                 setSettings(next);
               }}
+              onClearHistory={async () => {
+                await window.bisbi.clearHistory();
+              }}
             />
           )}
-          {tab === 'history' && <History />}
+          {tab === 'history' && (
+            <History
+              saveHistoryEnabled={settings.saveHistory}
+              onOpenSettings={() => setTab('settings')}
+            />
+          )}
+          {tab === 'account' && <Account />}
         </div>
       </main>
     </div>
