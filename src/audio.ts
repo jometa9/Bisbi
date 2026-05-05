@@ -57,7 +57,7 @@ export async function startRecording(): Promise<RecordingHandle> {
       const downsampled = downsampleBuffer(merged, sourceSampleRate, TARGET_SAMPLE_RATE);
       const pcm16 = floatTo16BitPcm(downsampled);
       return {
-        pcm: pcm16.buffer,
+        pcm: pcm16.buffer as ArrayBuffer,
         sampleRate: TARGET_SAMPLE_RATE,
         channels: CHANNELS,
       };

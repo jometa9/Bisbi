@@ -14,6 +14,7 @@ export function App() {
   const [resourcesOk, setResourcesOk] = useState<boolean | null>(null);
 
   useEffect(() => {
+    if (!window.bisbi) return;
     void window.bisbi.getSettings().then(setSettings);
     void window.bisbi.getAppVersion().then(setAppVersion);
     void window.bisbi.getRecordingState().then(setRecState);
@@ -35,6 +36,7 @@ export function App() {
   // The hotkey lives in the main process. When it fires, main asks the
   // renderer to start/stop the mic capture via these IPC events.
   useEffect(() => {
+    if (!window.bisbi) return;
     let handle: RecordingHandle | null = null;
 
     const offStart = window.bisbi.onRecordingStart(async () => {
@@ -70,6 +72,23 @@ export function App() {
       handle?.cancel();
     };
   }, []);
+
+  if (!window.bisbi) {
+    return (
+      <div className="not-electron">
+        <h1>Bisbi</h1>
+        <p>
+          Esta ventana tiene que abrirse desde Electron para que funcionen el
+          hotkey global, el micrófono y la transcripción.
+        </p>
+        <p>
+          Si estás en desarrollo, corré <code>npm run dev</code> en la raíz del
+          repo y dejá que Electron abra su propia ventana. No abras{' '}
+          <code>http://localhost:7775</code> directamente en el browser.
+        </p>
+      </div>
+    );
+  }
 
   if (!settings) {
     return <div className="loading">Cargando…</div>;

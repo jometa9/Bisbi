@@ -136,6 +136,23 @@ body { overflow: hidden; }
   color: var(--text-dim);
 }
 
+.not-electron {
+  max-width: 520px;
+  margin: 0 auto;
+  padding: 64px 32px;
+  line-height: 1.55;
+}
+
+.not-electron h1 { margin-top: 0; }
+
+.not-electron code {
+  background: var(--bg-elevated);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 12px;
+}
+
 /* Settings */
 
 .settings { max-width: 640px; display: flex; flex-direction: column; gap: 28px; }

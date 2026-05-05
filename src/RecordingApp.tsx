@@ -6,6 +6,7 @@ export function RecordingApp() {
   const [seconds, setSeconds] = useState(0);
 
   useEffect(() => {
+    if (!window.bisbi) return;
     const off = window.bisbi.onRecordingState((s) => setState(s));
     return off;
   }, []);

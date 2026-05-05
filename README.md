@@ -75,42 +75,34 @@ curl -L \
 
 (`ggml-base-q5_1.bin` ≈ 57 MB)
 
-### 3. Compilar (o descargar) los binarios de whisper.cpp
+### 3. Compilar los binarios de whisper.cpp
 
-Necesitás un `whisper-cli` por plataforma. Las opciones son:
-
-#### Opción A — compilar desde el repo oficial
+Hay un script por plataforma que clona whisper.cpp, lo compila y copia el binario a `resources/whisper/<platform>-<arch>/`. **Hay que correrlo en cada máquina target** (no se puede cross-compilar fácilmente).
 
 ```bash
-git clone https://github.com/ggerganov/whisper.cpp.git
-cd whisper.cpp
-cmake -B build -DGGML_METAL=ON   # macOS Apple Silicon
-cmake --build build --config Release
-# binario en: build/bin/whisper-cli
+# Mac (arm64 con Metal o x64 con Accelerate, auto-detect)
+./scripts/build-whisper.sh
+
+# Linux x64 (mismo script)
+./scripts/build-whisper.sh
+
+# Windows x64 (PowerShell, requiere Visual Studio 2022 + C++ workload)
+.\scripts\build-whisper.ps1
 ```
 
-Repetí en cada máquina target (mac arm/x64, Windows, Linux) y copiá los binarios a las carpetas correspondientes:
-
+Resultado esperado:
 ```
-resources/whisper/darwin-arm64/whisper-cli
-resources/whisper/darwin-x64/whisper-cli
+resources/whisper/darwin-arm64/whisper-cli       # ~3 MB, Metal
+resources/whisper/darwin-x64/whisper-cli         # Accelerate + AVX
 resources/whisper/win32-x64/whisper-cli.exe
 resources/whisper/linux-x64/whisper-cli
 ```
 
-#### Opción B — usar releases pre-compilados
+Los binarios son self-contained: solo dependen de frameworks/libs del sistema. No necesitan dylibs externas. Verificá con `otool -L` en mac o `ldd` en linux.
 
-whisper.cpp publica binarios en sus [releases](https://github.com/ggerganov/whisper.cpp/releases). Bajá los que correspondan y renombralos a `whisper-cli` / `whisper-cli.exe`.
+### 4. Permisos de ejecución
 
-### 4. Permisos de ejecución (macOS / Linux)
-
-```bash
-chmod +x resources/whisper/darwin-arm64/whisper-cli
-chmod +x resources/whisper/darwin-x64/whisper-cli
-chmod +x resources/whisper/linux-x64/whisper-cli
-```
-
-`afterPack.ts` repite el chmod cuando se empaqueta, pero hace falta tenerlo correcto en dev también.
+El script ya hace `chmod +x` y `afterPack.ts` lo repite al empaquetar. Si copiaste el binario a mano, asegurate de que tenga el bit ejecutable.
 
 ### 5. Íconos
 

@@ -1,4 +1,4 @@
-# B2DM — Auto-update & License API
+# Bisbi — Auto-update & License API
 
 Spec for backend work required by the desktop client.
 Covers two concerns:
@@ -6,13 +6,13 @@ Covers two concerns:
 1. **Auto-update**: static file server so the installed desktop app can self-update.
 2. **License validation**: formal contract for the existing `/api/validate-subscription` endpoint.
 
-Base domain assumed: `https://b2dm.app`.
+Base domain assumed: `https://bisbi.app`.
 
 ---
 
 ## 1. Auto-update endpoint
 
-The desktop client uses [`electron-updater`](https://www.electron.build/auto-update) configured with a `generic` provider pointing at `https://b2dm.app/updates/`.
+The desktop client uses [`electron-updater`](https://www.electron.build/auto-update) configured with a `generic` provider pointing at `https://bisbi.app/updates/`.
 
 This is **not an API** — it is a **static file host**. No dynamic logic, no auth, no database. Just files served over HTTPS.
 
@@ -25,8 +25,8 @@ Every time a new desktop version is released, we upload a small set of files to 
 | `latest-mac.yml` | macOS manifest | `text/yaml` or `text/plain` |
 | `latest.yml` | Windows manifest | `text/yaml` or `text/plain` |
 | `latest-linux.yml` | Linux manifest (future) | `text/yaml` or `text/plain` |
-| `B2DM-<version>-arm64-mac.zip` | macOS binary (used by updater) | `application/zip` |
-| `B2DM-Setup.exe` | Windows installer | `application/octet-stream` |
+| `Bisbi-<version>-arm64-mac.zip` | macOS binary (used by updater) | `application/zip` |
+| `Bisbi-Setup.exe` | Windows installer | `application/octet-stream` |
 | `blockmap` files (optional) | Enable delta updates | `application/octet-stream` |
 
 > **Note**: these exact filenames are produced by our `npm run build` step — the API dev does not generate them, just hosts them.
@@ -38,10 +38,10 @@ This is what `electron-builder` outputs. The client fetches this file to decide 
 ```yaml
 version: 0.2.0
 files:
-  - url: B2DM-0.2.0-arm64-mac.zip
+  - url: Bisbi-0.2.0-arm64-mac.zip
     sha512: gY9s1r...==
     size: 95431221
-path: B2DM-0.2.0-arm64-mac.zip
+path: Bisbi-0.2.0-arm64-mac.zip
 sha512: gY9s1r...==
 releaseDate: '2026-04-20T12:00:00.000Z'
 ```
@@ -92,7 +92,7 @@ This endpoint already exists. This section **formalizes the contract** so the de
 ### 2.1 Request
 
 ```
-GET https://b2dm.app/api/validate-subscription?apiKey=<LICENSE_KEY>
+GET https://bisbi.app/api/validate-subscription?apiKey=<LICENSE_KEY>
 ```
 
 - No auth headers required — the key **is** the auth.
@@ -166,7 +166,7 @@ The server should **not** aggressively cache this response either. A few seconds
 - [ ] HTTPS enforced on both `/updates/` and `/api/validate-subscription`.
 - [ ] `/api/validate-subscription` is rate-limited per IP (e.g. 10 req/min). Legitimate clients validate on launch + manual refresh only — anything higher is abuse.
 - [ ] `/updates/` is not behind any auth; it must be reachable before the user logs in.
-- [ ] TLS cert valid for `b2dm.app`. Self-signed certs break `electron-updater` silently.
+- [ ] TLS cert valid for `bisbi.app`. Self-signed certs break `electron-updater` silently.
 - [ ] No PII in updater URLs or query strings. `/updates/` requests are anonymous by design.
 
 ---
@@ -176,13 +176,13 @@ The server should **not** aggressively cache this response either. A few seconds
 ### 4.1 Validate-subscription smoke test
 
 ```bash
-curl "https://b2dm.app/api/validate-subscription?apiKey=TEST_KEY"
+curl "https://bisbi.app/api/validate-subscription?apiKey=TEST_KEY"
 ```
 
 Expected on success:
 
 ```json
-{"email":"you@b2dm.app","name":"You","plan":"pro"}
+{"email":"you@bisbi.app","name":"You","plan":"pro"}
 ```
 
 Expected on invalid key: HTTP 401/403 with `{"error":"..."}`.
@@ -190,15 +190,15 @@ Expected on invalid key: HTTP 401/403 with `{"error":"..."}`.
 ### 4.2 Updates smoke test
 
 ```bash
-curl -I "https://b2dm.app/updates/latest-mac.yml"
-curl    "https://b2dm.app/updates/latest-mac.yml"
+curl -I "https://bisbi.app/updates/latest-mac.yml"
+curl    "https://bisbi.app/updates/latest-mac.yml"
 ```
 
 Expected: HTTP 200, valid YAML body matching the example in §1.2.
 
 ### 4.3 End-to-end update test
 
-1. Install B2DM v0.1.0 on a machine.
+1. Install Bisbi v0.1.0 on a machine.
 2. Release v0.2.0 and upload files to `/updates/`.
 3. Open the installed app. Within ~15 seconds the Home banner should show "Downloading update v0.2.0".
 4. When complete, banner shows "Update ready — v0.2.0" with a Restart & install button.
@@ -207,7 +207,7 @@ Expected: HTTP 200, valid YAML body matching the example in §1.2.
 
 ## 5. Summary of what to build
 
-- [ ] Static file server at `https://b2dm.app/updates/` serving files from §1.1.
+- [ ] Static file server at `https://bisbi.app/updates/` serving files from §1.1.
 - [ ] Headers per §1.4 (short cache on `.yml`, long cache on binaries).
 - [ ] Keep `/api/validate-subscription` matching the contract in §2.
 - [ ] Security checks from §3.

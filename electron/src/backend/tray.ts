@@ -48,8 +48,19 @@ export function initTray(opts: TrayOptions): void {
   onOpenSettings = opts.onOpenSettings;
   onShowHistory = opts.onShowHistory;
 
-  tray = new Tray(buildIcon());
+  try {
+    tray = new Tray(buildIcon());
+  } catch (err) {
+    console.error('[tray] failed to create tray:', err);
+    return;
+  }
   tray.setToolTip('Bisbi — listo para dictar');
+
+  // Always show a visible label on macOS so the user can find the tray entry
+  // even before we have a proper icon asset in build-resources/.
+  if (process.platform === 'darwin') {
+    tray.setTitle('Bisbi');
+  }
 
   if (process.platform !== 'darwin') {
     tray.on('click', () => opts.onOpenSettings());
@@ -69,7 +80,9 @@ export function setRecordingState(state: RecordingState): void {
       : 'Bisbi — listo para dictar';
   tray.setToolTip(tooltip);
   if (process.platform === 'darwin') {
-    tray.setTitle(state === 'idle' ? '' : state === 'recording' ? '● REC' : '… ');
+    const title =
+      state === 'recording' ? '● REC' : state === 'transcribing' ? '… ' : 'Bisbi';
+    tray.setTitle(title);
   }
 }
 

@@ -122,24 +122,33 @@ if (!gotTheLock) {
 
     Menu.setApplicationMenu(null);
 
+    logMain('[main] Bisbi ready, registering backend…');
+
     try {
       await registerBackend({
         onOpenSettings: openSettingsWindow,
         onQuit: () => { isQuitting = true; app.quit(); },
       });
+      logMain('[main] backend ready');
     } catch (err) {
       logMain(`[main] backend registration failed: ${(err as Error)?.message ?? err}`, true);
     }
 
-    // Open the settings window on first run so the user can configure the
-    // hotkey and grant mic permission. Subsequent launches keep it hidden
-    // and the tray icon is the entry point.
+    // In dev we always open the settings window so the developer sees
+    // something. In packaged builds we only open it on first run; after that
+    // the tray icon is the entry point.
     const isFirstRun = !fs.existsSync(getWindowStatePath());
-    if (isFirstRun) openSettingsWindow();
+    const shouldOpenWindow = isFirstRun || !app.isPackaged;
+    if (shouldOpenWindow) {
+      logMain('[main] opening settings window');
+      openSettingsWindow();
+    } else {
+      logMain('[main] running in tray; click the tray icon to open settings');
+    }
 
-    // On macOS, hide the dock icon when no window is visible — Bisbi is a
-    // background utility, not a regular foreground app.
-    if (process.platform === 'darwin' && !isFirstRun && app.dock) {
+    // On macOS, hide the dock icon only when running fully headless (packaged
+    // and not first-run). Otherwise the user can't find the window.
+    if (process.platform === 'darwin' && app.dock && !shouldOpenWindow) {
       app.dock.hide();
     }
 
