@@ -36,6 +36,9 @@ export const en: {
     upgradeToPro: string;
     logout: string;
     confirmLogout: string;
+    profileSection: { title: string; description: string };
+    subscriptionSection: { title: string; description: string };
+    sessionSection: { title: string; description: string };
   };
   home: {
     greeting: { lateNight: string; morning: string; afternoon: string; evening: string };
@@ -178,6 +181,18 @@ export const en: {
     upgradeToPro: 'Upgrade to Pro',
     logout: 'Log out',
     confirmLogout: 'Log out of Bisbi?',
+    profileSection: {
+      title: 'Profile',
+      description: 'How Bisbi identifies you across devices.',
+    },
+    subscriptionSection: {
+      title: 'Subscription',
+      description: 'Manage your plan and billing.',
+    },
+    sessionSection: {
+      title: 'Session',
+      description: 'Sign out of this device.',
+    },
   },
   home: {
     greeting: {

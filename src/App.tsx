@@ -191,8 +191,10 @@ export function App() {
               </span>
             </span>
           </button>
-          <StatusBadge state={recState} />
-          <span className="sidebar-version">v{appVersion}</span>
+          <div className="sidebar-status-row">
+            <StatusBadge state={recState} />
+            <span className="sidebar-version">v{appVersion}</span>
+          </div>
         </div>
       </aside>
 

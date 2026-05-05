@@ -50,6 +50,18 @@ export const zh: Translations = {
     upgradeToPro: '升级到 Pro',
     logout: '退出登录',
     confirmLogout: '退出 Bisbi 账户?',
+    profileSection: {
+      title: '个人资料',
+      description: 'Bisbi 在所有设备上识别您的方式。',
+    },
+    subscriptionSection: {
+      title: '订阅',
+      description: '管理您的套餐和账单。',
+    },
+    sessionSection: {
+      title: '会话',
+      description: '在此设备上退出登录。',
+    },
   },
   home: {
     greeting: {

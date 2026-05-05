@@ -50,6 +50,18 @@ export const hi: Translations = {
     upgradeToPro: 'Pro में अपग्रेड करें',
     logout: 'लॉग आउट',
     confirmLogout: 'Bisbi से लॉग आउट करें?',
+    profileSection: {
+      title: 'प्रोफ़ाइल',
+      description: 'Bisbi आपको सभी डिवाइस पर कैसे पहचानता है।',
+    },
+    subscriptionSection: {
+      title: 'सदस्यता',
+      description: 'अपनी योजना और बिलिंग प्रबंधित करें।',
+    },
+    sessionSection: {
+      title: 'सत्र',
+      description: 'इस डिवाइस से साइन आउट करें।',
+    },
   },
   home: {
     greeting: {

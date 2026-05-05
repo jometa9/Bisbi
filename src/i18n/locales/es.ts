@@ -50,6 +50,18 @@ export const es: Translations = {
     upgradeToPro: 'Pasar a Pro',
     logout: 'Cerrar sesión',
     confirmLogout: '¿Cerrar sesión en Bisbi?',
+    profileSection: {
+      title: 'Perfil',
+      description: 'Cómo Bisbi te identifica en todos los dispositivos.',
+    },
+    subscriptionSection: {
+      title: 'Suscripción',
+      description: 'Gestiona tu plan y la facturación.',
+    },
+    sessionSection: {
+      title: 'Sesión',
+      description: 'Cerrar sesión en este dispositivo.',
+    },
   },
   home: {
     greeting: {

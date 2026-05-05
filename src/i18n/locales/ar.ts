@@ -50,6 +50,18 @@ export const ar: Translations = {
     upgradeToPro: 'الترقية إلى Pro',
     logout: 'تسجيل الخروج',
     confirmLogout: 'تسجيل الخروج من Bisbi؟',
+    profileSection: {
+      title: 'الملف الشخصي',
+      description: 'كيف يتعرّف Bisbi عليك عبر الأجهزة.',
+    },
+    subscriptionSection: {
+      title: 'الاشتراك',
+      description: 'إدارة خطتك والفوترة.',
+    },
+    sessionSection: {
+      title: 'الجلسة',
+      description: 'تسجيل الخروج من هذا الجهاز.',
+    },
   },
   home: {
     greeting: {
