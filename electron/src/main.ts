@@ -3,6 +3,7 @@ import path from 'path';
 import fs from 'fs';
 
 import { BUILD_CONFIG } from './buildConfig';
+import { resolveDevFrontendPort } from './devPort';
 import { appendLogLineWithRetention, trimLogFileToRetention } from './logRetention';
 import { registerBackend } from './backend';
 
@@ -78,11 +79,9 @@ function saveWindowState(win: BrowserWindow): void {
   } catch {}
 }
 
-function getFrontendPort(): number { return BUILD_CONFIG.FRONTEND_PORT; }
-
 function getFrontendServerUrl(): string | undefined {
   if (app.isPackaged) return undefined;
-  return `http://localhost:${getFrontendPort()}`;
+  return `http://localhost:${resolveDevFrontendPort()}`;
 }
 
 function getWindowIconPath(): string {

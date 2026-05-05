@@ -549,40 +549,103 @@ button { font-family: inherit; }
 
 /* Recording pill (floating window) */
 
-body.recording {
-  background: transparent;
+html.recording-window,
+body.recording-window,
+html.recording-window #root {
+  background: transparent !important;
 }
 
 .recording-pill {
   display: flex;
   align-items: center;
   gap: 10px;
-  background: rgba(255, 255, 255, 0.96);
-  color: var(--text);
-  padding: 10px 18px;
+  background: rgba(20, 20, 22, 0.92);
+  padding: 0 12px;
   border-radius: 999px;
-  font-size: 13px;
-  font-weight: 450;
   -webkit-app-region: no-drag;
   height: 100%;
-  border: 1px solid var(--border);
-  box-shadow: 0 8px 28px rgba(24, 24, 27, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
   backdrop-filter: blur(12px);
+  animation: rec-fade-in 180ms ease-out;
 }
 
-.dot {
-  width: 8px;
-  height: 8px;
+.rec-indicator {
+  flex: 0 0 auto;
+  width: 14px;
+  height: 14px;
   border-radius: 50%;
-  background: var(--idle);
+  background: var(--recording);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: rec-pulse 1.4s ease-in-out infinite;
 }
 
-.dot.recording { background: var(--recording); animation: pulse 1.2s ease-in-out infinite; }
-.dot.transcribing { background: var(--transcribing); animation: pulse 0.6s ease-in-out infinite; }
+.rec-square {
+  width: 5px;
+  height: 5px;
+  border-radius: 1px;
+  background: #fff;
+}
 
-@keyframes pulse {
+.rec-waveform {
+  flex: 1 1 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2px;
+  height: 22px;
+}
+
+.rec-bar {
+  flex: 1 1 0;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.85);
+  border-radius: 2px;
+  transform-origin: center;
+  transform: scaleY(0.12);
+  transition: transform 90ms linear;
+}
+
+.recording-pill.state-transcribing .rec-indicator {
+  background: var(--transcribing);
+  animation: rec-pulse 0.6s ease-in-out infinite;
+}
+
+.recording-pill.state-transcribing .rec-bar {
+  animation: rec-scan 1.2s ease-in-out infinite;
+}
+
+.recording-pill.state-transcribing .rec-bar:nth-child(2) { animation-delay: 0.06s; }
+.recording-pill.state-transcribing .rec-bar:nth-child(3) { animation-delay: 0.12s; }
+.recording-pill.state-transcribing .rec-bar:nth-child(4) { animation-delay: 0.18s; }
+.recording-pill.state-transcribing .rec-bar:nth-child(5) { animation-delay: 0.24s; }
+.recording-pill.state-transcribing .rec-bar:nth-child(6) { animation-delay: 0.30s; }
+.recording-pill.state-transcribing .rec-bar:nth-child(7) { animation-delay: 0.36s; }
+.recording-pill.state-transcribing .rec-bar:nth-child(8) { animation-delay: 0.42s; }
+.recording-pill.state-transcribing .rec-bar:nth-child(9) { animation-delay: 0.48s; }
+.recording-pill.state-transcribing .rec-bar:nth-child(10) { animation-delay: 0.54s; }
+.recording-pill.state-transcribing .rec-bar:nth-child(11) { animation-delay: 0.60s; }
+.recording-pill.state-transcribing .rec-bar:nth-child(12) { animation-delay: 0.66s; }
+.recording-pill.state-transcribing .rec-bar:nth-child(13) { animation-delay: 0.72s; }
+.recording-pill.state-transcribing .rec-bar:nth-child(14) { animation-delay: 0.78s; }
+.recording-pill.state-transcribing .rec-bar:nth-child(15) { animation-delay: 0.84s; }
+.recording-pill.state-transcribing .rec-bar:nth-child(16) { animation-delay: 0.90s; }
+
+@keyframes rec-pulse {
   0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.5; transform: scale(0.8); }
+  50% { opacity: 0.6; transform: scale(0.85); }
+}
+
+@keyframes rec-scan {
+  0%, 100% { transform: scaleY(0.18); }
+  50% { transform: scaleY(0.7); }
+}
+
+@keyframes rec-fade-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 /* RTL adjustments. Most of the layout is flex-based and flips automatically

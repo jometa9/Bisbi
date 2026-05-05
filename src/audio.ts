@@ -12,7 +12,13 @@ export interface RecordingHandle {
   cancel: () => void;
 }
 
-export async function startRecording(): Promise<RecordingHandle> {
+export interface StartRecordingOptions {
+  onLevel?: (level: number) => void;
+}
+
+export async function startRecording(
+  opts: StartRecordingOptions = {}
+): Promise<RecordingHandle> {
   const stream = await navigator.mediaDevices.getUserMedia({
     audio: {
       channelCount: 1,
@@ -36,6 +42,12 @@ export async function startRecording(): Promise<RecordingHandle> {
     if (stopped) return;
     const input = event.inputBuffer.getChannelData(0);
     chunks.push(new Float32Array(input));
+    if (opts.onLevel) {
+      let sum = 0;
+      for (let i = 0; i < input.length; i++) sum += input[i]! * input[i]!;
+      const rms = Math.sqrt(sum / input.length);
+      opts.onLevel(Math.min(1, rms * 4));
+    }
   };
 
   source.connect(processor);

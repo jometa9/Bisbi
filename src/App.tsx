@@ -45,7 +45,9 @@ export function App() {
 
     const offStart = window.bisbi.onRecordingStart(async () => {
       try {
-        handle = await startRecording();
+        handle = await startRecording({
+          onLevel: (level) => window.bisbi.sendRecordingLevel(level),
+        });
       } catch (err) {
         console.error('[App] mic access failed:', err);
         await window.bisbi.cancelRecording();
@@ -88,7 +90,7 @@ export function App() {
             }),
             {
               __CMD__: <code key="cmd">npm run dev</code>,
-              __URL__: <code key="url">http://localhost:7775</code>,
+              __URL__: <code key="url">{window.location.origin}</code>,
             }
           )}
         </p>

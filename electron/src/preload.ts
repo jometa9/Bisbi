@@ -43,6 +43,9 @@ const bisbi = {
     listen<void>('recording:stop', () => cb()),
   onRecordingState: (cb: (s: import('./backend/types').RecordingState) => void) =>
     listen<import('./backend/types').RecordingState>('recording:state', cb),
+  sendRecordingLevel: (level: number) => ipcRenderer.send('recording:level', level),
+  onRecordingLevel: (cb: (level: number) => void) =>
+    listen<number>('recording:level', cb),
 
   // History
   listHistory: (limit?: number) =>

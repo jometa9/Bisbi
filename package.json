@@ -13,7 +13,7 @@
     "postinstall": "electron-rebuild -f -w better-sqlite3",
     "dev": "concurrently -k -n vite,electron -c blue,magenta \"npm:dev:vite\" \"npm:dev:electron-wait\"",
     "dev:vite": "vite",
-    "dev:electron-wait": "wait-on http://localhost:7775 && npm run dev:electron",
+    "dev:electron-wait": "node scripts/dev-electron.js",
     "dev:electron": "tsc -p electron/tsconfig.json && electron electron/dist/main.js",
     "build": "npm run build:frontend && npm run build:electron",
     "build:frontend": "vite build",

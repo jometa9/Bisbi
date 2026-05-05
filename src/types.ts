@@ -58,6 +58,8 @@ declare global {
       onRecordingStart: (cb: () => void) => () => void;
       onRecordingStop: (cb: () => void) => () => void;
       onRecordingState: (cb: (s: RecordingState) => void) => () => void;
+      sendRecordingLevel: (level: number) => void;
+      onRecordingLevel: (cb: (level: number) => void) => () => void;
       listHistory: (limit?: number) => Promise<TranscriptionRow[]>;
       deleteHistory: (id: string) => Promise<void>;
       clearHistory: () => Promise<void>;

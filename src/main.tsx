@@ -10,6 +10,11 @@ const root = createRoot(document.getElementById('root')!);
 const route = window.location.hash.replace(/^#/, '') || '/';
 const isRecordingWindow = route.startsWith('/recording');
 
+if (isRecordingWindow) {
+  document.documentElement.classList.add('recording-window');
+  document.body.classList.add('recording-window');
+}
+
 root.render(
   <React.StrictMode>
     <I18nGate>

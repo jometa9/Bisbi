@@ -31,6 +31,9 @@ resources/whisper/*.bin
 # Local build cache
 .cache/
 
+# Vite dev port handoff (written by vite, read by electron)
+.bisbi-dev-port
+
 # Logs & temp
 *.log
 npm-debug.log*

@@ -19,6 +19,7 @@ import {
   showRecordingWindow,
   hideRecordingWindow,
   setState as setRecordingWindowState,
+  setLevel as setRecordingWindowLevel,
 } from './recordingWindow';
 import {
   checkForUpdatesManual,
@@ -116,6 +117,13 @@ export async function registerBackend(opts: BackendOptions): Promise<void> {
 
   // ---------- IPC: recording state ----------
   ipcMain.handle('recording:getState', () => recordingState);
+
+  // Mic levels arrive ~12 fps from the renderer; we forward them to the
+  // floating recording window so the waveform reacts to the user's voice.
+  ipcMain.on('recording:level', (_e, level: number) => {
+    if (recordingState !== 'recording') return;
+    setRecordingWindowLevel(typeof level === 'number' ? level : 0);
+  });
 
   // The renderer captures audio via getUserMedia and sends the raw PCM here
   // when the user toggles the hotkey off.
