@@ -1,13 +1,14 @@
 import { useEffect, useState } from 'react';
+import { Home } from './pages/Home';
 import { Settings } from './pages/Settings';
 import { History } from './pages/History';
 import { startRecording, type RecordingHandle } from './audio';
 import type { AppSettings, RecordingState } from './types';
 
-type Tab = 'settings' | 'history';
+type Tab = 'home' | 'settings' | 'history';
 
 export function App() {
-  const [tab, setTab] = useState<Tab>('settings');
+  const [tab, setTab] = useState<Tab>('home');
   const [settings, setSettings] = useState<AppSettings | null>(null);
   const [recState, setRecState] = useState<RecordingState>('idle');
   const [appVersion, setAppVersion] = useState('');
@@ -25,6 +26,7 @@ export function App() {
     const offNav = window.bisbi.onNavigate(({ to }) => {
       if (to === '/history') setTab('history');
       else if (to === '/settings') setTab('settings');
+      else if (to === '/home' || to === '/') setTab('home');
     });
     return () => {
       offSettings();
@@ -100,16 +102,22 @@ export function App() {
         <div className="brand">Bisbi</div>
         <nav className="tabs">
           <button
-            className={tab === 'settings' ? 'active' : ''}
-            onClick={() => setTab('settings')}
+            className={tab === 'home' ? 'active' : ''}
+            onClick={() => setTab('home')}
           >
-            Ajustes
+            Inicio
           </button>
           <button
             className={tab === 'history' ? 'active' : ''}
             onClick={() => setTab('history')}
           >
             Historial
+          </button>
+          <button
+            className={tab === 'settings' ? 'active' : ''}
+            onClick={() => setTab('settings')}
+          >
+            Ajustes
           </button>
         </nav>
         <div className="status">
@@ -125,24 +133,27 @@ export function App() {
       )}
 
       <main className="content">
-        {tab === 'settings' && (
-          <Settings
-            settings={settings}
-            onChange={async (patch) => {
-              try {
-                const next = await window.bisbi.updateSettings(patch);
+        <div className="content-inner">
+          {tab === 'home' && <Home settings={settings} recState={recState} />}
+          {tab === 'settings' && (
+            <Settings
+              settings={settings}
+              onChange={async (patch) => {
+                try {
+                  const next = await window.bisbi.updateSettings(patch);
+                  setSettings(next);
+                } catch (err) {
+                  alert((err as Error).message);
+                }
+              }}
+              onReset={async () => {
+                const next = await window.bisbi.resetSettings();
                 setSettings(next);
-              } catch (err) {
-                alert((err as Error).message);
-              }
-            }}
-            onReset={async () => {
-              const next = await window.bisbi.resetSettings();
-              setSettings(next);
-            }}
-          />
-        )}
-        {tab === 'history' && <History />}
+              }}
+            />
+          )}
+          {tab === 'history' && <History />}
+        </div>
       </main>
 
       <footer className="footer">

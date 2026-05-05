@@ -17,6 +17,6 @@ export const BUILD_CONFIG = {
   FRONTEND_PORT: 7775,
   PROTOCOL: 'bisbi',
   PRODUCT_NAME: 'Bisbi',
-  WHISPER_MODEL_FILE: 'ggml-base-q5_1.bin',
+  WHISPER_MODEL_FILE: 'ggml-small-q5_1.bin',
   DEFAULT_HOTKEY: process.platform === 'darwin' ? 'Cmd+Shift+Space' : 'Ctrl+Shift+Space',
 } as const;

@@ -10,9 +10,11 @@
     "email": "hello@bisbi.app"
   },
   "scripts": {
-    "dev": "concurrently -k -n vite,electron -c blue,magenta \"npm:dev:vite\" \"npm:dev:electron\"",
+    "postinstall": "electron-rebuild -f -w better-sqlite3",
+    "dev": "concurrently -k -n vite,electron -c blue,magenta \"npm:dev:vite\" \"npm:dev:electron-wait\"",
     "dev:vite": "vite",
-    "dev:electron": "wait-on http://localhost:7775 && tsc -p electron/tsconfig.json && electron electron/dist/main.js",
+    "dev:electron-wait": "wait-on http://localhost:7775 && npm run dev:electron",
+    "dev:electron": "tsc -p electron/tsconfig.json && electron electron/dist/main.js",
     "build": "npm run build:frontend && npm run build:electron",
     "build:frontend": "vite build",
     "build:electron": "tsc -p electron/tsconfig.json",
@@ -27,6 +29,7 @@
     "electron-updater": "^6.3.9"
   },
   "devDependencies": {
+    "@electron/rebuild": "^3.7.2",
     "@types/better-sqlite3": "^7.6.11",
     "@types/node": "^22.7.4",
     "@types/react": "^18.3.12",
@@ -58,7 +61,9 @@
       {
         "from": "resources/whisper",
         "to": "whisper",
-        "filter": ["**/*"]
+        "filter": [
+          "**/*"
+        ]
       }
     ],
     "directories": {
@@ -69,7 +74,9 @@
     "protocols": [
       {
         "name": "Bisbi",
-        "schemes": ["bisbi"]
+        "schemes": [
+          "bisbi"
+        ]
       }
     ],
     "publish": {
@@ -90,11 +97,17 @@
       "target": [
         {
           "target": "dmg",
-          "arch": ["arm64", "x64"]
+          "arch": [
+            "arm64",
+            "x64"
+          ]
         },
         {
           "target": "zip",
-          "arch": ["arm64", "x64"]
+          "arch": [
+            "arm64",
+            "x64"
+          ]
         }
       ]
     },
@@ -106,7 +119,9 @@
       "target": [
         {
           "target": "nsis",
-          "arch": ["x64"]
+          "arch": [
+            "x64"
+          ]
         }
       ]
     },
@@ -123,11 +138,15 @@
       "target": [
         {
           "target": "AppImage",
-          "arch": ["x64"]
+          "arch": [
+            "x64"
+          ]
         },
         {
           "target": "deb",
-          "arch": ["x64"]
+          "arch": [
+            "x64"
+          ]
         }
       ]
     }
