@@ -24,6 +24,7 @@ export const es: Translations = {
       'Faltan los recursos de Whisper. Mirá el README para descargar el binario y el modelo en {path}.',
     micError:
       'No se pudo acceder al micrófono. Asegurate de que Bisbi tenga permiso en los ajustes del sistema.',
+    limitReached: 'Llegaste al límite del plan gratis de este mes.',
   },
   auth: {
     welcome: 'Bienvenido a Bisbi',
@@ -66,9 +67,9 @@ export const es: Translations = {
     billingPeriod: 'Período de facturación',
     opening: 'Abriendo…',
     features: {
-      dictation2k: '2.000 palabras / semana en escritorio',
+      dictation2k: '2.000 palabras / mes en escritorio',
       unlimited: 'Palabras ilimitadas en todos los dispositivos',
-      allDevices: 'Mac, Windows e iOS',
+      allDevices: 'Mac y Windows',
       languages: 'Más de 100 idiomas',
       zeroRetention: 'Sin retención de datos',
       priority: 'Soporte prioritario',

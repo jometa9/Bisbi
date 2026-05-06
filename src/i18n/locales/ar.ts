@@ -24,6 +24,7 @@ export const ar: Translations = {
       'موارد Whisper مفقودة. راجع ملف README لمعرفة كيفية تنزيل الملف الثنائي والنموذج إلى {path}.',
     micError:
       'تعذّر الوصول إلى الميكروفون. تأكد من أن Bisbi يملك إذن الوصول في إعدادات النظام.',
+    limitReached: 'لقد بلغت حد الخطة المجانية لهذا الشهر.',
   },
   auth: {
     welcome: 'مرحبًا بك في Bisbi',
@@ -58,6 +59,21 @@ export const ar: Translations = {
     upgradeToPro: 'الترقية إلى Pro',
     logout: 'تسجيل الخروج',
     confirmLogout: 'تسجيل الخروج من Bisbi؟',
+    monthly: 'شهري',
+    annual: 'سنوي',
+    month: 'شهر',
+    forever: 'للأبد',
+    currentPlan: 'الخطة الحالية',
+    billingPeriod: 'دورة الفوترة',
+    opening: 'جارٍ الفتح…',
+    features: {
+      dictation2k: '2,000 كلمة/شهر على سطح المكتب',
+      unlimited: 'كلمات غير محدودة على جميع الأجهزة',
+      allDevices: 'Mac وWindows',
+      languages: 'أكثر من 100 لغة',
+      zeroRetention: 'عدم الاحتفاظ بالبيانات',
+      priority: 'دعم ذو أولوية',
+    },
     profileSection: {
       title: 'الملف الشخصي',
       description: 'كيف يتعرّف Bisbi عليك عبر الأجهزة.',

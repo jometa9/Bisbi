@@ -7,6 +7,9 @@ import {
   clearTranscriptions,
   getStatsTotals,
   countWords,
+  getMonthlyWordUsage,
+  addMonthlyWordUsage,
+  FREE_MONTHLY_WORD_LIMIT,
 } from './db';
 import {
   getSession,
@@ -115,6 +118,7 @@ async function processQueue(): Promise<void> {
           vocabulary: cfg.vocabulary,
         });
         const meaningful = out.text.replace(/\s/g, '').length >= 2;
+        const wordCount = meaningful ? countWords(out.text) : 0;
         if (meaningful) {
           await deliverText(out.text, cfg.pasteMode);
         }
@@ -127,10 +131,15 @@ async function processQueue(): Promise<void> {
             durationMs: out.durationMs,
             model: out.modelFile.replace(/\.bin$/, ''),
             audioDurationMs: out.audioDurationMs,
-            wordCount: countWords(out.text),
+            wordCount,
           });
           broadcast('history:changed');
           broadcast('stats:totals', getStatsTotals());
+        }
+        // Track monthly usage regardless of saveHistory — the limit must be
+        // enforced even when history is off.
+        if (meaningful && wordCount > 0) {
+          addMonthlyWordUsage(wordCount);
         }
       } catch (err) {
         console.error('[backend] transcription job failed:', err);
@@ -243,6 +252,18 @@ export async function registerBackend(opts: BackendOptions): Promise<void> {
         syncState();
         return;
       }
+      // Free-plan monthly word cap. If already at/over the cap, drop the clip
+      // and notify the renderer so it can prompt to upgrade.
+      const session = getSession();
+      const isPro = session.userInfo?.plan === 'pro';
+      if (!isPro) {
+        const used = getMonthlyWordUsage();
+        if (used >= FREE_MONTHLY_WORD_LIMIT) {
+          broadcast('usage:limitReached', { used, limit: FREE_MONTHLY_WORD_LIMIT });
+          syncState();
+          return;
+        }
+      }
       transcriptionQueue.push({
         pcm,
         sampleRate: payload.sampleRate,
@@ -311,6 +332,12 @@ export async function registerBackend(opts: BackendOptions): Promise<void> {
   ipcMain.handle('auth:checkout', async (_e, billingPeriod: 'monthly' | 'annual'): Promise<string> => {
     return startCheckout(billingPeriod);
   });
+
+  // ---------- IPC: usage ----------
+  ipcMain.handle('usage:getMonthly', () => ({
+    used: getMonthlyWordUsage(),
+    limit: FREE_MONTHLY_WORD_LIMIT,
+  }));
 
   // ---------- IPC: deep link / external links ----------
   ipcMain.handle('deepLink:getPending', () => getPendingDeepLink());

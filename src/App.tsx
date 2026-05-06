@@ -25,6 +25,7 @@ export function App() {
   const [recState, setRecState] = useState<RecordingState>('idle');
   const [appVersion, setAppVersion] = useState('');
   const [resourcesOk, setResourcesOk] = useState<boolean | null>(null);
+  const [showLimitBanner, setShowLimitBanner] = useState(false);
 
   useEffect(() => {
     settingsRef.current = settings;
@@ -45,12 +46,21 @@ export function App() {
       else if (to === '/account') setTab('account');
       else if (to === '/home' || to === '/') setTab('home');
     });
+    const offLimit = window.bisbi.usage.onLimitReached(() => {
+      setShowLimitBanner(true);
+    });
     return () => {
       offSettings();
       offState();
       offNav();
+      offLimit();
     };
   }, []);
+
+  // Hide the limit banner as soon as the user becomes Pro.
+  useEffect(() => {
+    if (userInfo?.plan === 'pro') setShowLimitBanner(false);
+  }, [userInfo?.plan]);
 
   // The hotkey lives in the main process. When it fires, main asks the
   // renderer to start/stop the mic capture via these IPC events. We
@@ -201,6 +211,21 @@ export function App() {
       </aside>
 
       <main className="content">
+        {showLimitBanner && userInfo?.plan !== 'pro' && (
+          <div className="banner banner-upgrade">
+            <span>{t('app.limitReached')}</span>
+            <button
+              type="button"
+              className="banner-upgrade-cta"
+              onClick={() => {
+                setShowLimitBanner(false);
+                setTab('account');
+              }}
+            >
+              {t('account.upgradeToPro')}
+            </button>
+          </div>
+        )}
         {resourcesOk === false && (
           <div className="banner banner-error">
             {renderWithTokens(

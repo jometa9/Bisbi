@@ -201,6 +201,30 @@ export function clearTranscriptions(): void {
   getDb().prepare('DELETE FROM transcriptions').run();
 }
 
+export const FREE_MONTHLY_WORD_LIMIT = 2000;
+
+function currentMonthKey(): string {
+  const now = new Date();
+  const yyyy = now.getFullYear();
+  const mm = String(now.getMonth() + 1).padStart(2, '0');
+  return `usage_words_${yyyy}-${mm}`;
+}
+
+export function getMonthlyWordUsage(): number {
+  const v = metaGet(currentMonthKey());
+  if (!v) return 0;
+  const n = parseInt(v, 10);
+  return Number.isFinite(n) && n > 0 ? n : 0;
+}
+
+export function addMonthlyWordUsage(words: number): number {
+  const inc = Math.max(0, Math.floor(words));
+  if (inc === 0) return getMonthlyWordUsage();
+  const next = getMonthlyWordUsage() + inc;
+  metaSet(currentMonthKey(), String(next));
+  return next;
+}
+
 export interface StatsTotals {
   totalTranscriptions: number;
   totalAudioMs: number;

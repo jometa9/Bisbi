@@ -105,6 +105,14 @@ const bisbi = {
       listen<{ url: string }>('deep-link', cb),
   },
   openExternal: (url: string) => invoke<void>('app:openExternal', url),
+
+  // Usage / quota — free plan monthly word cap, tracked locally.
+  usage: {
+    getMonthly: () =>
+      invoke<{ used: number; limit: number }>('usage:getMonthly'),
+    onLimitReached: (cb: (payload: { used: number; limit: number }) => void) =>
+      listen<{ used: number; limit: number }>('usage:limitReached', cb),
+  },
 };
 
 contextBridge.exposeInMainWorld('bisbi', bisbi);

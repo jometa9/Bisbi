@@ -146,6 +146,10 @@ declare global {
         onLink: (cb: (payload: { url: string }) => void) => () => void;
       };
       openExternal: (url: string) => Promise<void>;
+      usage: {
+        getMonthly: () => Promise<{ used: number; limit: number }>;
+        onLimitReached: (cb: (payload: { used: number; limit: number }) => void) => () => void;
+      };
     };
   }
 }

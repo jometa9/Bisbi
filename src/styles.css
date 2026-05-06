@@ -332,6 +332,35 @@ button { font-family: inherit; }
   color: var(--error);
 }
 
+.banner-upgrade {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border-color: var(--primary-light);
+  background: var(--primary-tint);
+  color: var(--primary-dark);
+}
+
+.banner-upgrade-cta {
+  appearance: none;
+  border: 0;
+  cursor: pointer;
+  background: var(--primary-dark);
+  color: var(--white);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 999px;
+  white-space: nowrap;
+  transition: background 0.12s;
+}
+
+.banner-upgrade-cta:hover {
+  background: var(--accent);
+}
+
 .banner code {
   font-family: ui-monospace, "SF Mono", Menlo, monospace;
   font-size: 12px;

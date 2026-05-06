@@ -24,6 +24,7 @@ export const hi: Translations = {
       'Whisper के संसाधन गायब हैं। बाइनरी और मॉडल को {path} में डाउनलोड करने के लिए README देखें।',
     micError:
       'माइक्रोफ़ोन तक पहुँच नहीं हो सकी। सुनिश्चित करें कि Bisbi को सिस्टम सेटिंग्स में अनुमति प्राप्त है।',
+    limitReached: 'इस महीने के मुफ़्त प्लान की सीमा पूरी हो गई।',
   },
   auth: {
     welcome: 'Bisbi में आपका स्वागत है',
@@ -58,6 +59,21 @@ export const hi: Translations = {
     upgradeToPro: 'Pro में अपग्रेड करें',
     logout: 'लॉग आउट',
     confirmLogout: 'Bisbi से लॉग आउट करें?',
+    monthly: 'मासिक',
+    annual: 'वार्षिक',
+    month: 'माह',
+    forever: 'हमेशा',
+    currentPlan: 'वर्तमान योजना',
+    billingPeriod: 'बिलिंग अवधि',
+    opening: 'खुल रहा है…',
+    features: {
+      dictation2k: 'डेस्कटॉप पर 2,000 शब्द/माह',
+      unlimited: 'सभी डिवाइस पर असीमित शब्द',
+      allDevices: 'Mac और Windows',
+      languages: '100+ भाषाएं',
+      zeroRetention: 'डेटा संधारण नहीं',
+      priority: 'प्राथमिकता समर्थन',
+    },
     profileSection: {
       title: 'प्रोफ़ाइल',
       description: 'Bisbi आपको सभी डिवाइस पर कैसे पहचानता है।',

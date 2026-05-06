@@ -10,6 +10,7 @@ export const en: {
     notElectron: { body: string; devHint: string };
     resourcesMissing: string;
     micError: string;
+    limitReached: string;
   };
   auth: {
     welcome: string;
@@ -195,6 +196,7 @@ export const en: {
       'Whisper resources are missing. See the README for how to download the binary and the model into {path}.',
     micError:
       'Could not access the microphone. Make sure Bisbi has permission in your system settings.',
+    limitReached: 'You’ve hit your free plan limit for this month.',
   },
   auth: {
     welcome: 'Welcome to Bisbi',
@@ -237,9 +239,9 @@ export const en: {
     billingPeriod: 'Billing period',
     opening: 'Opening…',
     features: {
-      dictation2k: '2,000 words / week on desktop',
+      dictation2k: '2,000 words / month on desktop',
       unlimited: 'Unlimited words on all devices',
-      allDevices: 'Mac, Windows & iOS',
+      allDevices: 'Mac & Windows',
       languages: '100+ languages',
       zeroRetention: 'Zero data retention',
       priority: 'Priority support',

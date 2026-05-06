@@ -24,6 +24,7 @@ export const zh: Translations = {
       '缺少 Whisper 资源。请查看 README 以了解如何将二进制文件和模型下载到 {path}。',
     micError:
       '无法访问麦克风。请确保 Bisbi 在系统设置中拥有权限。',
+    limitReached: '本月免费套餐已用完。',
   },
   auth: {
     welcome: '欢迎使用 Bisbi',
@@ -58,6 +59,21 @@ export const zh: Translations = {
     upgradeToPro: '升级到 Pro',
     logout: '退出登录',
     confirmLogout: '退出 Bisbi 账户?',
+    monthly: '每月',
+    annual: '每年',
+    month: '月',
+    forever: '永久',
+    currentPlan: '当前方案',
+    billingPeriod: '结算周期',
+    opening: '正在打开…',
+    features: {
+      dictation2k: '桌面端每月 2,000 字',
+      unlimited: '所有设备无限字数',
+      allDevices: 'Mac 和 Windows',
+      languages: '100+ 种语言',
+      zeroRetention: '零数据保留',
+      priority: '优先支持',
+    },
     profileSection: {
       title: '个人资料',
       description: 'Bisbi 在所有设备上识别您的方式。',
