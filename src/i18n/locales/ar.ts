@@ -194,7 +194,7 @@ export const ar: Translations = {
       title: 'مفردات مخصصة',
       description:
         'أسماء أو علامات تجارية أو مصطلحات تقنية ينبغي أن يتعرف عليها Bisbi بشكل أفضل. تُستخدم كسياق لكل عملية نسخ.',
-      placeholder: 'مثال: Joaquín، Bisbi، whisper.cpp، Kubernetes، Anthropic',
+      placeholder: 'مثال: محمد، ChatGPT، القاهرة، Excel، سبرينت، فاتورة',
       hint: 'اجعلها قصيرة. اكتب المصطلحات باللغة التي تُملي بها في الغالب.',
     },
     dangerZone: {

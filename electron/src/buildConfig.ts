@@ -9,7 +9,7 @@ export const BUILD_CONFIG = {
   PROTOCOL: 'bisbi',
   PRODUCT_NAME: 'Bisbi',
   WHISPER_MODELS,
-  DEFAULT_PRECISION: 'balanced' as const,
+  DEFAULT_PRECISION: 'high' as const,
   // Single-key defaults so the hotkey works in push-to-talk: hold one thumb-
   // reachable key. Right Command on Mac, Right Alt elsewhere.
   DEFAULT_HOTKEY: process.platform === 'darwin' ? 'MetaRight' : 'AltRight',

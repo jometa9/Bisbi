@@ -190,7 +190,7 @@ export const zh: Translations = {
     vocabulary: {
       title: '自定义词汇',
       description: '希望 Bisbi 更准确识别的人名、品牌或专业术语。会作为每次转录的上下文。',
-      placeholder: '例如:Joaquín、Bisbi、whisper.cpp、Kubernetes、Anthropic',
+      placeholder: '例如:小明、ChatGPT、上海、Excel、冲刺、发票',
       hint: '保持简短。用你最常使用的语言书写这些词汇。',
     },
     dangerZone: {

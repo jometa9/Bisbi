@@ -197,7 +197,7 @@ export const es: Translations = {
       title: 'Vocabulario personalizado',
       description:
         'Nombres propios, marcas o jerga que Bisbi tiene que reconocer mejor. Se usa como contexto en cada transcripción.',
-      placeholder: 'ej. Joaquín, Bisbi, whisper.cpp, Kubernetes, Anthropic',
+      placeholder: 'ej. María, ChatGPT, Buenos Aires, Excel, sprint, factura',
       hint: 'Mantenelo corto. Escribí los términos en el idioma que más dictás.',
     },
     dangerZone: {

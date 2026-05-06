@@ -345,7 +345,7 @@ export const en: {
       title: 'Custom vocabulary',
       description:
         'Names, brand terms or jargon Bisbi should recognise better. Used as context for every transcription.',
-      placeholder: 'e.g. Joaquín, Bisbi, whisper.cpp, Kubernetes, Anthropic',
+      placeholder: 'e.g. John, ChatGPT, New York, Excel, sprint, invoice',
       hint: 'Keep it short. Write the terms in the language you mostly dictate in.',
     },
     dangerZone: {

@@ -194,7 +194,7 @@ export const hi: Translations = {
       title: 'कस्टम शब्दावली',
       description:
         'नाम, ब्रांड या तकनीकी शब्द जिन्हें Bisbi को बेहतर पहचानना चाहिए। हर ट्रांसक्रिप्शन के लिए संदर्भ के रूप में उपयोग किया जाता है।',
-      placeholder: 'जैसे: Joaquín, Bisbi, whisper.cpp, Kubernetes, Anthropic',
+      placeholder: 'जैसे: राहुल, ChatGPT, मुंबई, Excel, स्प्रिंट, चालान',
       hint: 'संक्षिप्त रखें। उस भाषा में शब्द लिखें जिसमें आप ज़्यादातर बोलते हैं।',
     },
     dangerZone: {
