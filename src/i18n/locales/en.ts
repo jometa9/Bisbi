@@ -101,6 +101,18 @@ export const en: {
       balanced: { label: string; hint: string };
       high: { label: string; hint: string };
     };
+    suppressNonSpeech: {
+      title: string;
+      description: string;
+      enabled: { label: string; hint: string };
+      disabled: { label: string; hint: string };
+    };
+    vocabulary: {
+      title: string;
+      description: string;
+      placeholder: string;
+      hint: string;
+    };
     dangerZone: { title: string; description: string };
     reset: string;
     clearHistory: string;
@@ -129,6 +141,11 @@ export const en: {
     checkUpdates: string;
     version: string;
     quit: string;
+  };
+  update: {
+    downloading: string;
+    ready: string;
+    restart: string;
   };
   errors: { hotkeyRegister: string };
   common: { yes: string; no: string };
@@ -311,6 +328,26 @@ export const en: {
         hint: 'More effort and slower, but better with mixed languages, technical terms, or noisy audio.',
       },
     },
+    suppressNonSpeech: {
+      title: 'Non-speech sounds',
+      description:
+        'Whisper can transcribe annotations like "[Music]", "[Laughter]" or "(sigh)". Choose whether they should appear in your text.',
+      enabled: {
+        label: 'Hide them (recommended)',
+        hint: 'Only spoken words are inserted. Background sounds and noises are ignored.',
+      },
+      disabled: {
+        label: 'Keep them',
+        hint: 'Annotations like [Music] or (sigh) are included in the transcription.',
+      },
+    },
+    vocabulary: {
+      title: 'Custom vocabulary',
+      description:
+        'Names, brand terms or jargon Bisbi should recognise better. Used as context for every transcription.',
+      placeholder: 'e.g. Joaquín, Bisbi, whisper.cpp, Kubernetes, Anthropic',
+      hint: 'Keep it short. Write the terms in the language you mostly dictate in.',
+    },
     dangerZone: {
       title: 'Reset & data',
       description: 'These actions are permanent and cannot be undone.',
@@ -352,6 +389,11 @@ export const en: {
     checkUpdates: 'Check for updates',
     version: 'Version {v}',
     quit: 'Quit',
+  },
+  update: {
+    downloading: 'Downloading update… {percent}%',
+    ready: 'Update ready: v{version}',
+    restart: 'Restart',
   },
   errors: {
     hotkeyRegister: 'Could not register the shortcut "{accel}". Try another one.',

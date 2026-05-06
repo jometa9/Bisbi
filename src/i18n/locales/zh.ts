@@ -175,6 +175,24 @@ export const zh: Translations = {
         hint: '处理更多、速度更慢,但对多语言混合、专业术语或嘈杂音频效果更好。',
       },
     },
+    suppressNonSpeech: {
+      title: '非语音声音',
+      description: 'Whisper 可以转录"[音乐]"、"[笑声]"或"(叹气)"等注释。选择是否在文本中显示它们。',
+      enabled: {
+        label: '隐藏(推荐)',
+        hint: '只插入说出的内容。背景声音和噪音将被忽略。',
+      },
+      disabled: {
+        label: '保留',
+        hint: '[音乐] 或 (叹气) 等注释会出现在转录文本中。',
+      },
+    },
+    vocabulary: {
+      title: '自定义词汇',
+      description: '希望 Bisbi 更准确识别的人名、品牌或专业术语。会作为每次转录的上下文。',
+      placeholder: '例如:Joaquín、Bisbi、whisper.cpp、Kubernetes、Anthropic',
+      hint: '保持简短。用你最常使用的语言书写这些词汇。',
+    },
     dangerZone: {
       title: '重置与数据',
       description: '这些操作不可撤销,执行后无法恢复。',
@@ -216,6 +234,11 @@ export const zh: Translations = {
     checkUpdates: '检查更新',
     version: '版本 {v}',
     quit: '退出',
+  },
+  update: {
+    downloading: '正在下载更新… {percent}%',
+    ready: '更新已就绪：v{version}',
+    restart: '重启',
   },
   errors: {
     hotkeyRegister: '无法注册快捷键 “{accel}”。请尝试其他组合。',

@@ -4,6 +4,7 @@ import { Settings } from './pages/Settings';
 import { History } from './pages/History';
 import { Account } from './pages/Account';
 import { Login } from './pages/Login';
+import { UpdateLabel } from './components/UpdateLabel';
 import { startRecording, type RecordingHandle } from './audio';
 import type { AppSettings, RecordingState } from './types';
 import { useTranslation } from './i18n';
@@ -169,6 +170,7 @@ export function App() {
           </button>
         </nav>
         <div className="sidebar-bottom">
+          <UpdateLabel />
           <button
             className={`sidebar-account${tab === 'account' ? ' active' : ''}`}
             onClick={() => setTab('account')}

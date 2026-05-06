@@ -180,6 +180,26 @@ export const es: Translations = {
         hint: 'Mayor esfuerzo y demora, pero mejor con mezcla de idiomas, términos técnicos o audios ruidosos.',
       },
     },
+    suppressNonSpeech: {
+      title: 'Sonidos no verbales',
+      description:
+        'Whisper puede transcribir anotaciones como "[Música]", "[Risas]" o "(suspiro)". Elegí si querés que aparezcan en el texto.',
+      enabled: {
+        label: 'Ocultarlos (recomendado)',
+        hint: 'Solo se inserta lo que se habla. Los sonidos y ruidos de fondo se ignoran.',
+      },
+      disabled: {
+        label: 'Mantenerlos',
+        hint: 'Las anotaciones como [Música] o (suspiro) se incluyen en la transcripción.',
+      },
+    },
+    vocabulary: {
+      title: 'Vocabulario personalizado',
+      description:
+        'Nombres propios, marcas o jerga que Bisbi tiene que reconocer mejor. Se usa como contexto en cada transcripción.',
+      placeholder: 'ej. Joaquín, Bisbi, whisper.cpp, Kubernetes, Anthropic',
+      hint: 'Mantenelo corto. Escribí los términos en el idioma que más dictás.',
+    },
     dangerZone: {
       title: 'Restablecer y datos',
       description: 'Estas acciones son permanentes y no se pueden deshacer.',
@@ -221,6 +241,11 @@ export const es: Translations = {
     checkUpdates: 'Buscar actualizaciones',
     version: 'Versión {v}',
     quit: 'Salir',
+  },
+  update: {
+    downloading: 'Descargando actualización… {percent}%',
+    ready: 'Actualización lista: v{version}',
+    restart: 'Reiniciar',
   },
   errors: {
     hotkeyRegister: 'No se pudo registrar el atajo "{accel}". Probá otro.',

@@ -29,11 +29,6 @@ interface ParsedAccelerator {
   bareModifier: boolean;
 }
 
-// libuiohook exposes the macOS Fn key as VC_FUNCTION (0x0E36). It isn't in
-// uiohook-napi's UiohookKey map but events still carry the keycode, so we
-// recognize it by number. Outside macOS Fn rarely surfaces as a keycode.
-const VC_FUNCTION = 0x0e36;
-
 const KEY_TOKEN_MAP: Record<string, number> = {
   // Letters and digits
   ...Object.fromEntries(
@@ -67,7 +62,6 @@ const KEY_TOKEN_MAP: Record<string, number> = {
   PageDown: UiohookKey.PageDown,
   CapsLock: UiohookKey.CapsLock,
   // Bare modifier keys (used standalone, not as modifier flags)
-  Fn: VC_FUNCTION,
   AltRight: UiohookKey.AltRight,
   AltLeft: UiohookKey.Alt,
   CtrlRight: UiohookKey.CtrlRight,
@@ -79,7 +73,6 @@ const KEY_TOKEN_MAP: Record<string, number> = {
 };
 
 const BARE_MODIFIER_TOKENS = new Set([
-  'Fn',
   'AltRight',
   'AltLeft',
   'CtrlRight',

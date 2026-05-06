@@ -109,6 +109,8 @@ async function processQueue(): Promise<void> {
         const out = await transcribePcm(job.pcm, job.sampleRate, job.channels, {
           language: cfg.language,
           precision: cfg.precision,
+          suppressNonSpeech: cfg.suppressNonSpeech,
+          vocabulary: cfg.vocabulary,
         });
         const meaningful = out.text.replace(/\s/g, '').length >= 2;
         if (meaningful) {

@@ -15,10 +15,22 @@ export function RecordingApp() {
   const [seconds, setSeconds] = useState(0);
   const lastLevelRef = useRef(0);
   const peakRef = useRef(MIN_PEAK);
+  const startedAtRef = useRef<number | null>(null);
 
   useEffect(() => {
     if (!window.bisbi) return;
-    const offState = window.bisbi.onPillState(setState);
+    const offState = window.bisbi.onPillState((s) => {
+      // Reset on every 'recording' event, even if state didn't change —
+      // guards against a stale counter from a previous session or after
+      // the computer was suspended mid-recording.
+      if (s === 'recording') {
+        startedAtRef.current = Date.now();
+        setSeconds(0);
+      } else if (s === 'idle') {
+        startedAtRef.current = null;
+      }
+      setState(s);
+    });
     const offLevel = window.bisbi.onRecordingLevel((level) => {
       lastLevelRef.current = level;
     });
@@ -53,8 +65,12 @@ export function RecordingApp() {
       return;
     }
     if (state === 'recording') {
-      setSeconds(0);
-      const id = window.setInterval(() => setSeconds((s) => s + 1), 1000);
+      // Compute elapsed from a timestamp instead of incrementing — survives
+      // setInterval throttling and OS sleep without drifting.
+      const id = window.setInterval(() => {
+        if (startedAtRef.current == null) return;
+        setSeconds(Math.floor((Date.now() - startedAtRef.current) / 1000));
+      }, 250);
       return () => window.clearInterval(id);
     }
     // 'transcribing' freezes the counter at the value reached during recording

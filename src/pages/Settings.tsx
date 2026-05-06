@@ -10,6 +10,7 @@ import {
 import { Select } from '../components/Select';
 import { ConfirmButton } from '../components/ConfirmButton';
 import { listMicrophones, type MicrophoneDevice } from '../audio';
+import { HotkeyKeys } from '../components/HotkeyKeys';
 
 interface Props {
   settings: AppSettings;
@@ -134,6 +135,40 @@ export function Settings({ settings, onChange, onReset, onClearHistory }: Props)
               onSelect={() => onChange({ precision: opt })}
             />
           ))}
+        </div>
+      </Section>
+
+      <Section
+        title={t('settings.vocabulary.title')}
+        description={t('settings.vocabulary.description')}
+      >
+        <VocabularyInput
+          value={settings.vocabulary}
+          onChange={(vocabulary) => onChange({ vocabulary })}
+          placeholder={t('settings.vocabulary.placeholder')}
+          hint={t('settings.vocabulary.hint')}
+        />
+      </Section>
+
+      <Section
+        title={t('settings.suppressNonSpeech.title')}
+        description={t('settings.suppressNonSpeech.description')}
+      >
+        <div className="option-cards">
+          <OptionCard
+            name="suppressNonSpeech"
+            selected={settings.suppressNonSpeech}
+            title={t('settings.suppressNonSpeech.enabled.label')}
+            hint={t('settings.suppressNonSpeech.enabled.hint')}
+            onSelect={() => onChange({ suppressNonSpeech: true })}
+          />
+          <OptionCard
+            name="suppressNonSpeech"
+            selected={!settings.suppressNonSpeech}
+            title={t('settings.suppressNonSpeech.disabled.label')}
+            hint={t('settings.suppressNonSpeech.disabled.hint')}
+            onSelect={() => onChange({ suppressNonSpeech: false })}
+          />
         </div>
       </Section>
 
@@ -322,6 +357,7 @@ function HotkeyInput({
   }, [capturing, onChange]);
 
   const showCapturePreview = capturing && draft && draft !== value;
+  const platform = isMac ? 'mac' : 'win';
 
   return (
     <div className="hotkey-input" ref={ref}>
@@ -329,12 +365,20 @@ function HotkeyInput({
         {capturing ? (
           <>
             <span className="hotkey-display-pulse" aria-hidden="true" />
-            <span className="hotkey-display-text">
-              {showCapturePreview ? draft : t('settings.hotkey.waiting')}
-            </span>
+            {showCapturePreview ? (
+              <span className="hotkey-display-keys">
+                <HotkeyKeys accel={draft} platform={platform} size="sm" />
+              </span>
+            ) : (
+              <span className="hotkey-display-text">
+                {t('settings.hotkey.waiting')}
+              </span>
+            )}
           </>
         ) : (
-          <span className="hotkey-display-text">{draft}</span>
+          <span className="hotkey-display-keys">
+            <HotkeyKeys accel={draft} platform={platform} size="sm" />
+          </span>
         )}
       </div>
       <button
@@ -351,12 +395,12 @@ function HotkeyInput({
             type="button"
             className="btn-link"
             onClick={() => {
-              setDraft('Fn');
-              onChange('Fn');
+              setDraft('MetaRight');
+              onChange('MetaRight');
               setCapturing(false);
             }}
           >
-            Fn
+            Right Command
           </button>
         )}
         <button
@@ -428,6 +472,58 @@ function MicrophonePicker({
       ariaLabel={t('settings.microphone.title')}
       options={options}
     />
+  );
+}
+
+// Whisper's `--prompt` is capped around 224 tokens — well under that the
+// quality starts to degrade if the prompt drowns out the actual audio.
+// 240 chars keeps users within a safe envelope without having to count tokens.
+const VOCABULARY_MAX_LENGTH = 240;
+
+function VocabularyInput({
+  value,
+  onChange,
+  placeholder,
+  hint,
+}: {
+  value: string;
+  onChange: (next: string) => void;
+  placeholder: string;
+  hint: string;
+}) {
+  const [draft, setDraft] = useState(value);
+  // Re-sync if the underlying setting changes from elsewhere (reset, another
+  // window). We compare to avoid clobbering an in-progress edit when this
+  // component itself emitted the change.
+  useEffect(() => {
+    setDraft((prev) => (prev === value ? prev : value));
+  }, [value]);
+
+  // Debounce disk writes so we don't fsync on every keystroke. 400ms feels
+  // immediate while still collapsing a typing burst into a single save.
+  useEffect(() => {
+    if (draft === value) return;
+    const handle = setTimeout(() => onChange(draft), 400);
+    return () => clearTimeout(handle);
+  }, [draft, value, onChange]);
+
+  return (
+    <div className="vocabulary-input">
+      <textarea
+        value={draft}
+        onChange={(e) => setDraft(e.target.value.slice(0, VOCABULARY_MAX_LENGTH))}
+        placeholder={placeholder}
+        rows={3}
+        maxLength={VOCABULARY_MAX_LENGTH}
+        spellCheck={false}
+      />
+      <div className="vocabulary-input-meta">
+        <span className="vocabulary-input-hint">{hint}</span>
+        <span className="vocabulary-input-counter">
+          {draft.length}/{VOCABULARY_MAX_LENGTH}
+        </span>
+      </div>
+    </div>
   );
 }
 

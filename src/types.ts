@@ -13,6 +13,12 @@ export interface AppSettings {
   pasteMode: 'paste' | 'clipboard';
   saveHistory: boolean;
   precision: Precision;
+  // When true, whisper-cli strips non-speech tokens like "[Música]" or
+  // "(suspiro)" from the transcript. Defaults to true.
+  suppressNonSpeech: boolean;
+  // Free-form text used as the whisper-cli `--prompt`. Helps the model
+  // recognise proper names, brand terms, jargon. Empty ⇒ no prompt.
+  vocabulary: string;
   // null means "use the operating-system default microphone". A non-null id is
   // remembered even if the device is currently unplugged, so we automatically
   // re-pick it the next time it shows up.

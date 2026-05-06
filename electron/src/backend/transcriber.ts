@@ -11,6 +11,8 @@ export interface TranscribeOptions {
   language: string; // 'auto' or ISO code (e.g. 'es', 'en')
   precision: Precision;
   threads?: number;
+  suppressNonSpeech?: boolean;
+  vocabulary?: string;
 }
 
 export interface TranscribeOutput {
@@ -129,6 +131,13 @@ export async function transcribePcm(
       '-nt', // no timestamps in the txt output
       '-t', String(opts.threads ?? Math.max(2, Math.floor(os.cpus().length / 2))),
     ];
+    if (opts.suppressNonSpeech) {
+      args.push('--suppress-nst');
+    }
+    const prompt = opts.vocabulary?.trim();
+    if (prompt) {
+      args.push('--prompt', prompt);
+    }
 
     const text = await runWhisper(check.binaryPath, args, wavPath);
     const durationMs = Date.now() - startedAt;

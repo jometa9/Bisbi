@@ -11,8 +11,7 @@ export const BUILD_CONFIG = {
   WHISPER_MODELS,
   DEFAULT_PRECISION: 'balanced' as const,
   // Single-key defaults so the hotkey works in push-to-talk: hold one thumb-
-  // reachable key. Fn on Mac (libuiohook reports it as VC_FUNCTION); Right Alt
-  // elsewhere because Fn isn't a reportable keycode on most non-Mac keyboards.
-  DEFAULT_HOTKEY: process.platform === 'darwin' ? 'Fn' : 'AltRight',
+  // reachable key. Right Command on Mac, Right Alt elsewhere.
+  DEFAULT_HOTKEY: process.platform === 'darwin' ? 'MetaRight' : 'AltRight',
   DEFAULT_HANDS_FREE: false,
 } as const;

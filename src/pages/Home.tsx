@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from 'react';
 import type { AppSettings, RecordingState, StatsTotals, TranscriptionRow } from '../types';
 import { useTranslation, type UiLanguage } from '../i18n';
 import { TranscriptionList } from '../components/TranscriptionList';
+import { HotkeyKeys, type HotkeyVisualState } from '../components/HotkeyKeys';
+import type { KeyPlatform } from '../lib/hotkey';
 
 interface Props {
   settings: AppSettings;
@@ -9,7 +11,7 @@ interface Props {
   onNavigateToHistory?: () => void;
 }
 
-type KeyStyle = 'mac' | 'win';
+type KeyStyle = KeyPlatform;
 
 const HOME_RECENT_LIMIT = 3;
 const EMPTY_TOTALS: StatsTotals = {
@@ -73,7 +75,11 @@ export function Home({ settings, recState, onNavigateToHistory }: Props) {
       <div className="home-hotkey">
         <span className="home-hotkey-label">{t('home.hotkeyLabel')}</span>
         <div className="home-hotkey-keys">
-          {renderHotkey(settings.hotkey, keyStyle, hotkeyVisualState(recState, settings.handsFreeMode))}
+          <HotkeyKeys
+            accel={settings.hotkey}
+            platform={keyStyle}
+            visual={hotkeyVisualState(recState, settings.handsFreeMode)}
+          />
         </div>
         <span className="home-hotkey-hint">
           {settings.pasteMode === 'paste'
@@ -128,49 +134,9 @@ function Stat({ value, label }: { value: string | number; label: string }) {
   );
 }
 
-type HotkeyVisualState = 'idle' | 'pressed' | 'lit';
-
 function hotkeyVisualState(rec: RecordingState, handsFree: boolean): HotkeyVisualState {
   if (rec !== 'recording') return 'idle';
   return handsFree ? 'lit' : 'pressed';
-}
-
-function renderHotkey(accel: string, style: KeyStyle, visual: HotkeyVisualState) {
-  const parts = accel.split('+').filter(Boolean);
-  const stateClass = visual === 'idle' ? '' : ` kbd-${visual}`;
-  return parts.flatMap((part, i) => {
-    const node = (
-      <kbd key={`k-${i}`} className={`kbd kbd-${style}${stateClass}`}>
-        {prettyKey(part)}
-      </kbd>
-    );
-    if (i === parts.length - 1) return [node];
-    return [
-      node,
-      <span key={`p-${i}`} className="kbd-plus">
-        +
-      </span>,
-    ];
-  });
-}
-
-function prettyKey(part: string): string {
-  switch (part) {
-    case 'Cmd':
-    case 'CommandOrControl':
-      return '⌘';
-    case 'Ctrl':
-      return '⌃';
-    case 'Alt':
-    case 'Option':
-      return '⌥';
-    case 'Shift':
-      return '⇧';
-    case 'Space':
-      return 'Space';
-    default:
-      return part;
-  }
 }
 
 function timeGreetingKey():

@@ -21,8 +21,9 @@
     "package": "npm run build && electron-builder",
     "package:mac": "npm run build && electron-builder --mac",
     "package:win": "npm run build && electron-builder --win",
-    "package:linux": "npm run build && electron-builder --linux",
-    "typecheck": "tsc --noEmit && tsc -p electron/tsconfig.json --noEmit"
+    "typecheck": "tsc --noEmit && tsc -p electron/tsconfig.json --noEmit",
+    "release": "node scripts/release.mjs",
+    "release:add": "node scripts/release.mjs add"
   },
   "dependencies": {
     "better-sqlite3": "^11.5.0",
@@ -101,7 +102,7 @@
     "publish": {
       "provider": "github",
       "owner": "jometa9",
-      "repo": "Bisbi"
+      "repo": "bisbi-releases"
     },
     "mac": {
       "category": "public.app-category.productivity",
@@ -151,24 +152,6 @@
       "allowToChangeInstallationDirectory": true,
       "include": "build/installer.nsh",
       "artifactName": "Bisbi-Setup-${version}.${ext}"
-    },
-    "linux": {
-      "icon": "build-resources/icon.png",
-      "category": "Utility",
-      "target": [
-        {
-          "target": "AppImage",
-          "arch": [
-            "x64"
-          ]
-        },
-        {
-          "target": "deb",
-          "arch": [
-            "x64"
-          ]
-        }
-      ]
     }
   }
 }

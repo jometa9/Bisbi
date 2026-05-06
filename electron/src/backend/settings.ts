@@ -14,6 +14,8 @@ const DEFAULT_SETTINGS: AppSettings = {
   pasteMode: 'paste',
   saveHistory: true,
   precision: 'balanced',
+  suppressNonSpeech: true,
+  vocabulary: '',
   microphoneId: null,
 };
 
@@ -33,6 +35,11 @@ export function getSettings(): AppSettings {
     cached = { ...DEFAULT_SETTINGS, ...parsed };
   } catch {
     cached = { ...DEFAULT_SETTINGS };
+  }
+  // Migrate legacy "Fn" hotkey: it's no longer supported, fall back to default.
+  if (cached.hotkey === 'Fn') {
+    cached = { ...cached, hotkey: BUILD_CONFIG.DEFAULT_HOTKEY };
+    fs.writeFileSync(settingsPath(), JSON.stringify(cached, null, 2), 'utf8');
   }
   return cached;
 }
