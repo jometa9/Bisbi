@@ -90,8 +90,11 @@ const bisbi = {
     loginWithToken: (token: string) =>
       invoke<import('./backend/auth').AuthSession>('auth:loginWithToken', token),
     logout: () => invoke<import('./backend/auth').AuthSession>('auth:logout'),
+    refresh: () => invoke<import('./backend/auth').AuthSession>('auth:refresh'),
     onChange: (cb: (s: import('./backend/auth').AuthSession) => void) =>
       listen<import('./backend/auth').AuthSession>('auth:changed', cb),
+    checkout: (billingPeriod: 'monthly' | 'annual') =>
+      invoke<string>('auth:checkout', billingPeriod),
   },
 
   // Deep link / external links

@@ -1,3 +1,5 @@
+export const WEB_BASE = 'http://localhost:3001';
+
 export const WHISPER_MODELS = {
   fast: 'ggml-base-q5_1.bin',
   balanced: 'ggml-small-q5_1.bin',

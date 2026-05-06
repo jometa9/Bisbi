@@ -12,6 +12,8 @@ import {
   getSession,
   loginWithToken,
   logout as authLogout,
+  refreshSession,
+  startCheckout,
   type AuthSession,
 } from './auth';
 import {
@@ -300,6 +302,14 @@ export async function registerBackend(opts: BackendOptions): Promise<void> {
     const session = authLogout();
     broadcast('auth:changed', session);
     return session;
+  });
+  ipcMain.handle('auth:refresh', async (): Promise<AuthSession> => {
+    const session = await refreshSession();
+    broadcast('auth:changed', session);
+    return session;
+  });
+  ipcMain.handle('auth:checkout', async (_e, billingPeriod: 'monthly' | 'annual'): Promise<string> => {
+    return startCheckout(billingPeriod);
   });
 
   // ---------- IPC: deep link / external links ----------

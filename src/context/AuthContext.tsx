@@ -19,17 +19,16 @@ interface AuthContextValue {
   userInfo: UserInfo | null;
   loginStatus: LoginStatus;
   error: string | null;
+  isRefreshing: boolean;
   startWebLogin: () => void;
   cancelLogin: () => void;
   logout: () => Promise<void>;
+  refreshSession: () => Promise<void>;
   clearError: () => void;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
-// The landing page redirects via bisbi://login?token=XYZ. We accept both
-// `token` and `apiKey` to stay compatible with the IPTRADE-style flow until
-// the bisbi.io endpoint is finalized.
 function extractTokenFromUrl(url: string): string | null {
   try {
     const u = new URL(url);
@@ -56,6 +55,7 @@ export function AuthProvider({ children }: ProviderProps) {
   });
   const [loginStatus, setLoginStatus] = useState<LoginStatus>('idle');
   const [error, setError] = useState<string | null>(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const redirectingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const handleToken = useCallback(async (token: string) => {
@@ -97,8 +97,7 @@ export function AuthProvider({ children }: ProviderProps) {
     };
   }, [handleToken]);
 
-  // Live subscriptions: backend session changes (e.g. logout from another
-  // window) and deep links delivered while the app is already running.
+  // Live subscriptions: backend session changes and deep links while running.
   useEffect(() => {
     if (!window.bisbi) return;
     const offChange = window.bisbi.auth.onChange((s) => setSession(s));
@@ -119,30 +118,27 @@ export function AuthProvider({ children }: ProviderProps) {
     };
   }, [handleToken]);
 
-  // MOCK MODE — flip this to false (or remove the block) once bisbi.io is
-  // wired up. While true, clicking "Sign in" skips the browser round-trip
-  // and validates a hardcoded token so the rest of the app is usable.
-  const USE_MOCK_LOGIN = true;
+  // Auto-refresh on window focus so the plan updates after the user manages
+  // their subscription in the browser and comes back to the app.
+  useEffect(() => {
+    const onFocus = () => {
+      if (!window.bisbi || !session.isAuthenticated) return;
+      void window.bisbi.auth.refresh().then((next) => setSession(next));
+    };
+    window.addEventListener('focus', onFocus);
+    return () => window.removeEventListener('focus', onFocus);
+  }, [session.isAuthenticated]);
 
   const startWebLogin = useCallback(() => {
     if (!window.bisbi) return;
     setError(null);
-
-    if (USE_MOCK_LOGIN) {
-      void handleToken('mock-dev-token');
-      return;
-    }
-
     setLoginStatus('authenticating');
     void window.bisbi.openExternal(urls.signIn);
-    // After a short delay we transition to "redirecting" so the user sees we
-    // are still waiting for the browser. If the deep link arrives first the
-    // listener clears the timer.
     if (redirectingTimerRef.current) clearTimeout(redirectingTimerRef.current);
     redirectingTimerRef.current = setTimeout(() => {
       setLoginStatus((cur) => (cur === 'authenticating' ? 'redirecting' : cur));
     }, 3000);
-  }, [handleToken]);
+  }, []);
 
   const cancelLogin = useCallback(() => {
     if (redirectingTimerRef.current) {
@@ -159,6 +155,17 @@ export function AuthProvider({ children }: ProviderProps) {
     setSession(next);
   }, []);
 
+  const refreshSession = useCallback(async () => {
+    if (!window.bisbi) return;
+    setIsRefreshing(true);
+    try {
+      const next = await window.bisbi.auth.refresh();
+      setSession(next);
+    } finally {
+      setIsRefreshing(false);
+    }
+  }, []);
+
   const clearError = useCallback(() => setError(null), []);
 
   const value = useMemo<AuthContextValue>(
@@ -168,9 +175,11 @@ export function AuthProvider({ children }: ProviderProps) {
       userInfo: session.userInfo,
       loginStatus,
       error,
+      isRefreshing,
       startWebLogin,
       cancelLogin,
       logout,
+      refreshSession,
       clearError,
     }),
     [
@@ -179,9 +188,11 @@ export function AuthProvider({ children }: ProviderProps) {
       session.userInfo,
       loginStatus,
       error,
+      isRefreshing,
       startWebLogin,
       cancelLogin,
       logout,
+      refreshSession,
       clearError,
     ]
   );

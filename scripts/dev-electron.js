@@ -19,7 +19,7 @@ function sleep(ms) {
 
 function checkPortReachable(port) {
   return new Promise((resolve) => {
-    const sock = net.connect({ host: '127.0.0.1', port });
+    const sock = net.connect({ host: 'localhost', port });
     let settled = false;
     const done = (ok) => {
       if (settled) return;

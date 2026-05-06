@@ -58,12 +58,35 @@ export interface ResourceCheck {
 
 export type Plan = 'free' | 'pro';
 
+export interface PricingPlan {
+  priceId: string | null;
+  amount: number;
+  currency: string;
+  label: string;
+}
+
+export interface PricingPlanAnnual extends PricingPlan {
+  monthlyEquivalent: string;
+  savings: string;
+}
+
+export interface Pricing {
+  pro: {
+    monthly: PricingPlan;
+    annual: PricingPlanAnnual;
+  };
+}
+
 export interface UserInfo {
   userId: string;
   email: string;
   name: string;
   plan: Plan;
   avatarUrl?: string | null;
+  subscriptionStatus?: string | null;
+  subscriptionExpiresAt?: string | null;
+  subscriptionBillingPeriod?: string | null;
+  pricing?: Pricing | null;
 }
 
 export interface AuthSession {
@@ -113,7 +136,9 @@ declare global {
         getSession: () => Promise<AuthSession>;
         loginWithToken: (token: string) => Promise<AuthSession>;
         logout: () => Promise<AuthSession>;
+        refresh: () => Promise<AuthSession>;
         onChange: (cb: (s: AuthSession) => void) => () => void;
+        checkout: (billingPeriod: 'monthly' | 'annual') => Promise<string>;
       };
       deepLink: {
         getPending: () => Promise<string | null>;

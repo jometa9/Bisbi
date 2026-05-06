@@ -1091,6 +1091,7 @@ button { font-family: inherit; }
 
 .actions {
   display: flex;
+  align-items: center;
   gap: 8px;
   flex-wrap: wrap;
 }
@@ -1457,6 +1458,10 @@ html.recording-window #root {
   to { transform: rotate(360deg); }
 }
 
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
 .login-retry {
   margin-top: -4px;
 }
@@ -1611,6 +1616,150 @@ html.recording-window #root {
   font-size: 12px;
   color: var(--text-muted);
   font-weight: 400;
+}
+
+/* Billing toggle */
+
+.billing-toggle {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  border-radius: var(--radius);
+  background: var(--bg-soft);
+  border: 1px solid var(--border);
+  width: fit-content;
+}
+
+.billing-toggle-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 14px;
+  border-radius: calc(var(--radius) - 2px);
+  border: none;
+  background: transparent;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.billing-toggle-btn.active {
+  background: var(--white);
+  color: var(--text);
+  box-shadow: var(--shadow-sm);
+}
+
+.billing-savings-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 6px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 600;
+  background: var(--primary-dark);
+  color: var(--white);
+  letter-spacing: 0.02em;
+}
+
+/* Plan cards */
+
+.plan-cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.plan-card {
+  display: flex;
+  flex-direction: column;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+
+.plan-card-free {
+  background: var(--bg-soft);
+}
+
+.plan-card-pro {
+  background: var(--primary-tint);
+  border-color: var(--primary-light);
+}
+
+.plan-card-header {
+  padding: 14px 14px 10px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.plan-card-name {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--text-muted);
+}
+
+.plan-card-pro .plan-card-name {
+  color: var(--primary-dark);
+}
+
+.plan-card-price {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.1;
+  margin-top: 4px;
+}
+
+.plan-card-period {
+  font-size: 11px;
+  color: var(--text-soft);
+}
+
+.plan-card-features {
+  list-style: none;
+  margin: 0;
+  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  flex: 1;
+}
+
+.plan-card-features li {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.plan-card-features svg {
+  flex-shrink: 0;
+  color: var(--primary-dark);
+}
+
+.plan-card-footer {
+  padding: 10px 14px 14px;
+}
+
+.plan-card-current {
+  font-size: 12px;
+  color: var(--text-soft);
+  font-weight: 500;
+}
+
+.plan-card-cta {
+  width: 100%;
+  justify-content: center;
+  font-size: 13px;
+  padding: 8px 12px;
 }
 
 /* RTL adjustments. Most of the layout is flex-based and flips automatically

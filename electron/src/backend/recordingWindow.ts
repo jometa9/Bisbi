@@ -6,7 +6,7 @@ import type { RecordingState } from './types';
 
 let win: BrowserWindow | null = null;
 
-const WIDTH = 130;
+const WIDTH = 100;
 const HEIGHT = 22;
 const MARGIN_BOTTOM = 15;
 

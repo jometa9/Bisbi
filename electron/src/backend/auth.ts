@@ -1,7 +1,27 @@
 import { safeStorage } from 'electron';
 import { authGet, authSet, authClear } from './db';
+import { WEB_BASE } from '../buildConfig';
 
 export type Plan = 'free' | 'pro';
+
+export interface PricingPlan {
+  priceId: string | null;
+  amount: number;
+  currency: string;
+  label: string;
+}
+
+export interface PricingPlanAnnual extends PricingPlan {
+  monthlyEquivalent: string;
+  savings: string;
+}
+
+export interface Pricing {
+  pro: {
+    monthly: PricingPlan;
+    annual: PricingPlanAnnual;
+  };
+}
 
 export interface UserInfo {
   userId: string;
@@ -9,6 +29,10 @@ export interface UserInfo {
   name: string;
   plan: Plan;
   avatarUrl?: string | null;
+  subscriptionStatus?: string | null;
+  subscriptionExpiresAt?: string | null;
+  subscriptionBillingPeriod?: string | null;
+  pricing?: Pricing | null;
 }
 
 export interface AuthSession {
@@ -22,9 +46,6 @@ function encryptString(value: string): Buffer {
   if (safeStorage.isEncryptionAvailable()) {
     return safeStorage.encryptString(value);
   }
-  // Fallback for systems where the OS keychain is unavailable (rare, mostly
-  // Linux without libsecret). The data still lives on disk only — no worse
-  // than localStorage — and we mark it so decrypt can detect plain values.
   return Buffer.from(`PLAIN:${value}`, 'utf8');
 }
 
@@ -80,20 +101,37 @@ export function getSession(): AuthSession {
   };
 }
 
-// Mock validation. When the real bisbi.io API is wired up, swap the body of
-// this function for a fetch call to the validate endpoint and parse the
-// response into a UserInfo.
 async function validateTokenWithApi(token: string): Promise<UserInfo> {
-  // Pretend the network call succeeded. The mock always returns a Pro user
-  // so the Account screen has something realistic to display.
-  await Promise.resolve();
-  const trimmed = token.trim();
+  const resp = await fetch(`${WEB_BASE}/api/license`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!resp.ok) {
+    throw new Error(`Auth failed: ${resp.status}`);
+  }
+  const data = await resp.json() as {
+    userId: string;
+    email: string;
+    name: string;
+    avatar?: string | null;
+    plan: Plan;
+    subscription?: {
+      status: string;
+      tier: string;
+      billingPeriod: string | null;
+      expiresAt: string | null;
+    } | null;
+    pricing?: Pricing | null;
+  };
   return {
-    userId: trimmed.slice(0, 16) || 'mock-user',
-    email: 'demo@bisbi.io',
-    name: 'Bisbi Demo',
-    plan: 'pro',
-    avatarUrl: null,
+    userId: data.userId,
+    email: data.email,
+    name: data.name,
+    plan: data.plan,
+    avatarUrl: data.avatar ?? null,
+    subscriptionStatus: data.subscription?.status ?? null,
+    subscriptionExpiresAt: data.subscription?.expiresAt ?? null,
+    subscriptionBillingPeriod: data.subscription?.billingPeriod ?? null,
+    pricing: data.pricing ?? null,
   };
 }
 
@@ -105,14 +143,40 @@ export async function loginWithToken(token: string): Promise<AuthSession> {
   return { isAuthenticated: true, userInfo };
 }
 
+export async function refreshSession(): Promise<AuthSession> {
+  loadFromDisk();
+  if (!memCache?.token) return { isAuthenticated: false, userInfo: null };
+  try {
+    const userInfo = await validateTokenWithApi(memCache.token);
+    persist(memCache.token, userInfo);
+    return { isAuthenticated: true, userInfo };
+  } catch {
+    return { isAuthenticated: true, userInfo: memCache.userInfo };
+  }
+}
+
+export async function startCheckout(billingPeriod: 'monthly' | 'annual'): Promise<string> {
+  loadFromDisk();
+  if (!memCache?.token) throw new Error('Not authenticated');
+  const resp = await fetch(`${WEB_BASE}/api/checkout`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${memCache.token}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ billingPeriod }),
+  });
+  if (!resp.ok) throw new Error(`Checkout failed: ${resp.status}`);
+  const data = await resp.json() as { checkoutUrl: string };
+  return data.checkoutUrl;
+}
+
 export function logout(): AuthSession {
   memCache = null;
   authClear();
   return { isAuthenticated: false, userInfo: null };
 }
 
-// Parses an incoming deep link of shape bisbi://login?token=XYZ and returns
-// the token if present. Returns null for any other URL.
 export function parseLoginDeepLink(url: string): string | null {
   try {
     const u = new URL(url);

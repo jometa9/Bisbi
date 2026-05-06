@@ -27,8 +27,16 @@ export const en: {
   account: {
     title: string;
     plan: string;
+    billing: string;
     planFree: string;
     planPro: string;
+    planTrial: string;
+    planCanceling: string;
+    trialEnds: string;
+    renewsOn: string;
+    cancelsOn: string;
+    refresh: string;
+    refreshing: string;
     email: string;
     name: string;
     userId: string;
@@ -36,6 +44,21 @@ export const en: {
     upgradeToPro: string;
     logout: string;
     confirmLogout: string;
+    monthly: string;
+    annual: string;
+    month: string;
+    forever: string;
+    currentPlan: string;
+    billingPeriod: string;
+    opening: string;
+    features: {
+      dictation2k: string;
+      unlimited: string;
+      allDevices: string;
+      languages: string;
+      zeroRetention: string;
+      priority: string;
+    };
     profileSection: { title: string; description: string };
     subscriptionSection: { title: string; description: string };
     sessionSection: { title: string; description: string };
@@ -189,8 +212,16 @@ export const en: {
   account: {
     title: 'Account',
     plan: 'Plan',
+    billing: 'Billing',
     planFree: 'Free',
     planPro: 'Pro',
+    planTrial: 'Trial',
+    planCanceling: 'Canceling',
+    trialEnds: 'Trial ends {date}',
+    renewsOn: 'Renews {date}',
+    cancelsOn: 'Cancels {date}',
+    refresh: 'Refresh plan',
+    refreshing: 'Refreshing…',
     email: 'Email',
     name: 'Name',
     userId: 'User ID',
@@ -198,6 +229,21 @@ export const en: {
     upgradeToPro: 'Upgrade to Pro',
     logout: 'Log out',
     confirmLogout: 'Log out of Bisbi?',
+    monthly: 'Monthly',
+    annual: 'Annual',
+    month: 'month',
+    forever: 'forever',
+    currentPlan: 'Current plan',
+    billingPeriod: 'Billing period',
+    opening: 'Opening…',
+    features: {
+      dictation2k: '2,000 words / week on desktop',
+      unlimited: 'Unlimited words on all devices',
+      allDevices: 'Mac, Windows & iOS',
+      languages: '100+ languages',
+      zeroRetention: 'Zero data retention',
+      priority: 'Priority support',
+    },
     profileSection: {
       title: 'Profile',
       description: 'How Bisbi identifies you across devices.',

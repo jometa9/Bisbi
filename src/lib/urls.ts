@@ -1,4 +1,4 @@
-const WEB_BASE = 'https://bisbi.io';
+const WEB_BASE = 'http://localhost:3001';
 
 export const urls = {
   webBase: WEB_BASE,

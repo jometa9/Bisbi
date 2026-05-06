@@ -13,6 +13,10 @@ function writeDevPortPlugin(): PluginOption {
     name: 'bisbi-write-dev-port',
     apply: 'serve',
     configureServer(server) {
+      // Delete any stale port file from a previous crashed/killed run
+      // so dev-electron.js never reads a leftover port before Vite writes the new one.
+      try { fs.unlinkSync(PORT_FILE); } catch {}
+
       const writePort = () => {
         const address = server.httpServer?.address();
         if (address && typeof address === 'object' && typeof address.port === 'number') {
