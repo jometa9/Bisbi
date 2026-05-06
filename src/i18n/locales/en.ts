@@ -193,7 +193,7 @@ export const en: {
       devHint: 'If you are in development, run {cmd} in the repo root and let Electron open its own window. Do not open {url} directly in the browser.',
     },
     resourcesMissing:
-      'Whisper resources are missing. See the README for how to download the binary and the model into {path}.',
+      'Bisbi resources are missing. See the README for how to download the binary and the model into {path}.',
     micError:
       'Could not access the microphone. Make sure Bisbi has permission in your system settings.',
     limitReached: 'You’ve hit your free plan limit for this month.',
@@ -333,7 +333,7 @@ export const en: {
     },
     transcriptionLanguage: {
       title: 'Transcription language',
-      description: 'Whisper auto-detects the language. Pin it for more speed.',
+      description: 'Bisbi auto-detects the language. Pin it for more speed.',
       searchPlaceholder: 'Search a language…',
     },
     uiLanguage: {
@@ -380,7 +380,7 @@ export const en: {
     suppressNonSpeech: {
       title: 'Non-speech sounds',
       description:
-        'Whisper can transcribe annotations like "[Music]", "[Laughter]" or "(sigh)". Choose whether they should appear in your text.',
+        'Bisbi can transcribe annotations like "[Music]", "[Laughter]" or "(sigh)". Choose whether they should appear in your text.',
       enabled: {
         label: 'Hide them (recommended)',
         hint: 'Only spoken words are inserted. Background sounds and noises are ignored.',

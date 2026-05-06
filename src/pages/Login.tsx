@@ -1,6 +1,8 @@
 import { useTranslation } from '../i18n';
 import { useAuth } from '../context/AuthContext';
 import { urls } from '../lib/urls';
+import owlIdleSvg from '../../build-resources/owl_head.svg';
+import owlRecSvg from '../../build-resources/owl_head_rec.svg';
 
 export function Login() {
   const { t } = useTranslation();
@@ -22,6 +24,13 @@ export function Login() {
 
   return (
     <div className="login-screen">
+      <img
+        src={owlIdleSvg}
+        alt=""
+        aria-hidden="true"
+        className="login-owl login-owl--left"
+      />
+
       <div className="login-card">
         <div className="login-brand">{t('app.brand')}</div>
         <h1 className="login-title">{t('auth.welcome')}</h1>

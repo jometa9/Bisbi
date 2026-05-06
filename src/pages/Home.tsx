@@ -54,6 +54,10 @@ export function Home({ settings, recState, onNavigateToHistory }: Props) {
   }, [totals.totalAudioMs, totals.totalWords]);
 
   const statusText = t(`home.statusTitle.${recState}` as const);
+  const lastTranscription = rows[0]?.text?.trim() ?? '';
+  const showWatermark = recState !== 'transcribing' && lastTranscription.length > 0;
+  const isTranscribing = recState === 'transcribing';
+  const isRecording = recState === 'recording';
   const transcriptionsLabel =
     totals.totalTranscriptions === 1
       ? t('home.transcriptionsOne')
@@ -72,20 +76,40 @@ export function Home({ settings, recState, onNavigateToHistory }: Props) {
         </h1>
       </div>
 
-      <div className="home-hotkey">
-        <span className="home-hotkey-label">{t('home.hotkeyLabel')}</span>
-        <div className="home-hotkey-keys">
-          <HotkeyKeys
-            accel={settings.hotkey}
-            platform={keyStyle}
-            visual={hotkeyVisualState(recState, settings.handsFreeMode)}
-          />
+      <div
+        className={`home-hotkey${isTranscribing ? ' home-hotkey--transcribing' : ''}${isRecording ? ' home-hotkey--recording' : ''}`}
+      >
+        {showWatermark && (
+          <div className="home-hotkey-watermark" aria-hidden="true">
+            {lastTranscription}
+          </div>
+        )}
+        <div className="home-hotkey-content">
+          <span className="home-hotkey-label">{t('home.hotkeyLabel')}</span>
+          <div className="home-hotkey-keys">
+            <HotkeyKeys
+              accel={settings.hotkey}
+              platform={keyStyle}
+              visual={hotkeyVisualState(recState, settings.handsFreeMode)}
+            />
+          </div>
+          {isTranscribing ? (
+            <span className="home-hotkey-transcribing">
+              <span className="home-hotkey-transcribing-dot" />
+              <span className="home-hotkey-transcribing-dot" />
+              <span className="home-hotkey-transcribing-dot" />
+              <span className="home-hotkey-transcribing-text">
+                {t('home.statusTitle.transcribing')}
+              </span>
+            </span>
+          ) : (
+            <span className="home-hotkey-hint">
+              {settings.pasteMode === 'paste'
+                ? t('home.hotkeyHintPaste')
+                : t('home.hotkeyHintClipboard')}
+            </span>
+          )}
         </div>
-        <span className="home-hotkey-hint">
-          {settings.pasteMode === 'paste'
-            ? t('home.hotkeyHintPaste')
-            : t('home.hotkeyHintClipboard')}
-        </span>
       </div>
 
       {settings.saveHistory && (

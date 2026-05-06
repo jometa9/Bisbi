@@ -21,7 +21,7 @@ export const zh: Translations = {
         '如果你在开发模式下,请在仓库根目录运行 {cmd},让 Electron 打开它自己的窗口。不要直接在浏览器中打开 {url}。',
     },
     resourcesMissing:
-      '缺少 Whisper 资源。请查看 README 以了解如何将二进制文件和模型下载到 {path}。',
+      '缺少 Bisbi 资源。请查看 README 以了解如何将二进制文件和模型下载到 {path}。',
     micError:
       '无法访问麦克风。请确保 Bisbi 在系统设置中拥有权限。',
     limitReached: '本月免费套餐已用完。',
@@ -158,7 +158,7 @@ export const zh: Translations = {
     },
     transcriptionLanguage: {
       title: '转写语言',
-      description: 'Whisper 会自动检测语言。固定它可以提速。',
+      description: 'Bisbi 会自动检测语言。固定它可以提速。',
       searchPlaceholder: '搜索语言…',
     },
     uiLanguage: {
@@ -202,7 +202,7 @@ export const zh: Translations = {
     },
     suppressNonSpeech: {
       title: '非语音声音',
-      description: 'Whisper 可以转录"[音乐]"、"[笑声]"或"(叹气)"等注释。选择是否在文本中显示它们。',
+      description: 'Bisbi 可以转录"[音乐]"、"[笑声]"或"(叹气)"等注释。选择是否在文本中显示它们。',
       enabled: {
         label: '隐藏(推荐)',
         hint: '只插入说出的内容。背景声音和噪音将被忽略。',

@@ -21,7 +21,7 @@ export const es: Translations = {
         'Si estás en desarrollo, corré {cmd} en la raíz del repo y dejá que Electron abra su propia ventana. No abras {url} directamente en el browser.',
     },
     resourcesMissing:
-      'Faltan los recursos de Whisper. Mirá el README para descargar el binario y el modelo en {path}.',
+      'Faltan los recursos de Bisbi. Mirá el README para descargar el binario y el modelo en {path}.',
     micError:
       'No se pudo acceder al micrófono. Asegurate de que Bisbi tenga permiso en los ajustes del sistema.',
     limitReached: 'Llegaste al límite del plan gratis de este mes.',
@@ -161,7 +161,7 @@ export const es: Translations = {
     },
     transcriptionLanguage: {
       title: 'Idioma de transcripción',
-      description: 'Whisper detecta el idioma automáticamente. Fijalo si querés más velocidad.',
+      description: 'Bisbi detecta el idioma automáticamente. Fijalo si querés más velocidad.',
       searchPlaceholder: 'Buscar un idioma…',
     },
     uiLanguage: {
@@ -208,7 +208,7 @@ export const es: Translations = {
     suppressNonSpeech: {
       title: 'Sonidos no verbales',
       description:
-        'Whisper puede transcribir anotaciones como "[Música]", "[Risas]" o "(suspiro)". Elegí si querés que aparezcan en el texto.',
+        'Bisbi puede transcribir anotaciones como "[Música]", "[Risas]" o "(suspiro)". Elegí si querés que aparezcan en el texto.',
       enabled: {
         label: 'Ocultarlos (recomendado)',
         hint: 'Solo se inserta lo que se habla. Los sonidos y ruidos de fondo se ignoran.',

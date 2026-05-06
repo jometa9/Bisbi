@@ -62,6 +62,10 @@ export function App() {
     if (userInfo?.plan === 'pro') setShowLimitBanner(false);
   }, [userInfo?.plan]);
 
+  useEffect(() => {
+    if (isAuthenticated) setTab('home');
+  }, [isAuthenticated]);
+
   // The hotkey lives in the main process. When it fires, main asks the
   // renderer to start/stop the mic capture via these IPC events. We
   // serialize start/stop through a promise chain so a fast re-tap can't
