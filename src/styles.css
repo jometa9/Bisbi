@@ -1597,8 +1597,8 @@ html.recording-window #root {
 
 .login-owl {
   position: absolute;
-  bottom: -30%;
-  width: clamp(500px, 32vw, 360px);
+  bottom: -40%;
+  width: clamp(600px, 32vw, 360px);
   height: auto;
   opacity: 0.07;
   pointer-events: none;
@@ -1613,8 +1613,10 @@ html.recording-window #root {
 }
 
 .login-owl--right {
+  bottom: auto;
+  top: -15%;
   right: -6%;
-  transform: rotate(8deg) ;
+  transform: rotate(-50deg);
 }
 
 .login-card {

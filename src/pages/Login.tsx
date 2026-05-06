@@ -2,7 +2,6 @@ import { useTranslation } from '../i18n';
 import { useAuth } from '../context/AuthContext';
 import { urls } from '../lib/urls';
 import owlIdleSvg from '../../build-resources/owl_head.svg';
-import owlRecSvg from '../../build-resources/owl_head_rec.svg';
 
 export function Login() {
   const { t } = useTranslation();

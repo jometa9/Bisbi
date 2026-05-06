@@ -151,6 +151,8 @@ export function AuthProvider({ children }: ProviderProps) {
 
   const logout = useCallback(async () => {
     if (!window.bisbi) return;
+    await window.bisbi.clearHistory();
+    await window.bisbi.resetSettings();
     const next = await window.bisbi.auth.logout();
     setSession(next);
   }, []);
