@@ -11,6 +11,7 @@ import { Select } from '../components/Select';
 import { ConfirmButton } from '../components/ConfirmButton';
 import { listMicrophones, type MicrophoneDevice } from '../audio';
 import { HotkeyKeys } from '../components/HotkeyKeys';
+import { WHISPER_LANGUAGES, whisperLanguageLabel } from '../whisperLanguages';
 
 interface Props {
   settings: AppSettings;
@@ -18,19 +19,6 @@ interface Props {
   onReset: () => Promise<void>;
   onClearHistory: () => Promise<void>;
 }
-
-const TRANSCRIPTION_LANGUAGES: { value: string; key: string }[] = [
-  { value: 'auto', key: 'languages.auto' },
-  { value: 'es', key: 'languages.es' },
-  { value: 'en', key: 'languages.en' },
-  { value: 'pt', key: 'languages.pt' },
-  { value: 'fr', key: 'languages.fr' },
-  { value: 'it', key: 'languages.it' },
-  { value: 'de', key: 'languages.de' },
-  { value: 'zh', key: 'languages.zh' },
-  { value: 'hi', key: 'languages.hi' },
-  { value: 'ar', key: 'languages.ar' },
-];
 
 const PRECISION_OPTIONS: Precision[] = ['fast', 'balanced', 'high'];
 
@@ -113,10 +101,18 @@ export function Settings({ settings, onChange, onReset, onClearHistory }: Props)
           value={settings.language}
           onChange={(language) => onChange({ language })}
           ariaLabel={t('settings.transcriptionLanguage.title')}
-          options={TRANSCRIPTION_LANGUAGES.map((l) => ({
-            value: l.value,
-            label: t(l.key as Parameters<typeof t>[0]),
-          }))}
+          searchPlaceholder={t('settings.transcriptionLanguage.searchPlaceholder')}
+          options={[
+            { value: 'auto', label: t('languages.auto') },
+            ...WHISPER_LANGUAGES.map((lang) => ({
+              value: lang.code,
+              label: whisperLanguageLabel(lang),
+              // The label format is "English — Endonym"; pasting both into
+              // searchTerms is redundant but harmless and keeps any future
+              // label-format change from breaking search.
+              searchTerms: `${lang.english} ${lang.endonym} ${lang.code}`,
+            })),
+          ]}
         />
       </Section>
 

@@ -162,6 +162,7 @@ export const es: Translations = {
     transcriptionLanguage: {
       title: 'Idioma de transcripción',
       description: 'Whisper detecta el idioma automáticamente. Fijalo si querés más velocidad.',
+      searchPlaceholder: 'Buscar un idioma…',
     },
     uiLanguage: {
       title: 'Idioma de la app',

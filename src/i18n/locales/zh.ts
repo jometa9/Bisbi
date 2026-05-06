@@ -159,6 +159,7 @@ export const zh: Translations = {
     transcriptionLanguage: {
       title: '转写语言',
       description: 'Whisper 会自动检测语言。固定它可以提速。',
+      searchPlaceholder: '搜索语言…',
     },
     uiLanguage: {
       title: '应用语言',

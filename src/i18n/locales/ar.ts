@@ -160,6 +160,7 @@ export const ar: Translations = {
     transcriptionLanguage: {
       title: 'لغة الكتابة',
       description: 'يكتشف Whisper اللغة تلقائيًا. ثبّتها لمزيد من السرعة.',
+      searchPlaceholder: 'ابحث عن لغة…',
     },
     uiLanguage: {
       title: 'لغة التطبيق',

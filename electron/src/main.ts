@@ -163,6 +163,13 @@ if (!gotTheLock) {
 
     Menu.setApplicationMenu(null);
 
+    if (process.platform === 'darwin' && app.dock) {
+      const dockIconPath = path.join(appRoot, 'build-resources', 'icon.png');
+      if (fs.existsSync(dockIconPath)) {
+        app.dock.setIcon(nativeImage.createFromPath(dockIconPath));
+      }
+    }
+
     logMain('[main] Bisbi ready, registering backend…');
 
     try {

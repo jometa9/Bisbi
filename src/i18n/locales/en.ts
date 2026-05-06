@@ -109,7 +109,7 @@ export const en: {
       systemDefault: string;
       unnamed: string;
     };
-    transcriptionLanguage: { title: string; description: string };
+    transcriptionLanguage: { title: string; description: string; searchPlaceholder: string };
     uiLanguage: { title: string; description: string; system: string };
     pasteMode: { title: string; description: string; paste: string; clipboard: string };
     saveHistory: {
@@ -334,6 +334,7 @@ export const en: {
     transcriptionLanguage: {
       title: 'Transcription language',
       description: 'Whisper auto-detects the language. Pin it for more speed.',
+      searchPlaceholder: 'Search a language…',
     },
     uiLanguage: {
       title: 'App language',

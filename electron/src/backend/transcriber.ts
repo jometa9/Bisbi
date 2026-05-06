@@ -100,22 +100,6 @@ function writeWavFile(pcm: Buffer, sampleRate: number, channels: number): string
   return file;
 }
 
-const LANGUAGE_PROMPTS: Record<string, string> = {
-  es: 'Buenos días. Esta es una transcripción en español con puntuación correcta y mayúsculas apropiadas.',
-  en: 'Hello. This is a transcription with correct punctuation and proper capitalization.',
-  pt: 'Bom dia. Esta é uma transcrição com pontuação correta e maiúsculas adequadas.',
-  fr: 'Bonjour. Ceci est une transcription avec une ponctuation correcte et des majuscules appropriées.',
-  it: 'Buongiorno. Questa è una trascrizione con punteggiatura corretta e maiuscole appropriate.',
-  de: 'Guten Tag. Dies ist eine Transkription mit korrekter Zeichensetzung.',
-  zh: '你好。这是一段具有正确标点符号的转录。',
-  hi: 'नमस्ते। यह सही विराम चिह्न के साथ एक प्रतिलेख है।',
-  ar: 'مرحبا. هذا نص مكتوب بعلامات ترقيم صحيحة.',
-};
-
-function defaultPrompt(language: string): string {
-  return LANGUAGE_PROMPTS[language] ?? LANGUAGE_PROMPTS['en'];
-}
-
 export async function transcribePcm(
   pcm: Buffer,
   sampleRate: number,
@@ -148,11 +132,13 @@ export async function transcribePcm(
       '-t', String(opts.threads ?? Math.max(2, Math.floor(os.cpus().length / 2))),
     ];
     args.push('--temperature', '0.0');
-    args.push('--no-speech-thold', '0.4');
-    if (opts.suppressNonSpeech) {
-      args.push('--suppress-nst');
-    }
-    const prompt = opts.vocabulary?.trim() || defaultPrompt(opts.language);
+    args.push('--no-speech-thold', '0.6');
+    // Always suppress non-speech tokens — together with the higher no-speech
+    // threshold and the absence of a default prompt, this is what keeps
+    // whisper from hallucinating "gracias" / "thanks for watching" on quiet
+    // or very short clips.
+    args.push('--suppress-nst');
+    const prompt = opts.vocabulary?.trim();
     if (prompt) {
       args.push('--prompt', prompt);
     }

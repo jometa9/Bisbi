@@ -829,17 +829,62 @@ button { font-family: inherit; }
   top: calc(100% + 4px);
   left: 0;
   right: 0;
-  list-style: none;
-  margin: 0;
-  padding: 4px;
-  max-height: 260px;
-  overflow-y: auto;
-  scroll-behavior: smooth;
+  display: flex;
+  flex-direction: column;
+  max-height: 300px;
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-sm);
   background: var(--white);
   box-shadow: var(--shadow-md);
   outline: none;
+  overflow: hidden;
+}
+
+.select-search {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-soft);
+  flex: 0 0 auto;
+}
+
+.select-search-icon {
+  color: var(--text-soft);
+  flex: 0 0 auto;
+}
+
+.select-search-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  padding: 0;
+}
+
+.select-search-input::placeholder {
+  color: var(--text-soft);
+}
+
+.select-list {
+  list-style: none;
+  margin: 0;
+  padding: 4px;
+  overflow-y: auto;
+  scroll-behavior: smooth;
+  outline: none;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.select-empty {
+  padding: 12px 10px;
+  color: var(--text-soft);
+  text-align: center;
+  font-size: 12px;
 }
 
 .select-option {

@@ -160,6 +160,7 @@ export const hi: Translations = {
     transcriptionLanguage: {
       title: 'ट्रांसक्रिप्शन भाषा',
       description: 'Whisper स्वतः भाषा का पता लगाता है। तेज़ी के लिए इसे फ़िक्स करें।',
+      searchPlaceholder: 'भाषा खोजें…',
     },
     uiLanguage: {
       title: 'ऐप भाषा',

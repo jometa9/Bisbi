@@ -1,8 +1,11 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 export interface SelectOption<T extends string> {
   value: T;
   label: string;
+  // Optional extra haystack used by the search input (e.g. native names,
+  // synonyms). Not displayed.
+  searchTerms?: string;
 }
 
 interface Props<T extends string> {
@@ -10,17 +13,35 @@ interface Props<T extends string> {
   options: SelectOption<T>[];
   onChange: (next: T) => void;
   ariaLabel?: string;
+  // When set, shows a search input at the top of the dropdown that filters
+  // options. The string is used as the input's placeholder.
+  searchPlaceholder?: string;
 }
 
-export function Select<T extends string>({ value, options, onChange, ariaLabel }: Props<T>) {
+export function Select<T extends string>({
+  value,
+  options,
+  onChange,
+  ariaLabel,
+  searchPlaceholder,
+}: Props<T>) {
   const [open, setOpen] = useState(false);
-  const [activeIndex, setActiveIndex] = useState(() =>
-    Math.max(0, options.findIndex((o) => o.value === value))
-  );
+  const [query, setQuery] = useState('');
+  const [activeIndex, setActiveIndex] = useState(0);
   const rootRef = useRef<HTMLDivElement>(null);
   const listRef = useRef<HTMLUListElement>(null);
+  const searchRef = useRef<HTMLInputElement>(null);
 
   const selected = options.find((o) => o.value === value) ?? options[0];
+
+  const filteredOptions = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return options;
+    return options.filter((opt) => {
+      const haystack = `${opt.label} ${opt.searchTerms ?? ''}`.toLowerCase();
+      return haystack.includes(q);
+    });
+  }, [options, query]);
 
   useEffect(() => {
     if (!open) return;
@@ -41,10 +62,21 @@ export function Select<T extends string>({ value, options, onChange, ariaLabel }
     };
   }, [open]);
 
+  // Reset the search query and active index whenever the menu opens, so the
+  // user starts fresh and the selected option is highlighted.
   useEffect(() => {
     if (!open) return;
-    setActiveIndex(Math.max(0, options.findIndex((o) => o.value === value)));
-  }, [open, options, value]);
+    setQuery('');
+    const idx = filteredOptions.findIndex((o) => o.value === value);
+    setActiveIndex(Math.max(0, idx));
+  }, [open]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Keep activeIndex in range as the filtered list shrinks/grows.
+  useEffect(() => {
+    if (activeIndex >= filteredOptions.length) {
+      setActiveIndex(filteredOptions.length === 0 ? 0 : filteredOptions.length - 1);
+    }
+  }, [filteredOptions, activeIndex]);
 
   useEffect(() => {
     if (!open) return;
@@ -64,10 +96,15 @@ export function Select<T extends string>({ value, options, onChange, ariaLabel }
   }, [activeIndex, open]);
 
   useEffect(() => {
+    if (!open) return;
     // `preventScroll` keeps the page where the user left it — without it the
     // browser scrolls the listbox into view, jumping the Settings panel.
-    if (open) listRef.current?.focus({ preventScroll: true });
-  }, [open]);
+    if (searchPlaceholder) {
+      searchRef.current?.focus({ preventScroll: true });
+    } else {
+      listRef.current?.focus({ preventScroll: true });
+    }
+  }, [open, searchPlaceholder]);
 
   const onTriggerKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'ArrowDown' || e.key === 'ArrowUp' || e.key === 'Enter' || e.key === ' ') {
@@ -76,10 +113,18 @@ export function Select<T extends string>({ value, options, onChange, ariaLabel }
     }
   };
 
-  const onListKeyDown = (e: React.KeyboardEvent) => {
+  const commitActive = () => {
+    const opt = filteredOptions[activeIndex];
+    if (opt) {
+      onChange(opt.value);
+      setOpen(false);
+    }
+  };
+
+  const onMenuKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'ArrowDown') {
       e.preventDefault();
-      setActiveIndex((i) => Math.min(options.length - 1, i + 1));
+      setActiveIndex((i) => Math.min(filteredOptions.length - 1, i + 1));
     } else if (e.key === 'ArrowUp') {
       e.preventDefault();
       setActiveIndex((i) => Math.max(0, i - 1));
@@ -88,14 +133,15 @@ export function Select<T extends string>({ value, options, onChange, ariaLabel }
       setActiveIndex(0);
     } else if (e.key === 'End') {
       e.preventDefault();
-      setActiveIndex(options.length - 1);
-    } else if (e.key === 'Enter' || e.key === ' ') {
+      setActiveIndex(filteredOptions.length - 1);
+    } else if (e.key === 'Enter') {
       e.preventDefault();
-      const opt = options[activeIndex];
-      if (opt) {
-        onChange(opt.value);
-        setOpen(false);
-      }
+      commitActive();
+    } else if (e.key === ' ' && !searchPlaceholder) {
+      // Space selects when there's no search input; with a search input,
+      // space must remain available to type into.
+      e.preventDefault();
+      commitActive();
     }
   };
 
@@ -114,34 +160,65 @@ export function Select<T extends string>({ value, options, onChange, ariaLabel }
         <ChevronIcon />
       </button>
       {open && (
-        <ul
-          className="select-menu"
-          role="listbox"
-          tabIndex={-1}
-          ref={listRef}
-          onKeyDown={onListKeyDown}
-        >
-          {options.map((opt, i) => {
-            const isSelected = opt.value === value;
-            const isActive = i === activeIndex;
-            return (
-              <li
-                key={opt.value}
-                role="option"
-                aria-selected={isSelected}
-                className={`select-option${isSelected ? ' selected' : ''}${isActive ? ' active' : ''}`}
-                onMouseEnter={() => setActiveIndex(i)}
-                onClick={() => {
-                  onChange(opt.value);
-                  setOpen(false);
+        <div className="select-menu">
+          {searchPlaceholder && (
+            <div className="select-search">
+              <SearchIcon />
+              <input
+                ref={searchRef}
+                type="text"
+                className="select-search-input"
+                value={query}
+                onChange={(e) => {
+                  setQuery(e.target.value);
+                  setActiveIndex(0);
                 }}
-              >
-                <span className="select-option-label">{opt.label}</span>
-                {isSelected && <CheckIcon />}
+                onKeyDown={onMenuKeyDown}
+                placeholder={searchPlaceholder}
+                aria-label={searchPlaceholder}
+                spellCheck={false}
+                autoComplete="off"
+              />
+            </div>
+          )}
+          <ul
+            className="select-list"
+            role="listbox"
+            tabIndex={-1}
+            ref={listRef}
+            onKeyDown={onMenuKeyDown}
+            aria-label={ariaLabel}
+          >
+            {filteredOptions.length === 0 ? (
+              <li className="select-empty" role="presentation">
+                {/* Intentionally left empty so screen readers announce "no
+                    results" only via aria-live on the list, not as an option. */}
+                —
               </li>
-            );
-          })}
-        </ul>
+            ) : (
+              filteredOptions.map((opt, i) => {
+                const isSelected = opt.value === value;
+                const isActive = i === activeIndex;
+                return (
+                  <li
+                    key={opt.value}
+                    role="option"
+                    aria-selected={isSelected}
+                    className={`select-option${isSelected ? ' selected' : ''}${isActive ? ' active' : ''}`}
+                    onMouseEnter={() => setActiveIndex(i)}
+                    onClick={() => {
+                      onChange(opt.value);
+                      setOpen(false);
+                    }}
+                  >
+                    <span className="select-option-label">{opt.label}</span>
+                    {isSelected && <CheckIcon />}
+                  </li>
+                );
+              })
+            )}
+          </ul>
+        </div>
       )}
     </div>
   );
@@ -184,6 +261,27 @@ function CheckIcon() {
         strokeWidth="1.6"
         strokeLinecap="round"
         strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function SearchIcon() {
+  return (
+    <svg
+      className="select-search-icon"
+      width="14"
+      height="14"
+      viewBox="0 0 14 14"
+      fill="none"
+      aria-hidden="true"
+    >
+      <circle cx="6" cy="6" r="4" stroke="currentColor" strokeWidth="1.4" />
+      <path
+        d="M9 9L12 12"
+        stroke="currentColor"
+        strokeWidth="1.4"
+        strokeLinecap="round"
       />
     </svg>
   );
