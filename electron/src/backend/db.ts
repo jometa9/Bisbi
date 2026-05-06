@@ -96,6 +96,26 @@ function migrate(db: Database): void {
     db.prepare('DELETE FROM meta WHERE key = ?').run('total_words');
     db.pragma('user_version = 3');
   }
+
+  if (current < 4) {
+    // Persistent retry queue for usage events that need to be POSTed to the
+    // external API. Each row is one transcription's contribution; rows are
+    // deleted when the server acknowledges them.
+    db.exec(`
+      CREATE TABLE IF NOT EXISTS usage_queue (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        words INTEGER NOT NULL,
+        audio_seconds INTEGER NOT NULL,
+        transcribed_at INTEGER NOT NULL,
+        attempts INTEGER NOT NULL DEFAULT 0,
+        next_attempt_at INTEGER NOT NULL DEFAULT 0,
+        last_error TEXT
+      );
+      CREATE INDEX IF NOT EXISTS idx_usage_queue_next_attempt
+        ON usage_queue(next_attempt_at);
+    `);
+    db.pragma('user_version = 4');
+  }
 }
 
 export interface AuthRow {
@@ -201,28 +221,139 @@ export function clearTranscriptions(): void {
   getDb().prepare('DELETE FROM transcriptions').run();
 }
 
-export const FREE_MONTHLY_WORD_LIMIT = 2000;
+export const FREE_MONTHLY_WORD_LIMIT_DEFAULT = 2000;
 
-function currentMonthKey(): string {
+export function currentMonthKey(): string {
   const now = new Date();
   const yyyy = now.getFullYear();
   const mm = String(now.getMonth() + 1).padStart(2, '0');
-  return `usage_words_${yyyy}-${mm}`;
+  return `${yyyy}-${mm}`;
 }
 
-export function getMonthlyWordUsage(): number {
-  const v = metaGet(currentMonthKey());
+function usageWordsKey(monthKey: string = currentMonthKey()): string {
+  return `usage_words_${monthKey}`;
+}
+
+const USAGE_LIMIT_META_KEY = 'usage_words_limit';
+
+export function getMonthlyWordUsage(monthKey: string = currentMonthKey()): number {
+  const v = metaGet(usageWordsKey(monthKey));
   if (!v) return 0;
   const n = parseInt(v, 10);
   return Number.isFinite(n) && n > 0 ? n : 0;
 }
 
-export function addMonthlyWordUsage(words: number): number {
+export function addMonthlyWordUsage(
+  words: number,
+  monthKey: string = currentMonthKey()
+): number {
   const inc = Math.max(0, Math.floor(words));
-  if (inc === 0) return getMonthlyWordUsage();
-  const next = getMonthlyWordUsage() + inc;
-  metaSet(currentMonthKey(), String(next));
+  if (inc === 0) return getMonthlyWordUsage(monthKey);
+  const next = getMonthlyWordUsage(monthKey) + inc;
+  metaSet(usageWordsKey(monthKey), String(next));
   return next;
+}
+
+// Overwrite the local cache with the server's authoritative count. Called
+// after a successful POST /api/usage or GET /api/license response so the
+// next limit-check uses the server's view, not the optimistic local one.
+export function setMonthlyWordUsageFromServer(
+  words: number,
+  monthKey: string = currentMonthKey()
+): void {
+  const v = Math.max(0, Math.floor(words));
+  metaSet(usageWordsKey(monthKey), String(v));
+}
+
+export function getMonthlyWordLimit(): number {
+  const v = metaGet(USAGE_LIMIT_META_KEY);
+  if (!v) return FREE_MONTHLY_WORD_LIMIT_DEFAULT;
+  const n = parseInt(v, 10);
+  return Number.isFinite(n) && n > 0 ? n : FREE_MONTHLY_WORD_LIMIT_DEFAULT;
+}
+
+export function setMonthlyWordLimit(limit: number | null | undefined): void {
+  if (limit == null || !Number.isFinite(limit) || limit <= 0) {
+    metaSet(USAGE_LIMIT_META_KEY, null);
+    return;
+  }
+  metaSet(USAGE_LIMIT_META_KEY, String(Math.floor(limit)));
+}
+
+export interface UsageQueueRow {
+  id: number;
+  words: number;
+  audioSeconds: number;
+  transcribedAt: number;
+  attempts: number;
+  nextAttemptAt: number;
+  lastError: string | null;
+}
+
+export function enqueueUsage(input: {
+  words: number;
+  audioSeconds: number;
+  transcribedAt?: number;
+}): UsageQueueRow {
+  const words = Math.max(0, Math.floor(input.words));
+  const audioSeconds = Math.max(0, Math.floor(input.audioSeconds));
+  const transcribedAt = input.transcribedAt ?? Date.now();
+  const info = getDb()
+    .prepare(
+      `INSERT INTO usage_queue(words, audio_seconds, transcribed_at, attempts, next_attempt_at)
+       VALUES(?, ?, ?, 0, 0)`
+    )
+    .run(words, audioSeconds, transcribedAt);
+  return {
+    id: Number(info.lastInsertRowid),
+    words,
+    audioSeconds,
+    transcribedAt,
+    attempts: 0,
+    nextAttemptAt: 0,
+    lastError: null,
+  };
+}
+
+export function peekDueUsage(now: number = Date.now(), limit = 50): UsageQueueRow[] {
+  const rows = getDb()
+    .prepare(
+      `SELECT id, words, audio_seconds as audioSeconds,
+              transcribed_at as transcribedAt, attempts,
+              next_attempt_at as nextAttemptAt, last_error as lastError
+       FROM usage_queue
+       WHERE next_attempt_at <= ?
+       ORDER BY id ASC
+       LIMIT ?`
+    )
+    .all(now, limit) as UsageQueueRow[];
+  return rows;
+}
+
+export function deleteUsageQueueRow(id: number): void {
+  getDb().prepare('DELETE FROM usage_queue WHERE id = ?').run(id);
+}
+
+export function bumpUsageQueueRow(
+  id: number,
+  attempts: number,
+  nextAttemptAt: number,
+  lastError: string | null
+): void {
+  getDb()
+    .prepare(
+      `UPDATE usage_queue
+         SET attempts = ?, next_attempt_at = ?, last_error = ?
+       WHERE id = ?`
+    )
+    .run(attempts, nextAttemptAt, lastError, id);
+}
+
+export function countPendingUsage(): number {
+  const row = getDb()
+    .prepare('SELECT COUNT(*) as c FROM usage_queue')
+    .get() as { c: number } | undefined;
+  return row?.c ?? 0;
 }
 
 export interface StatsTotals {

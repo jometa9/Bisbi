@@ -1,5 +1,11 @@
 import { safeStorage } from 'electron';
-import { authGet, authSet, authClear } from './db';
+import {
+  authGet,
+  authSet,
+  authClear,
+  setMonthlyWordLimit,
+  setMonthlyWordUsageFromServer,
+} from './db';
 import { WEB_BASE } from '../buildConfig';
 
 export type Plan = 'free' | 'pro';
@@ -101,6 +107,13 @@ export function getSession(): AuthSession {
   };
 }
 
+// Exposed for the usage-sync module so it can authenticate POST /api/usage
+// without going through a renderer round-trip.
+export function getAuthToken(): string | null {
+  loadFromDisk();
+  return memCache?.token ?? null;
+}
+
 async function validateTokenWithApi(token: string): Promise<UserInfo> {
   const resp = await fetch(`${WEB_BASE}/api/license`, {
     headers: { Authorization: `Bearer ${token}` },
@@ -121,7 +134,21 @@ async function validateTokenWithApi(token: string): Promise<UserInfo> {
       expiresAt: string | null;
     } | null;
     pricing?: Pricing | null;
+    usage?: {
+      monthKey: string;
+      wordsUsed: number;
+      wordsLimit: number | null;
+      exceeded: boolean;
+      remaining: number | null;
+    } | null;
   };
+  // Reconcile local usage cache with the server's authoritative counts. The
+  // server is the source of truth — if the user reinstalled, the local cache
+  // is empty/optimistic, and this overwrites it back to reality.
+  if (data.usage) {
+    setMonthlyWordUsageFromServer(data.usage.wordsUsed, data.usage.monthKey);
+    setMonthlyWordLimit(data.usage.wordsLimit);
+  }
   return {
     userId: data.userId,
     email: data.email,

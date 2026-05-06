@@ -99,6 +99,10 @@ export const zh: Translations = {
       recording: '正在录音',
       transcribing: '正在转写',
     },
+    watermark: {
+      listening: '聆听中',
+      transcribing: '转写中',
+    },
     titleHint: '按下快捷键开始说话。',
     hotkeyLabel: '快捷键',
     hotkeyHintPaste: '文本会自动粘贴到你正在输入的位置。',

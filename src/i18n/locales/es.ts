@@ -99,6 +99,10 @@ export const es: Translations = {
       recording: 'Grabando ahora',
       transcribing: 'Transcribiendo',
     },
+    watermark: {
+      listening: 'Escuchando',
+      transcribing: 'Transcribiendo',
+    },
     titleHint: 'Apretá el atajo y hablá.',
     hotkeyLabel: 'Atajo',
     hotkeyHintPaste: 'El texto se pega automáticamente donde estés escribiendo.',

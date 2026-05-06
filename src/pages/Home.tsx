@@ -55,9 +55,16 @@ export function Home({ settings, recState, onNavigateToHistory }: Props) {
 
   const statusText = t(`home.statusTitle.${recState}` as const);
   const lastTranscription = rows[0]?.text?.trim() ?? '';
-  const showWatermark = recState !== 'transcribing' && lastTranscription.length > 0;
-  const isTranscribing = recState === 'transcribing';
-  const isRecording = recState === 'recording';
+  // Watermark text replaces the last-transcription preview while recording or
+  // transcribing, so the active state is conveyed by the same big rotated
+  // background instead of a separate inline indicator.
+  const watermarkText =
+    recState === 'recording'
+      ? t('home.watermark.listening')
+      : recState === 'transcribing'
+      ? t('home.watermark.transcribing')
+      : lastTranscription;
+  const showWatermark = watermarkText.length > 0;
   const transcriptionsLabel =
     totals.totalTranscriptions === 1
       ? t('home.transcriptionsOne')
@@ -76,12 +83,10 @@ export function Home({ settings, recState, onNavigateToHistory }: Props) {
         </h1>
       </div>
 
-      <div
-        className={`home-hotkey${isTranscribing ? ' home-hotkey--transcribing' : ''}${isRecording ? ' home-hotkey--recording' : ''}`}
-      >
+      <div className="home-hotkey">
         {showWatermark && (
           <div className="home-hotkey-watermark" aria-hidden="true">
-            {lastTranscription}
+            {watermarkText}
           </div>
         )}
         <div className="home-hotkey-content">
@@ -93,22 +98,11 @@ export function Home({ settings, recState, onNavigateToHistory }: Props) {
               visual={hotkeyVisualState(recState, settings.handsFreeMode)}
             />
           </div>
-          {isTranscribing ? (
-            <span className="home-hotkey-transcribing">
-              <span className="home-hotkey-transcribing-dot" />
-              <span className="home-hotkey-transcribing-dot" />
-              <span className="home-hotkey-transcribing-dot" />
-              <span className="home-hotkey-transcribing-text">
-                {t('home.statusTitle.transcribing')}
-              </span>
-            </span>
-          ) : (
-            <span className="home-hotkey-hint">
-              {settings.pasteMode === 'paste'
-                ? t('home.hotkeyHintPaste')
-                : t('home.hotkeyHintClipboard')}
-            </span>
-          )}
+          <span className="home-hotkey-hint">
+            {settings.pasteMode === 'paste'
+              ? t('home.hotkeyHintPaste')
+              : t('home.hotkeyHintClipboard')}
+          </span>
         </div>
       </div>
 
@@ -118,15 +112,15 @@ export function Home({ settings, recState, onNavigateToHistory }: Props) {
             <h2 className="home-section-title">{t('home.activitySection')}</h2>
             <div className="home-stats">
               <Stat
-                value={formatNumber(totals.totalTranscriptions, language)}
+                value={formatCompactNumber(totals.totalTranscriptions, language)}
                 label={transcriptionsLabel}
               />
               <Stat
                 value={formatDuration(Math.round(totals.totalAudioMs / 1000))}
                 label={t('home.dictated')}
               />
-              <Stat value={formatNumber(totals.totalWords, language)} label={wordsLabel} />
-              <Stat value={formatNumber(wpm, language)} label={t('home.wpmLabel')} />
+              <Stat value={formatCompactNumber(totals.totalWords, language)} label={wordsLabel} />
+              <Stat value={formatCompactNumber(wpm, language)} label={t('home.wpmLabel')} />
             </div>
           </section>
 
@@ -178,18 +172,30 @@ function timeGreetingKey():
 function formatDuration(s: number): string {
   if (s <= 0) return '0s';
   if (s < 60) return `${s}s`;
-  if (s < 3600) {
-    const m = Math.floor(s / 60);
-    const rem = s % 60;
-    return rem === 0 ? `${m}m` : `${m}m ${rem}s`;
-  }
-  const h = Math.floor(s / 3600);
-  const m = Math.floor((s % 3600) / 60);
-  return m === 0 ? `${h}h` : `${h}h ${m}m`;
+  if (s < 3600) return `${Math.floor(s / 60)}m`;
+  return `${Math.floor(s / 3600)}h`;
 }
 
-function formatNumber(n: number, lang: UiLanguage): string {
-  return new Intl.NumberFormat(localeForLang(lang)).format(n);
+function formatCompactNumber(n: number, lang: UiLanguage): string {
+  const locale = localeForLang(lang);
+  if (n < 1000) return new Intl.NumberFormat(locale).format(n);
+  let value: number;
+  let suffix: string;
+  if (n < 1_000_000) {
+    value = n / 1000;
+    suffix = 'K';
+  } else if (n < 1_000_000_000) {
+    value = n / 1_000_000;
+    suffix = 'M';
+  } else {
+    value = n / 1_000_000_000;
+    suffix = 'B';
+  }
+  const truncated = Math.floor(value * 10) / 10;
+  const formatted = new Intl.NumberFormat(locale, {
+    maximumFractionDigits: truncated < 10 ? 1 : 0,
+  }).format(truncated);
+  return `${formatted}${suffix}`;
 }
 
 function localeForLang(lang: UiLanguage): string {

@@ -99,6 +99,10 @@ export const hi: Translations = {
       recording: 'अभी रिकॉर्ड हो रहा है',
       transcribing: 'ट्रांसक्राइब हो रहा है',
     },
+    watermark: {
+      listening: 'सुन रहा है',
+      transcribing: 'ट्रांसक्राइब हो रहा है',
+    },
     titleHint: 'हॉटकी दबाएँ और बोलें।',
     hotkeyLabel: 'हॉटकी',
     hotkeyHintPaste: 'जहाँ आप टाइप कर रहे हैं, वहाँ टेक्स्ट अपने आप पेस्ट हो जाता है।',

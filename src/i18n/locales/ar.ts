@@ -99,6 +99,10 @@ export const ar: Translations = {
       recording: 'يسجل الآن',
       transcribing: 'يكتب',
     },
+    watermark: {
+      listening: 'يستمع',
+      transcribing: 'يكتب',
+    },
     titleHint: 'اضغط الاختصار وتحدّث.',
     hotkeyLabel: 'الاختصار',
     hotkeyHintPaste: 'يتم لصق النص تلقائيًا حيث تكتب.',

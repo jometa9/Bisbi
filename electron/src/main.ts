@@ -36,7 +36,7 @@ function logMain(message: string, isError = false): void {
   else console.log(message);
 }
 
-const DEFAULT_WINDOW = { width: 880, height: 620 };
+const DEFAULT_WINDOW = { width: 800, height: 700 };
 
 interface WindowState {
   width: number;

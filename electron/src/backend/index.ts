@@ -9,8 +9,15 @@ import {
   countWords,
   getMonthlyWordUsage,
   addMonthlyWordUsage,
-  FREE_MONTHLY_WORD_LIMIT,
+  getMonthlyWordLimit,
+  enqueueUsage,
 } from './db';
+import {
+  flushUsageQueue,
+  setUsageEventHandlers,
+  startUsageSync,
+  stopUsageSync,
+} from './usageSync';
 import {
   getSession,
   loginWithToken,
@@ -156,9 +163,18 @@ async function processQueue(): Promise<void> {
           broadcast('stats:totals', getStatsTotals());
         }
         // Track monthly usage regardless of saveHistory — the limit must be
-        // enforced even when history is off.
+        // enforced even when history is off. We update the local cache
+        // optimistically so the UI reflects the new count immediately, then
+        // enqueue a usage event for the external API. The flusher will
+        // overwrite the cache with the server's authoritative count once the
+        // POST succeeds.
         if (meaningful && wordCount > 0) {
           addMonthlyWordUsage(wordCount);
+          enqueueUsage({
+            words: wordCount,
+            audioSeconds: Math.round((out.audioDurationMs ?? 0) / 1000),
+          });
+          void flushUsageQueue();
         }
       } catch (err) {
         console.error('[backend] transcription job failed:', err);
@@ -200,6 +216,14 @@ export async function registerBackend(opts: BackendOptions): Promise<void> {
   });
 
   applyHotkey(settings);
+
+  // The usage-sync worker drains the offline queue and reconciles the local
+  // word-count cache with the external API. It also lets us notify the
+  // renderer when the server's response says the user just hit the limit.
+  setUsageEventHandlers({
+    onLimitReached: (info) => broadcast('usage:limitReached', info),
+  });
+  startUsageSync();
 
   // ---------- IPC: settings ----------
   ipcMain.handle('settings:get', (): AppSettings => getSettings());
@@ -272,13 +296,17 @@ export async function registerBackend(opts: BackendOptions): Promise<void> {
         return;
       }
       // Free-plan monthly word cap. If already at/over the cap, drop the clip
-      // and notify the renderer so it can prompt to upgrade.
+      // and notify the renderer so it can prompt to upgrade. The cap and the
+      // current count are reconciled with the external API after every
+      // transcription and on every license refresh, so they're authoritative
+      // even across reinstalls.
       const session = getSession();
       const isPro = session.userInfo?.plan === 'pro';
       if (!isPro) {
         const used = getMonthlyWordUsage();
-        if (used >= FREE_MONTHLY_WORD_LIMIT) {
-          broadcast('usage:limitReached', { used, limit: FREE_MONTHLY_WORD_LIMIT });
+        const limit = getMonthlyWordLimit();
+        if (used >= limit) {
+          broadcast('usage:limitReached', { used, limit });
           syncState();
           return;
         }
@@ -355,8 +383,11 @@ export async function registerBackend(opts: BackendOptions): Promise<void> {
   // ---------- IPC: usage ----------
   ipcMain.handle('usage:getMonthly', () => ({
     used: getMonthlyWordUsage(),
-    limit: FREE_MONTHLY_WORD_LIMIT,
+    limit: getMonthlyWordLimit(),
   }));
+  ipcMain.handle('usage:flush', async () => {
+    await flushUsageQueue();
+  });
 
   // ---------- IPC: onboarding ----------
   ipcMain.handle('onboarding:getState', (): OnboardingState => getOnboardingState());
@@ -419,6 +450,7 @@ export async function registerBackend(opts: BackendOptions): Promise<void> {
   app.on('before-quit', () => {
     unregisterAll();
     destroyTray();
+    stopUsageSync();
   });
 }
 

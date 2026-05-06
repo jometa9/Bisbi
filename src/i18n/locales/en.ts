@@ -67,6 +67,7 @@ export const en: {
   home: {
     greeting: { lateNight: string; morning: string; afternoon: string; evening: string };
     statusTitle: { idle: string; recording: string; transcribing: string };
+    watermark: { listening: string; transcribing: string };
     titleHint: string;
     hotkeyLabel: string;
     hotkeyHintPaste: string;
@@ -317,6 +318,10 @@ export const en: {
     statusTitle: {
       idle: 'Ready to listen',
       recording: 'Recording now',
+      transcribing: 'Transcribing',
+    },
+    watermark: {
+      listening: 'Listening',
       transcribing: 'Transcribing',
     },
     titleHint: 'Press the hotkey and speak.',
