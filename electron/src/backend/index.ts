@@ -28,6 +28,17 @@ import { registerHotkey, unregisterAll } from './hotkey';
 import { transcribePcm, checkResources } from './transcriber';
 import { deliverText } from './paster';
 import {
+  getOnboardingState,
+  setOnboardingState,
+  getPermissionStatus,
+  requestMicrophonePermission,
+  requestAccessibilityPermission,
+  openSystemSettingsFor,
+  validateHotkey,
+  type OnboardingState,
+  type PermissionStatus,
+} from './onboarding';
+import {
   initTray,
   setRecordingState as setTrayState,
   destroyTray,
@@ -38,6 +49,11 @@ import {
   setLevel as setRecordingWindowLevel,
   hideRecordingWindow,
 } from './recordingWindow';
+import {
+  muteSystemAudio,
+  restoreSystemAudio,
+  type MuteSnapshot,
+} from './mediaControl';
 import {
   checkForUpdatesManual,
   getUpdateStatus,
@@ -64,6 +80,9 @@ let activeMainWindowOpener: (() => void) | null = null;
 // otherwise finish first.
 let isRecording = false;
 let workerRunning = false;
+// Snapshot of side effects taken at recording-start so we can undo exactly
+// what we did at recording-stop. Cleared after restore.
+let muteSnapshot: MuteSnapshot | null = null;
 interface TranscriptionJob {
   pcm: Buffer;
   sampleRate: number;
@@ -339,6 +358,57 @@ export async function registerBackend(opts: BackendOptions): Promise<void> {
     limit: FREE_MONTHLY_WORD_LIMIT,
   }));
 
+  // ---------- IPC: onboarding ----------
+  ipcMain.handle('onboarding:getState', (): OnboardingState => getOnboardingState());
+  ipcMain.handle(
+    'onboarding:setState',
+    (_e, patch: Partial<OnboardingState>): OnboardingState => {
+      const next = setOnboardingState(patch);
+      broadcast('onboarding:state', next);
+      return next;
+    }
+  );
+  ipcMain.handle('onboarding:getPermissions', (): PermissionStatus => getPermissionStatus());
+  ipcMain.handle('onboarding:requestMicrophone', async (): Promise<PermissionStatus> => {
+    await requestMicrophonePermission();
+    return getPermissionStatus();
+  });
+  ipcMain.handle('onboarding:requestAccessibility', (): PermissionStatus => {
+    requestAccessibilityPermission();
+    return getPermissionStatus();
+  });
+  ipcMain.handle(
+    'onboarding:openSystemSettings',
+    async (_e, pane: 'microphone' | 'accessibility'): Promise<void> => {
+      await openSystemSettingsFor(pane);
+    }
+  );
+  ipcMain.handle(
+    'onboarding:validateHotkey',
+    (_e, accelerator: string): { ok: boolean; reason?: string } =>
+      validateHotkey(accelerator)
+  );
+  // Run whisper on a buffer the renderer captured but skip the paste/clipboard
+  // delivery and the history insert. Used by the onboarding "first dictation"
+  // screen to show the result inline.
+  ipcMain.handle(
+    'onboarding:transcribePreview',
+    async (
+      _e,
+      payload: { pcm: ArrayBuffer; sampleRate: number; channels: number }
+    ): Promise<string> => {
+      const pcm = Buffer.from(payload.pcm);
+      const cfg = getSettings();
+      const out = await transcribePcm(pcm, payload.sampleRate, payload.channels, {
+        language: cfg.language,
+        precision: cfg.precision,
+        suppressNonSpeech: cfg.suppressNonSpeech,
+        vocabulary: cfg.vocabulary,
+      });
+      return out.text;
+    }
+  );
+
   // ---------- IPC: deep link / external links ----------
   ipcMain.handle('deepLink:getPending', () => getPendingDeepLink());
   ipcMain.handle('deepLink:clearPending', (_e, url?: string) => {
@@ -358,6 +428,20 @@ function handleStartRecording(): void {
   showRecordingWindow('recording');
   syncState();
   broadcast('recording:start');
+  // Fire-and-forget: muting can take ~100-300ms (AppleScript / PowerShell
+  // spawn) and must never block the mic from opening.
+  const cfg = getSettings();
+  if (cfg.muteSystemAudioWhileRecording) {
+    void muteSystemAudio().then((snap) => {
+      // If the user already stopped recording before this resolved, restore
+      // immediately instead of leaving their audio muted.
+      if (!isRecording) {
+        void restoreSystemAudio(snap);
+        return;
+      }
+      muteSnapshot = snap;
+    });
+  }
 }
 
 function handleStopRecording(): void {
@@ -370,4 +454,13 @@ function handleStopRecording(): void {
   // submitAudio call is what actually enqueues the clip for processing.
   syncState();
   broadcast('recording:stop');
+  // Restore whatever we changed at start. The snapshot may still be null if
+  // the start-side promise hasn't resolved yet (very short recordings) — in
+  // that case the start-side .then() handles the restore by checking
+  // !isRecording.
+  if (muteSnapshot) {
+    const snap = muteSnapshot;
+    muteSnapshot = null;
+    void restoreSystemAudio(snap);
+  }
 }

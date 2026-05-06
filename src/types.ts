@@ -23,6 +23,7 @@ export interface AppSettings {
   // remembered even if the device is currently unplugged, so we automatically
   // re-pick it the next time it shows up.
   microphoneId: string | null;
+  muteSystemAudioWhileRecording: boolean;
 }
 
 export interface TranscriptionRow {
@@ -94,6 +95,18 @@ export interface AuthSession {
   userInfo: UserInfo | null;
 }
 
+export type OnboardingStep = 1 | 2 | 3 | 4 | 5;
+
+export interface OnboardingState {
+  completed: boolean;
+  lastStep: OnboardingStep;
+}
+
+export interface PermissionStatus {
+  microphone: 'granted' | 'denied' | 'unknown';
+  accessibility: 'granted' | 'denied' | 'unknown' | 'not-applicable';
+}
+
 declare global {
   interface Window {
     bisbi: {
@@ -149,6 +162,21 @@ declare global {
       usage: {
         getMonthly: () => Promise<{ used: number; limit: number }>;
         onLimitReached: (cb: (payload: { used: number; limit: number }) => void) => () => void;
+      };
+      onboarding: {
+        getState: () => Promise<OnboardingState>;
+        setState: (patch: Partial<OnboardingState>) => Promise<OnboardingState>;
+        onStateChange: (cb: (s: OnboardingState) => void) => () => void;
+        getPermissions: () => Promise<PermissionStatus>;
+        requestMicrophone: () => Promise<PermissionStatus>;
+        requestAccessibility: () => Promise<PermissionStatus>;
+        openSystemSettings: (pane: 'microphone' | 'accessibility') => Promise<void>;
+        validateHotkey: (accelerator: string) => Promise<{ ok: boolean; reason?: string }>;
+        transcribePreview: (
+          pcm: ArrayBuffer,
+          sampleRate: number,
+          channels: number
+        ) => Promise<string>;
       };
     };
   }

@@ -28,6 +28,9 @@ export interface AppSettings {
   // terms, technical jargon, etc. Empty string ⇒ no prompt is forwarded.
   vocabulary: string;
   microphoneId: string | null;
+  // When true, mute the system output for the duration of the recording and
+  // restore the previous mute state on stop. Off by default.
+  muteSystemAudioWhileRecording: boolean;
 }
 
 export interface TranscriptionResult {

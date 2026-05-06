@@ -212,6 +212,18 @@ export const zh: Translations = {
         hint: '[音乐] 或 (叹气) 等注释会出现在转录文本中。',
       },
     },
+    muteAudio: {
+      title: '录音时静音系统音频',
+      description: '在录音期间静音电脑输出,以防背景声音泄露到环境中。',
+      enabled: {
+        label: '录音时静音',
+        hint: '听写时系统输出会被静音,停止后会恢复之前的音量。',
+      },
+      disabled: {
+        label: '保持音频',
+        hint: '音量保持不变。如果你需要在说话时听到声音,可以使用此选项。',
+      },
+    },
     vocabulary: {
       title: '自定义词汇',
       description: '希望 Bisbi 更准确识别的人名、品牌或专业术语。会作为每次转录的上下文。',
@@ -271,5 +283,59 @@ export const zh: Translations = {
   common: {
     yes: '是',
     no: '否',
+  },
+  onboarding: {
+    progress: '{current} / {total}',
+    back: '返回',
+    welcome: {
+      title: '欢迎使用 Bisbi。',
+      subtitle: '最快的写字方式就是不打字。让我用不到 2 分钟向你演示。',
+      cta: '开始',
+    },
+    permissions: {
+      title: 'Bisbi 需要两项权限。',
+      subtitle: '没有这些权限就无法工作。',
+      grant: '授予权限',
+      continue: '继续',
+      openSettings: '打开系统设置',
+      microphone: {
+        title: '麦克风',
+        description: '用于在你说话时聆听。你的音频永远不会离开本机。',
+        deniedHint: '无法访问麦克风。',
+      },
+      accessibility: {
+        title: '辅助功能',
+        description: '用于在任何应用中把文字键入到光标所在位置。',
+        deniedHint: '无法获得辅助功能权限。',
+      },
+    },
+    hotkey: {
+      title: '你想用哪个键来唤起 Bisbi？',
+      subtitle: '按住说话，松开结束。',
+      recommended: '推荐',
+      custom: '自定义…',
+      pickOne: '请选择一个快捷键',
+      confirm: '确认',
+      conflictInUse: '该组合已被占用，请尝试其它。',
+      conflictInvalid: '该组合不受支持，请尝试其它。',
+    },
+    dictation: {
+      title: '试一下。',
+      subtitle: '按住',
+      waiting: '等待你的声音…',
+      listening: '正在聆听…',
+      transcribing: '正在转写…',
+      silenceError: '听不到声音，麦克风连接了吗？',
+      failedError: '无法转写，请再试一次。',
+      retry: '再试一次',
+      continue: '继续',
+      skip: '稍后再配置',
+    },
+    account: {
+      title: '成功了，对吧？',
+      subtitle: '创建账户以保存设置并开始使用 Bisbi。',
+      signIn: '使用 Google 继续',
+      microcopy: '免费起步。无需信用卡。',
+    },
   },
 };

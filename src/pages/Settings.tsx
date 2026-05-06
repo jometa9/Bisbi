@@ -169,6 +169,28 @@ export function Settings({ settings, onChange, onReset, onClearHistory }: Props)
       </Section>
 
       <Section
+        title={t('settings.muteAudio.title')}
+        description={t('settings.muteAudio.description')}
+      >
+        <div className="option-cards">
+          <OptionCard
+            name="muteSystemAudioWhileRecording"
+            selected={settings.muteSystemAudioWhileRecording}
+            title={t('settings.muteAudio.enabled.label')}
+            hint={t('settings.muteAudio.enabled.hint')}
+            onSelect={() => onChange({ muteSystemAudioWhileRecording: true })}
+          />
+          <OptionCard
+            name="muteSystemAudioWhileRecording"
+            selected={!settings.muteSystemAudioWhileRecording}
+            title={t('settings.muteAudio.disabled.label')}
+            hint={t('settings.muteAudio.disabled.hint')}
+            onSelect={() => onChange({ muteSystemAudioWhileRecording: false })}
+          />
+        </div>
+      </Section>
+
+      <Section
         title={t('settings.pasteMode.title')}
         description={t('settings.pasteMode.description')}
       >

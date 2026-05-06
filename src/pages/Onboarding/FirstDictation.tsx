@@ -1,0 +1,221 @@
+import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from '../../i18n';
+import { Waveform } from '../../components/Waveform';
+import { HotkeyKeys } from '../../components/HotkeyKeys';
+import { startRecording, type RecordingHandle } from '../../audio';
+import { formatHotkeyAccelerator, type KeyPlatform } from '../../lib/hotkey';
+
+interface Props {
+  hotkey: string;
+  platform: NodeJS.Platform | null;
+  microphoneId: string | null;
+  onContinue: () => void;
+  onBack: () => void;
+}
+
+type DictationState =
+  | 'waiting'
+  | 'listening'
+  | 'transcribing'
+  | 'success'
+  | 'silence'
+  | 'failed';
+
+const SAMPLE_PHRASE =
+  'Hola Bisbi, esta es mi primera dictada. Hablar es más rápido que escribir.';
+const NO_VOICE_TIMEOUT_MS = 5000;
+const MAX_RETRIES_BEFORE_SKIP = 3;
+
+// Screen 4 — combined mic test + first real transcription. We tap into the
+// global hotkey events the backend already broadcasts; on stop we ship the
+// PCM through `transcribePreview` so the result lands in our box instead of
+// being pasted into whatever app the user has in the background.
+export function FirstDictation({
+  hotkey,
+  platform,
+  microphoneId,
+  onContinue,
+  onBack,
+}: Props) {
+  const { t } = useTranslation();
+  const keyPlatform: KeyPlatform = platform === 'darwin' ? 'mac' : 'win';
+
+  const [state, setState] = useState<DictationState>('waiting');
+  const [transcript, setTranscript] = useState('');
+  const [level, setLevel] = useState(0);
+  const [failures, setFailures] = useState(0);
+
+  const handleRef = useRef<RecordingHandle | null>(null);
+  const chainRef = useRef<Promise<void>>(Promise.resolve());
+  const sawAudioRef = useRef(false);
+  const silenceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    if (!window.bisbi) return;
+
+    const offStart = window.bisbi.onRecordingStart(() => {
+      chainRef.current = chainRef.current.then(async () => {
+        sawAudioRef.current = false;
+        setTranscript('');
+        setState('listening');
+        setLevel(0);
+        if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
+        silenceTimerRef.current = setTimeout(() => {
+          if (!sawAudioRef.current) {
+            setState('silence');
+          }
+        }, NO_VOICE_TIMEOUT_MS);
+        try {
+          handleRef.current = await startRecording({
+            deviceId: microphoneId,
+            onLevel: (lv) => {
+              setLevel(lv);
+              if (lv > 0.06) sawAudioRef.current = true;
+            },
+          });
+        } catch (err) {
+          console.error('[onboarding] mic start failed:', err);
+          await window.bisbi.cancelRecording();
+          setState('failed');
+        }
+      });
+    });
+
+    const offStop = window.bisbi.onRecordingStop(() => {
+      chainRef.current = chainRef.current.then(async () => {
+        if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
+        const cur = handleRef.current;
+        handleRef.current = null;
+        if (!cur) {
+          await window.bisbi.cancelRecording();
+          return;
+        }
+        try {
+          const { pcm, sampleRate, channels } = await cur.stop();
+          // Tell the main process we are no longer holding a mic so its
+          // recording-state machine settles back to idle. We deliberately
+          // do NOT call submitAudio — that would route through the paste
+          // pipeline and history.
+          await window.bisbi.cancelRecording();
+          if (!sawAudioRef.current) {
+            setState('silence');
+            return;
+          }
+          setState('transcribing');
+          const text = await window.bisbi.onboarding.transcribePreview(
+            pcm,
+            sampleRate,
+            channels
+          );
+          const cleaned = text.trim();
+          if (!cleaned) {
+            setFailures((f) => f + 1);
+            setState('failed');
+            return;
+          }
+          setTranscript(cleaned);
+          setState('success');
+        } catch (err) {
+          console.error('[onboarding] preview transcription failed:', err);
+          setFailures((f) => f + 1);
+          setState('failed');
+        }
+      });
+    });
+
+    return () => {
+      offStart();
+      offStop();
+      if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
+      handleRef.current?.cancel();
+      handleRef.current = null;
+    };
+  }, [microphoneId]);
+
+  const retry = () => {
+    setTranscript('');
+    setState('waiting');
+  };
+
+  const reachedSkipThreshold = failures >= MAX_RETRIES_BEFORE_SKIP;
+
+  return (
+    <div className="onb-screen">
+      <h1 className="onb-title">{t('onboarding.dictation.title')}</h1>
+      <p className="onb-subtitle">
+        {t('onboarding.dictation.subtitle')}{' '}
+        <span className="onb-inline-keys">
+          <HotkeyKeys accel={hotkey} platform={keyPlatform} size="sm" visual="lit" />
+        </span>
+        {' — '}
+        {formatHotkeyAccelerator(hotkey, keyPlatform)}
+      </p>
+
+      <div className="onb-phrase">{SAMPLE_PHRASE}</div>
+
+      <div className={`onb-dictation-box onb-dictation-box--${state}`}>
+        <Waveform level={level} active={state === 'listening'} />
+        <div className="onb-dictation-result">
+          {state === 'waiting' && (
+            <span className="onb-dictation-placeholder">
+              {t('onboarding.dictation.waiting')}
+            </span>
+          )}
+          {state === 'listening' && (
+            <span className="onb-dictation-status">
+              {t('onboarding.dictation.listening')}
+            </span>
+          )}
+          {state === 'transcribing' && (
+            <span className="onb-dictation-status">
+              {t('onboarding.dictation.transcribing')}
+            </span>
+          )}
+          {state === 'success' && (
+            <span className="onb-dictation-text">{transcript}</span>
+          )}
+          {state === 'silence' && (
+            <span className="onb-dictation-error">
+              {t('onboarding.dictation.silenceError')}
+            </span>
+          )}
+          {state === 'failed' && (
+            <span className="onb-dictation-error">
+              {t('onboarding.dictation.failedError')}
+            </span>
+          )}
+        </div>
+      </div>
+
+      {(state === 'silence' || state === 'failed') && (
+        <button type="button" className="btn-secondary onb-retry" onClick={retry}>
+          {t('onboarding.dictation.retry')}
+        </button>
+      )}
+
+      <div className="onb-nav">
+        <button type="button" className="btn-secondary onb-back" onClick={onBack}>
+          {t('onboarding.back')}
+        </button>
+        {state === 'success' ? (
+          <button
+            type="button"
+            className="btn-primary onb-cta onb-cta--success"
+            onClick={onContinue}
+          >
+            <span className="onb-success-check" aria-hidden="true">✓</span>
+            {t('onboarding.dictation.continue')}
+          </button>
+        ) : (
+          <span className="onb-nav-spacer" />
+        )}
+      </div>
+
+      {reachedSkipThreshold && state !== 'success' && (
+        <button type="button" className="onb-skip-link" onClick={onContinue}>
+          {t('onboarding.dictation.skip')}
+        </button>
+      )}
+    </div>
+  );
+}

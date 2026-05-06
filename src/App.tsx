@@ -4,9 +4,15 @@ import { Settings } from './pages/Settings';
 import { History } from './pages/History';
 import { Account } from './pages/Account';
 import { Login } from './pages/Login';
+import { Onboarding } from './pages/Onboarding';
 import { UpdateLabel } from './components/UpdateLabel';
 import { startRecording, type RecordingHandle } from './audio';
-import type { AppSettings, RecordingState } from './types';
+import type {
+  AppSettings,
+  RecordingState,
+  OnboardingState,
+  OnboardingStep,
+} from './types';
 import { useTranslation } from './i18n';
 import { useAuth } from './context/AuthContext';
 import owlIdleSvg from '../build-resources/owl_head.svg';
@@ -26,6 +32,7 @@ export function App() {
   const [appVersion, setAppVersion] = useState('');
   const [resourcesOk, setResourcesOk] = useState<boolean | null>(null);
   const [showLimitBanner, setShowLimitBanner] = useState(false);
+  const [onboarding, setOnboarding] = useState<OnboardingState | null>(null);
 
   useEffect(() => {
     settingsRef.current = settings;
@@ -37,8 +44,10 @@ export function App() {
     void window.bisbi.getAppVersion().then(setAppVersion);
     void window.bisbi.getRecordingState().then(setRecState);
     void window.bisbi.checkResources().then((c) => setResourcesOk(c.ok));
+    void window.bisbi.onboarding.getState().then(setOnboarding);
 
     const offSettings = window.bisbi.onSettingsChange(setSettings);
+    const offOnboarding = window.bisbi.onboarding.onStateChange(setOnboarding);
     const offState = window.bisbi.onRecordingState(setRecState);
     const offNav = window.bisbi.onNavigate(({ to }) => {
       if (to === '/history') setTab('history');
@@ -54,6 +63,7 @@ export function App() {
       offState();
       offNav();
       offLimit();
+      offOnboarding();
     };
   }, []);
 
@@ -70,8 +80,16 @@ export function App() {
   // renderer to start/stop the mic capture via these IPC events. We
   // serialize start/stop through a promise chain so a fast re-tap can't
   // open a new mic handle before the previous one finishes flushing.
+  //
+  // Skip this handler entirely while the onboarding flow is mounted — its
+  // FirstDictation screen owns the recording events for the live preview
+  // and we don't want this fallback path to also fire submitAudio (which
+  // would route the clip through the paste/clipboard pipeline).
+  const isOnboardingActive =
+    !isAuthLoading && !isAuthenticated && onboarding !== null && !onboarding.completed;
   useEffect(() => {
     if (!window.bisbi) return;
+    if (isOnboardingActive) return;
     let handle: RecordingHandle | null = null;
     let chain: Promise<void> = Promise.resolve();
 
@@ -113,7 +131,7 @@ export function App() {
       offStop();
       handle?.cancel();
     };
-  }, [t]);
+  }, [t, isOnboardingActive]);
 
   if (!window.bisbi) {
     return (
@@ -136,8 +154,18 @@ export function App() {
     );
   }
 
-  if (isAuthLoading || !settings) {
+  if (isAuthLoading || !settings || onboarding === null) {
     return <div className="loading">{t('app.loading')}</div>;
+  }
+
+  if (!isAuthenticated && !onboarding.completed) {
+    return (
+      <Onboarding
+        settings={settings}
+        onSettingsChange={setSettings}
+        initialStep={(onboarding.lastStep || 1) as OnboardingStep}
+      />
+    );
   }
 
   if (!isAuthenticated) {

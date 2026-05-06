@@ -106,6 +106,33 @@ const bisbi = {
   },
   openExternal: (url: string) => invoke<void>('app:openExternal', url),
 
+  // Onboarding (first-run flow shown before login)
+  onboarding: {
+    getState: () =>
+      invoke<import('./backend/onboarding').OnboardingState>('onboarding:getState'),
+    setState: (patch: Partial<import('./backend/onboarding').OnboardingState>) =>
+      invoke<import('./backend/onboarding').OnboardingState>('onboarding:setState', patch),
+    onStateChange: (
+      cb: (s: import('./backend/onboarding').OnboardingState) => void
+    ) => listen<import('./backend/onboarding').OnboardingState>('onboarding:state', cb),
+    getPermissions: () =>
+      invoke<import('./backend/onboarding').PermissionStatus>('onboarding:getPermissions'),
+    requestMicrophone: () =>
+      invoke<import('./backend/onboarding').PermissionStatus>(
+        'onboarding:requestMicrophone'
+      ),
+    requestAccessibility: () =>
+      invoke<import('./backend/onboarding').PermissionStatus>(
+        'onboarding:requestAccessibility'
+      ),
+    openSystemSettings: (pane: 'microphone' | 'accessibility') =>
+      invoke<void>('onboarding:openSystemSettings', pane),
+    validateHotkey: (accelerator: string) =>
+      invoke<{ ok: boolean; reason?: string }>('onboarding:validateHotkey', accelerator),
+    transcribePreview: (pcm: ArrayBuffer, sampleRate: number, channels: number) =>
+      invoke<string>('onboarding:transcribePreview', { pcm, sampleRate, channels }),
+  },
+
   // Usage / quota — free plan monthly word cap, tracked locally.
   usage: {
     getMonthly: () =>

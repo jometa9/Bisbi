@@ -17,6 +17,7 @@ const DEFAULT_SETTINGS: AppSettings = {
   suppressNonSpeech: true,
   vocabulary: '',
   microphoneId: null,
+  muteSystemAudioWhileRecording: false,
 };
 
 function settingsPath(): string {

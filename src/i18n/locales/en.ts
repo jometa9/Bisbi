@@ -131,6 +131,12 @@ export const en: {
       enabled: { label: string; hint: string };
       disabled: { label: string; hint: string };
     };
+    muteAudio: {
+      title: string;
+      description: string;
+      enabled: { label: string; hint: string };
+      disabled: { label: string; hint: string };
+    };
     vocabulary: {
       title: string;
       description: string;
@@ -173,6 +179,48 @@ export const en: {
   };
   errors: { hotkeyRegister: string };
   common: { yes: string; no: string };
+  onboarding: {
+    progress: string;
+    back: string;
+    welcome: { title: string; subtitle: string; cta: string };
+    permissions: {
+      title: string;
+      subtitle: string;
+      grant: string;
+      continue: string;
+      openSettings: string;
+      microphone: { title: string; description: string; deniedHint: string };
+      accessibility: { title: string; description: string; deniedHint: string };
+    };
+    hotkey: {
+      title: string;
+      subtitle: string;
+      recommended: string;
+      custom: string;
+      pickOne: string;
+      confirm: string;
+      conflictInUse: string;
+      conflictInvalid: string;
+    };
+    dictation: {
+      title: string;
+      subtitle: string;
+      waiting: string;
+      listening: string;
+      transcribing: string;
+      silenceError: string;
+      failedError: string;
+      retry: string;
+      continue: string;
+      skip: string;
+    };
+    account: {
+      title: string;
+      subtitle: string;
+      signIn: string;
+      microcopy: string;
+    };
+  };
 } = {
   app: {
     brand: 'Bisbi',
@@ -390,6 +438,19 @@ export const en: {
         hint: 'Annotations like [Music] or (sigh) are included in the transcription.',
       },
     },
+    muteAudio: {
+      title: 'Mute system audio while recording',
+      description:
+        'Mute your computer output for the duration of the recording so background sounds do not bleed into the room.',
+      enabled: {
+        label: 'Mute on record',
+        hint: 'The system output is muted while you dictate and the previous level is restored on stop.',
+      },
+      disabled: {
+        label: 'Keep audio on',
+        hint: 'Your output stays at the same level. Use this if you rely on hearing the audio while you talk.',
+      },
+    },
     vocabulary: {
       title: 'Custom vocabulary',
       description:
@@ -450,6 +511,63 @@ export const en: {
   common: {
     yes: 'Yes',
     no: 'No',
+  },
+  onboarding: {
+    progress: '{current} of {total}',
+    back: 'Back',
+    welcome: {
+      title: 'Welcome to Bisbi.',
+      subtitle:
+        'The fastest way to write is not to type. Let me show you in under 2 minutes.',
+      cta: 'Get started',
+    },
+    permissions: {
+      title: 'Bisbi needs two permissions.',
+      subtitle: "Without these, it can't work.",
+      grant: 'Grant permissions',
+      continue: 'Continue',
+      openSettings: 'Open System Settings',
+      microphone: {
+        title: 'Microphone',
+        description:
+          'So we can hear you when you speak. Your audio never leaves your computer.',
+        deniedHint: "We couldn't access the mic.",
+      },
+      accessibility: {
+        title: 'Accessibility',
+        description:
+          'So Bisbi can type the text wherever your cursor is, in any app.',
+        deniedHint: "We couldn't get accessibility access.",
+      },
+    },
+    hotkey: {
+      title: 'Pick your shortcut.',
+      subtitle: 'Hold it down to speak. Let go when you are done.',
+      recommended: 'Recommended',
+      custom: 'Custom…',
+      pickOne: 'Pick a shortcut',
+      confirm: 'Confirm',
+      conflictInUse: 'That combination is already in use. Try another.',
+      conflictInvalid: "That combination isn't supported. Try another.",
+    },
+    dictation: {
+      title: "Let's try it.",
+      subtitle: 'Hold down',
+      waiting: 'Waiting for your voice…',
+      listening: 'Listening…',
+      transcribing: 'Transcribing…',
+      silenceError: "We can't hear you. Is your microphone connected?",
+      failedError: "We couldn't transcribe. Try again.",
+      retry: 'Try again',
+      continue: 'Continue',
+      skip: 'Skip and configure later',
+    },
+    account: {
+      title: 'It worked, right?',
+      subtitle: 'Create your account to save your settings and start using Bisbi.',
+      signIn: 'Continue with Google',
+      microcopy: 'Free to start. No credit card required.',
+    },
   },
 };
 

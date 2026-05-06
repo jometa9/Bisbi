@@ -48,11 +48,18 @@ function placeBottomCenter(w: BrowserWindow): void {
     width: WIDTH,
     height: HEIGHT,
   });
-  if (changed) {
-    try { w.setAlwaysOnTop(true, 'screen-saver'); } catch {}
-    try { w.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true }); } catch {}
-    try { w.showInactive(); } catch {}
-  }
+  if (changed) reassertWindowFlags(w);
+}
+
+// macOS in particular drops always-on-top + cross-workspace visibility when
+// the user enters fullscreen, switches Space, or another window briefly
+// claims the screen-saver level. Re-asserting the flags is cheap and idempotent,
+// so we do it both on display change and on every follow-loop tick where the
+// window appears not to be on screen.
+function reassertWindowFlags(w: BrowserWindow): void {
+  try { w.setAlwaysOnTop(true, 'screen-saver'); } catch {}
+  try { w.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true }); } catch {}
+  try { w.showInactive(); } catch {}
 }
 
 function startFollowingActiveDisplay(): void {
@@ -60,9 +67,19 @@ function startFollowingActiveDisplay(): void {
   followTimer = setInterval(() => {
     if (!win || win.isDestroyed()) return;
     const display = getActiveDisplay();
-    if (display.id !== lastDisplayId) placeBottomCenter(win);
-    else if (!win.isVisible()) {
-      try { win.showInactive(); } catch {}
+    if (display.id !== lastDisplayId) {
+      placeBottomCenter(win);
+      return;
+    }
+    // Same display, but the window may still have lost its on-top status when
+    // the user changed Space, entered/left fullscreen, or another panel briefly
+    // took over the screen-saver level. Re-assert flags + re-show whenever the
+    // window reports as not visible. This is the case we were missing before:
+    // the old code only re-showed via showInactive() but never re-applied the
+    // workspace/always-on-top flags, so on macOS the bar could be alive but
+    // hidden behind the active fullscreen Space.
+    if (!win.isVisible() || win.getOpacity() === 0) {
+      reassertWindowFlags(win);
     }
   }, 200);
 }
@@ -71,6 +88,24 @@ function stopFollowingActiveDisplay(): void {
   if (!followTimer) return;
   clearInterval(followTimer);
   followTimer = null;
+}
+
+// React to physical display configuration changes (resolution / scaling /
+// add / remove). Without this, plugging in a monitor while recording can
+// leave the pill positioned on coordinates that no longer exist.
+let screenListenersBound = false;
+function bindScreenListeners(): void {
+  if (screenListenersBound) return;
+  screenListenersBound = true;
+  const reposition = (): void => {
+    if (!win || win.isDestroyed()) return;
+    // Force a reposition by clearing the cached display id.
+    lastDisplayId = null;
+    placeBottomCenter(win);
+  };
+  screen.on('display-metrics-changed', reposition);
+  screen.on('display-added', reposition);
+  screen.on('display-removed', reposition);
 }
 
 function cancelFade(): void {
@@ -132,9 +167,15 @@ export function showRecordingWindow(state: RecordingState): void {
     win.loadURL(frontendUrl('/recording')).catch(() => {});
     win.on('closed', () => {
       win = null;
+      lastDisplayId = null;
     });
+    bindScreenListeners();
   }
   placeBottomCenter(win);
+  // Always re-assert flags on show — even when the window survived from a
+  // previous recording, the OS may have dropped them in the interim (Space
+  // change, fullscreen toggle).
+  reassertWindowFlags(win);
   if (!win.isVisible()) {
     try { win.setOpacity(0); } catch {}
     win.showInactive();

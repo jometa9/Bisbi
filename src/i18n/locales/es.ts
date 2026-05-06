@@ -218,6 +218,19 @@ export const es: Translations = {
         hint: 'Las anotaciones como [Música] o (suspiro) se incluyen en la transcripción.',
       },
     },
+    muteAudio: {
+      title: 'Silenciar audio del sistema al grabar',
+      description:
+        'Silencia la salida de tu computadora durante la grabación para que los sonidos de fondo no se filtren al ambiente.',
+      enabled: {
+        label: 'Silenciar al grabar',
+        hint: 'La salida del sistema se silencia mientras dictás y el volumen anterior se restaura al parar.',
+      },
+      disabled: {
+        label: 'Mantener el audio',
+        hint: 'El volumen queda igual. Útil si necesitás escuchar algo mientras hablás.',
+      },
+    },
     vocabulary: {
       title: 'Vocabulario personalizado',
       description:
@@ -278,5 +291,62 @@ export const es: Translations = {
   common: {
     yes: 'Sí',
     no: 'No',
+  },
+  onboarding: {
+    progress: '{current} de {total}',
+    back: 'Atrás',
+    welcome: {
+      title: 'Bienvenido a Bisbi.',
+      subtitle:
+        'La forma más rápida de escribir es no escribir. Te lo muestro en menos de 2 minutos.',
+      cta: 'Empezar',
+    },
+    permissions: {
+      title: 'Bisbi necesita dos permisos.',
+      subtitle: 'Sin estos, no puede funcionar.',
+      grant: 'Otorgar permisos',
+      continue: 'Continuar',
+      openSettings: 'Abrir Ajustes del Sistema',
+      microphone: {
+        title: 'Micrófono',
+        description:
+          'Para escucharte cuando hables. Tu audio nunca sale de tu computadora.',
+        deniedHint: 'No pudimos acceder al micrófono.',
+      },
+      accessibility: {
+        title: 'Accesibilidad',
+        description:
+          'Para escribir el texto donde tengas el cursor, en cualquier app.',
+        deniedHint: 'No pudimos obtener acceso de accesibilidad.',
+      },
+    },
+    hotkey: {
+      title: '¿Con qué tecla querés activar Bisbi?',
+      subtitle: 'Mantenela presionada para hablar. Soltala cuando termines.',
+      recommended: 'Recomendada',
+      custom: 'Personalizar…',
+      pickOne: 'Elegí un atajo',
+      confirm: 'Confirmar',
+      conflictInUse: 'Esa combinación ya está en uso. Probá otra.',
+      conflictInvalid: 'Esa combinación no está soportada. Probá otra.',
+    },
+    dictation: {
+      title: 'Probemos.',
+      subtitle: 'Mantené presionada',
+      waiting: 'Esperando tu voz…',
+      listening: 'Escuchando…',
+      transcribing: 'Transcribiendo…',
+      silenceError: 'No te escucho. ¿Está conectado tu micrófono?',
+      failedError: 'No pudimos transcribir. Probá de nuevo.',
+      retry: 'Probar de nuevo',
+      continue: 'Continuar',
+      skip: 'Saltear y configurar después',
+    },
+    account: {
+      title: 'Funcionó, ¿no?',
+      subtitle: 'Creá tu cuenta para guardar tu configuración y empezar a usar Bisbi.',
+      signIn: 'Continuar con Google',
+      microcopy: 'Gratis para empezar. Sin tarjeta de crédito.',
+    },
   },
 };
