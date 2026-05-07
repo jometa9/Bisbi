@@ -103,6 +103,7 @@ export const en: {
       description: string;
       pushToTalk: { label: string; hint: string };
       tapToToggle: { label: string; hint: string };
+      doubleTapNotice: string;
     };
     microphone: {
       title: string;
@@ -370,12 +371,14 @@ export const en: {
         'Choose how the shortcut starts and stops a recording.',
       pushToTalk: {
         label: 'Hold to talk',
-        hint: 'Hold the shortcut down while you speak; release it to stop. Tip: double-tap quickly to lock the recording so you can let go of the key.',
+        hint: 'Hold the shortcut down while you speak; release it to stop.',
       },
       tapToToggle: {
         label: 'Hands-free',
         hint: 'Tap the shortcut once to start recording, tap again to stop. Best for longer dictations where you do not want to keep a key pressed.',
       },
+      doubleTapNotice:
+        'Want to switch to hands-free on the fly? Double-tap {hotkey} quickly and the recording stays on so you can let go of the key.',
     },
     microphone: {
       title: 'Microphone',

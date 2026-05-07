@@ -147,12 +147,14 @@ export const zh: Translations = {
       description: '选择快捷键如何开始和结束录音。',
       pushToTalk: {
         label: '按住说话',
-        hint: '说话时按住快捷键,松开即停止。小技巧:快速双击可以锁定录音,这样你就可以松开按键。',
+        hint: '说话时按住快捷键,松开即停止。',
       },
       tapToToggle: {
         label: '免手模式',
         hint: '点击快捷键一次开始录音,再次点击结束录音。适合较长的口述,你不想一直按着按键。',
       },
+      doubleTapNotice:
+        '想随时切换到免手模式?快速双击 {hotkey},录音会保持开启,你就可以松开按键。',
     },
     microphone: {
       title: '麦克风',

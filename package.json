@@ -6,8 +6,8 @@
   "private": true,
   "main": "electron/dist/main.js",
   "author": {
-    "name": "Bisbi",
-    "email": "hello@bisbi.app"
+    "name": "IPTRADE COPIER LLC",
+    "email": "hello@bisbi.io"
   },
   "scripts": {
     "postinstall": "electron-rebuild -f -w better-sqlite3,uiohook-napi",
@@ -50,7 +50,7 @@
   "build": {
     "appId": "app.bisbi.desktop",
     "productName": "Bisbi",
-    "copyright": "Copyright © 2026 Bisbi",
+    "copyright": "Copyright © 2026 IPTRADE COPIER LLC",
     "asar": true,
     "asarUnpack": [
       "resources/whisper/**/*",
@@ -68,6 +68,10 @@
         "filter": [
           "**/*"
         ]
+      },
+      {
+        "from": "THIRD_PARTY_NOTICES.md",
+        "to": "THIRD_PARTY_NOTICES.md"
       },
       {
         "from": "build-resources/owl_idle_black.png",

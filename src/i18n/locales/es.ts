@@ -149,12 +149,14 @@ export const es: Translations = {
         'Elegí cómo querés que el atajo arranque y detenga la grabación.',
       pushToTalk: {
         label: 'Mantener apretado para hablar',
-        hint: 'Dejás apretado el atajo mientras hablás y lo soltás para que se detenga. Tip: si hacés un doble toque rápido, la grabación queda fija y podés soltar la tecla.',
+        hint: 'Dejás apretado el atajo mientras hablás y lo soltás para que se detenga.',
       },
       tapToToggle: {
         label: 'Manos libres',
         hint: 'Tocás el atajo una vez para empezar a grabar y lo tocás de nuevo para detener. Ideal para dictados largos en los que no querés tener una tecla apretada.',
       },
+      doubleTapNotice:
+        '¿Querés pasar a manos libres sobre la marcha? Hacé un doble toque rápido a {hotkey} y la grabación queda fija para que puedas soltar la tecla.',
     },
     microphone: {
       title: 'Micrófono',

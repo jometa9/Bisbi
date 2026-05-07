@@ -73,6 +73,9 @@ export function Settings({ settings, onChange, onReset, onClearHistory }: Props)
             onSelect={() => onChange({ handsFreeMode: true })}
           />
         </div>
+        {!settings.handsFreeMode && (
+          <DoubleTapNotice hotkey={settings.hotkey} />
+        )}
       </Section>
 
       <Section
@@ -249,6 +252,31 @@ export function Settings({ settings, onChange, onReset, onClearHistory }: Props)
           />
         </div>
       </Section>
+    </div>
+  );
+}
+
+function DoubleTapNotice({ hotkey }: { hotkey: string }) {
+  const { t } = useTranslation();
+  const isMac = useMemo(
+    () =>
+      typeof navigator !== 'undefined' &&
+      /Mac|iPhone|iPod|iPad/.test(navigator.platform),
+    []
+  );
+  const platform = isMac ? 'mac' : 'win';
+  const [before, after] = t('settings.handsFree.doubleTapNotice').split('{hotkey}');
+
+  return (
+    <div className="handsfree-notice" role="note">
+      <span className="handsfree-notice-body">
+        {before}
+        <span className="handsfree-notice-keys">
+          <HotkeyKeys accel={hotkey} platform={platform} size="sm" />
+          <HotkeyKeys accel={hotkey} platform={platform} size="sm" />
+        </span>
+        {after}
+      </span>
     </div>
   );
 }

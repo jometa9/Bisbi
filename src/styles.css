@@ -1071,6 +1071,33 @@ button { font-family: inherit; }
   box-shadow: 0 0 0 3px var(--primary-tint-hover);
 }
 
+.handsfree-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-top: 8px;
+  padding: 12px 14px;
+  border-radius: var(--radius);
+  border: 1px solid var(--primary);
+  background: var(--primary-tint);
+  box-shadow: 0 0 0 1px var(--primary) inset;
+  color: var(--primary-dark);
+  font-size: 12.5px;
+  line-height: 1.45;
+}
+
+.handsfree-notice-body {
+  min-width: 0;
+}
+
+.handsfree-notice-keys {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin: 0 4px;
+  vertical-align: middle;
+}
+
 .vocabulary-input {
   display: flex;
   flex-direction: column;
