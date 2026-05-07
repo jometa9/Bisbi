@@ -6,9 +6,6 @@ interface Props {
   bars?: number;
 }
 
-// Lightweight bar visualizer driven by the same RMS-based level the recording
-// pipeline already publishes. A short ring buffer per bar gives the eye
-// something to track even when the user's voice is fairly steady.
 export function Waveform({ level, active, bars = 28 }: Props) {
   const buffer = useRef<number[]>(Array(bars).fill(0));
   const containerRef = useRef<HTMLDivElement | null>(null);

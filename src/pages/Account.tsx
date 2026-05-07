@@ -49,7 +49,6 @@ export function Account() {
       const url = await window.bisbi.auth.checkout(billingPeriod);
       await window.bisbi.openExternal(url);
     } catch {
-      // silent — server not configured yet
     } finally {
       setIsCheckingOut(false);
     }

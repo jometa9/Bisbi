@@ -25,8 +25,6 @@ export function App() {
   const { isLoading: isAuthLoading, isAuthenticated, userInfo } = useAuth();
   const [tab, setTab] = useState<Tab>('home');
   const [settings, setSettings] = useState<AppSettings | null>(null);
-  // Read inside the recording-start handler without resubscribing on every
-  // settings change.
   const settingsRef = useRef<AppSettings | null>(null);
   const [recState, setRecState] = useState<RecordingState>('idle');
   const [appVersion, setAppVersion] = useState('');
@@ -67,7 +65,6 @@ export function App() {
     };
   }, []);
 
-  // Hide the limit banner as soon as the user becomes Pro.
   useEffect(() => {
     if (userInfo?.plan === 'pro') setShowLimitBanner(false);
   }, [userInfo?.plan]);
@@ -76,15 +73,6 @@ export function App() {
     if (isAuthenticated) setTab('home');
   }, [isAuthenticated]);
 
-  // The hotkey lives in the main process. When it fires, main asks the
-  // renderer to start/stop the mic capture via these IPC events. We
-  // serialize start/stop through a promise chain so a fast re-tap can't
-  // open a new mic handle before the previous one finishes flushing.
-  //
-  // Skip this handler entirely while the onboarding flow is mounted — its
-  // FirstDictation screen owns the recording events for the live preview
-  // and we don't want this fallback path to also fire submitAudio (which
-  // would route the clip through the paste/clipboard pipeline).
   const isOnboardingActive =
     !isAuthLoading && !isAuthenticated && onboarding !== null && !onboarding.completed;
   useEffect(() => {
@@ -373,9 +361,6 @@ function StatusBadge({ state }: { state: RecordingState }) {
   return <span className={`badge badge-${state}`}>{text}</span>;
 }
 
-// Splits a translated string by tokens like __CMD__ and replaces them with
-// React nodes. Lets translators move placeholders around freely while the
-// markup is owned by the component.
 function renderWithTokens(
   template: string,
   replacements: Record<string, React.ReactNode>

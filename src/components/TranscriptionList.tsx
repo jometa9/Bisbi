@@ -42,9 +42,7 @@ function TranscriptionItem({ row, language }: { row: TranscriptionRow; language:
       await navigator.clipboard.writeText(row.text);
       setCopied(true);
       window.setTimeout(() => setCopied(false), 1200);
-    } catch {
-      // Clipboard access can fail when the window isn't focused; ignore.
-    }
+    } catch {}
   };
 
   const handleDelete = () => {
@@ -174,10 +172,6 @@ function localeForLang(lang: UiLanguage): string {
   }
 }
 
-// Whisper.cpp returns plain text, but it does emit two cues we can lean on:
-//   - non-speech annotations like [Music], [Applause], (laughter)
-//   - emphasized phrases that come back fully capitalized
-// Render the first as muted italics and the second as bold, leave the rest as-is.
 const TRANSCRIPT_TOKEN_RE = /\[[^\]\n]+\]|\([^)\n]+\)|\b[\p{Lu}\p{N}][\p{Lu}\p{N}'’\-]{2,}\b/gu;
 
 function formatTranscript(text: string): ReactNode {

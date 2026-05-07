@@ -20,7 +20,7 @@ interface Props {
   onClearHistory: () => Promise<void>;
 }
 
-const PRECISION_OPTIONS: Precision[] = ['fast', 'balanced', 'high', 'max'];
+const PRECISION_OPTIONS: Precision[] = ['fast', 'accurate'];
 
 export function Settings({ settings, onChange, onReset, onClearHistory }: Props) {
   const { t, systemLocale } = useTranslation();

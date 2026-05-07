@@ -10,9 +10,6 @@ import {
 } from './db';
 import { getAuthToken } from './auth';
 
-// Backoff schedule (ms). After exhausting the schedule we keep using the last
-// value so the queue keeps trying without ever giving up — the user can be
-// offline for days and we still reconcile when they come back.
 const BACKOFF_MS = [
   30_000,
   60_000,
@@ -79,8 +76,6 @@ function applyServerResponse(res: UsageResponse): void {
   }
 }
 
-// Drains the queue best-effort. Stops at the first failure so we don't burn
-// retries while offline; the scheduler will pick it up later.
 export async function flushUsageQueue(): Promise<void> {
   if (flushing) return;
   flushing = true;
@@ -106,7 +101,6 @@ export async function flushUsageQueue(): Promise<void> {
           next,
           err instanceof Error ? err.message : String(err)
         );
-        // Stop on first failure: likely network/API down, don't hammer.
         break;
       }
     }
@@ -116,9 +110,6 @@ export async function flushUsageQueue(): Promise<void> {
   }
 }
 
-// Schedule a flush at the soonest pending row's next_attempt_at. If nothing is
-// pending we still poll every 5 minutes — cheap and lets us catch a queue that
-// was added off-cycle.
 function scheduleNextFlush(): void {
   if (flushTimer) {
     clearTimeout(flushTimer);
@@ -131,7 +122,6 @@ function scheduleNextFlush(): void {
     }, 5 * 60_000);
     return;
   }
-  // Wake at the earliest due time (we always check the head when flushing).
   const rows = peekDueUsage(Date.now() + 365 * 24 * 60 * 60_000, 1);
   if (rows.length === 0) return;
   const wait = Math.max(1000, rows[0].nextAttemptAt - Date.now());
@@ -141,8 +131,6 @@ function scheduleNextFlush(): void {
 }
 
 export function startUsageSync(): void {
-  // Kick an immediate flush at startup so any backlog from a previous session
-  // gets delivered before the user makes new transcriptions.
   void flushUsageQueue();
 }
 

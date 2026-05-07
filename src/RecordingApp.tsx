@@ -3,11 +3,9 @@ import type { RecordingState } from './types';
 
 const BARS = 12;
 const FALLOFF = 0.78;
-// Adaptive gain: the peak follows the recent loudness so bars look proportional
-// regardless of whether the user speaks softly or loudly.
-const MIN_PEAK = 0.04;     // noise floor — silence stays tiny, doesn't get amplified
-const PEAK_ATTACK = 0.6;   // how fast peak rises toward a louder value (0–1)
-const PEAK_DECAY = 0.992;  // per-tick decay (~30s half-life at 60ms tick)
+const MIN_PEAK = 0.04;
+const PEAK_ATTACK = 0.6;
+const PEAK_DECAY = 0.992;
 
 export function RecordingApp() {
   const [state, setState] = useState<RecordingState>('recording');
@@ -20,9 +18,6 @@ export function RecordingApp() {
   useEffect(() => {
     if (!window.bisbi) return;
     const offState = window.bisbi.onPillState((s) => {
-      // Reset on every 'recording' event, even if state didn't change —
-      // guards against a stale counter from a previous session or after
-      // the computer was suspended mid-recording.
       if (s === 'recording') {
         startedAtRef.current = Date.now();
         setSeconds(0);
@@ -65,15 +60,12 @@ export function RecordingApp() {
       return;
     }
     if (state === 'recording') {
-      // Compute elapsed from a timestamp instead of incrementing — survives
-      // setInterval throttling and OS sleep without drifting.
       const id = window.setInterval(() => {
         if (startedAtRef.current == null) return;
         setSeconds(Math.floor((Date.now() - startedAtRef.current) / 1000));
       }, 250);
       return () => window.clearInterval(id);
     }
-    // 'transcribing' freezes the counter at the value reached during recording
   }, [state]);
 
   return (

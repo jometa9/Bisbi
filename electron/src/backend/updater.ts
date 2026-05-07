@@ -1,8 +1,6 @@
 import { app } from 'electron';
 import { autoUpdater, type ProgressInfo, type UpdateInfo } from 'electron-updater';
 
-// Fired via `broadcast('updater:state', status)` whenever the state machine
-// advances. The renderer mirrors this into the UpdateBanner UI.
 export type UpdateStatus =
   | { kind: 'idle' }
   | { kind: 'checking' }
@@ -20,7 +18,7 @@ export type UpdateStatus =
   | { kind: 'error'; message: string };
 
 const INITIAL_CHECK_DELAY_MS = 15_000;
-const PERIODIC_CHECK_INTERVAL_MS = 6 * 60 * 60 * 1000; // 6 hours
+const PERIODIC_CHECK_INTERVAL_MS = 6 * 60 * 60 * 1000;
 const MANUAL_CHECK_DEBOUNCE_MS = 3_000;
 const NOT_AVAILABLE_CLEAR_MS = 5_000;
 
@@ -62,8 +60,6 @@ export function initUpdater(broadcast: Broadcaster): void {
   initialized = true;
   broadcaster = broadcast;
 
-  // electron-updater relies on the packaged `app-update.yml` produced by
-  // electron-builder's `publish` config; it is a no-op in dev mode.
   if (!app.isPackaged) {
     logUpdater('disabled: running unpackaged (dev mode)');
     return;
@@ -124,7 +120,6 @@ export function checkForUpdatesManual(): void {
 
 export function installUpdateAndRestart(): void {
   if (currentStatus.kind !== 'downloaded') return;
-  // Defer to next tick so the IPC reply returns before Electron tears down.
   setImmediate(() => {
     try {
       autoUpdater.quitAndInstall(false, true);

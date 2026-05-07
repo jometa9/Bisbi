@@ -136,8 +136,6 @@ export function getBackendStrings(lang: UiLanguage): BackendStrings {
 
 export function tBackend(
   lang: UiLanguage,
-  // Path through BackendStrings (e.g. 'tray.openSettings'). Kept loose because
-  // the surface is small and this is only used in the main process.
   key: string,
   vars?: Record<string, string | number>
 ): string {

@@ -32,11 +32,6 @@ function getActiveDisplay(): Electron.Display {
   }
 }
 
-// Always position relative to the display's physical bounds (not workArea),
-// so the bar sits at the screen bottom regardless of dock visibility, full-
-// screen apps, or which space is active. Combined with the 'screen-saver'
-// window level + NSPanel type, the bar floats above the dock when present.
-// This is the same approach Wispr Flow uses ("locked to bottom-center").
 function placeBottomCenter(w: BrowserWindow): void {
   const display = getActiveDisplay();
   const { x, y, width, height } = display.bounds;
@@ -51,11 +46,6 @@ function placeBottomCenter(w: BrowserWindow): void {
   if (changed) reassertWindowFlags(w);
 }
 
-// macOS in particular drops always-on-top + cross-workspace visibility when
-// the user enters fullscreen, switches Space, or another window briefly
-// claims the screen-saver level. Re-asserting the flags is cheap and idempotent,
-// so we do it both on display change and on every follow-loop tick where the
-// window appears not to be on screen.
 function reassertWindowFlags(w: BrowserWindow): void {
   try { w.setAlwaysOnTop(true, 'screen-saver'); } catch {}
   try { w.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true }); } catch {}
@@ -71,13 +61,6 @@ function startFollowingActiveDisplay(): void {
       placeBottomCenter(win);
       return;
     }
-    // Same display, but the window may still have lost its on-top status when
-    // the user changed Space, entered/left fullscreen, or another panel briefly
-    // took over the screen-saver level. Re-assert flags + re-show whenever the
-    // window reports as not visible. This is the case we were missing before:
-    // the old code only re-showed via showInactive() but never re-applied the
-    // workspace/always-on-top flags, so on macOS the bar could be alive but
-    // hidden behind the active fullscreen Space.
     if (!win.isVisible() || win.getOpacity() === 0) {
       reassertWindowFlags(win);
     }
@@ -90,16 +73,12 @@ function stopFollowingActiveDisplay(): void {
   followTimer = null;
 }
 
-// React to physical display configuration changes (resolution / scaling /
-// add / remove). Without this, plugging in a monitor while recording can
-// leave the pill positioned on coordinates that no longer exist.
 let screenListenersBound = false;
 function bindScreenListeners(): void {
   if (screenListenersBound) return;
   screenListenersBound = true;
   const reposition = (): void => {
     if (!win || win.isDestroyed()) return;
-    // Force a reposition by clearing the cached display id.
     lastDisplayId = null;
     placeBottomCenter(win);
   };
@@ -172,9 +151,6 @@ export function showRecordingWindow(state: RecordingState): void {
     bindScreenListeners();
   }
   placeBottomCenter(win);
-  // Always re-assert flags on show — even when the window survived from a
-  // previous recording, the OS may have dropped them in the interim (Space
-  // change, fullscreen toggle).
   reassertWindowFlags(win);
   if (!win.isVisible()) {
     try { win.setOpacity(0); } catch {}
@@ -199,7 +175,5 @@ export function setLevel(level: number): void {
 export function hideRecordingWindow(): void {
   stopFollowingActiveDisplay();
   if (!win || win.isDestroyed()) return;
-  // Don't actually hide() — keep the window alive at opacity 0 so the next
-  // show is a pure opacity fade with no native macOS show animation.
   fade(0);
 }

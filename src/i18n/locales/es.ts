@@ -193,19 +193,11 @@ export const es: Translations = {
         'A más precisión, mejor resultado pero más demora y consumo. Cambialo si notás errores.',
       fast: {
         label: 'Rápida',
-        hint: 'Menos esfuerzo, transcripción casi instantánea. Ideal si hablás claro y en un solo idioma.',
+        hint: 'Transcripción casi instantánea con un modelo más liviano. Ideal si hablás claro y en un solo idioma.',
       },
-      balanced: {
-        label: 'Equilibrada (recomendada)',
-        hint: 'Buen balance entre velocidad y calidad para uso diario.',
-      },
-      high: {
-        label: 'Alta',
-        hint: 'Mayor esfuerzo y demora, pero mejor con mezcla de idiomas, términos técnicos o audios ruidosos.',
-      },
-      max: {
-        label: 'Máxima',
-        hint: 'La opción más precisa. Bastante más lenta y pesada, ideal para audios difíciles, varias personas hablando o contenido crítico.',
+      accurate: {
+        label: 'Precisa (recomendada)',
+        hint: 'La opción más precisa. Más lenta y pesada, pero mejor con mezcla de idiomas, términos técnicos, audios ruidosos o varias personas hablando.',
       },
     },
     muteAudio: {

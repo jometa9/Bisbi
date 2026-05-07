@@ -122,9 +122,7 @@ export const en: {
       title: string;
       description: string;
       fast: { label: string; hint: string };
-      balanced: { label: string; hint: string };
-      high: { label: string; hint: string };
-      max: { label: string; hint: string };
+      accurate: { label: string; hint: string };
     };
     muteAudio: {
       title: string;
@@ -408,19 +406,11 @@ export const en: {
         'Higher accuracy gives better results but takes more time and resources. Change it if you notice errors.',
       fast: {
         label: 'Fast',
-        hint: 'Less effort, near-instant transcription. Ideal if you speak clearly in a single language.',
+        hint: 'Near-instant transcription with a lighter model. Ideal if you speak clearly in a single language.',
       },
-      balanced: {
-        label: 'Balanced (recommended)',
-        hint: 'Good trade-off between speed and quality for everyday use.',
-      },
-      high: {
-        label: 'High',
-        hint: 'More effort and slower, but better with mixed languages, technical terms, or noisy audio.',
-      },
-      max: {
-        label: 'Maximum',
-        hint: 'The most accurate option. Significantly slower and heavier, ideal for difficult audio, multiple speakers, or critical content.',
+      accurate: {
+        label: 'Accurate (recommended)',
+        hint: 'The most precise option. Slower and heavier, but best with mixed languages, technical terms, noisy audio, or multiple speakers.',
       },
     },
     muteAudio: {

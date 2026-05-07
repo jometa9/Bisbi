@@ -3,8 +3,6 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 export interface SelectOption<T extends string> {
   value: T;
   label: string;
-  // Optional extra haystack used by the search input (e.g. native names,
-  // synonyms). Not displayed.
   searchTerms?: string;
 }
 
@@ -13,8 +11,6 @@ interface Props<T extends string> {
   options: SelectOption<T>[];
   onChange: (next: T) => void;
   ariaLabel?: string;
-  // When set, shows a search input at the top of the dropdown that filters
-  // options. The string is used as the input's placeholder.
   searchPlaceholder?: string;
 }
 
@@ -62,8 +58,6 @@ export function Select<T extends string>({
     };
   }, [open]);
 
-  // Reset the search query and active index whenever the menu opens, so the
-  // user starts fresh and the selected option is highlighted.
   useEffect(() => {
     if (!open) return;
     setQuery('');
@@ -71,7 +65,6 @@ export function Select<T extends string>({
     setActiveIndex(Math.max(0, idx));
   }, [open]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Keep activeIndex in range as the filtered list shrinks/grows.
   useEffect(() => {
     if (activeIndex >= filteredOptions.length) {
       setActiveIndex(filteredOptions.length === 0 ? 0 : filteredOptions.length - 1);
@@ -80,9 +73,6 @@ export function Select<T extends string>({
 
   useEffect(() => {
     if (!open) return;
-    // Only scroll inside the listbox itself — never on ancestors. `scrollIntoView`
-    // would bubble up and reposition the whole settings page when the menu opens,
-    // jerking the user away from where they were looking.
     const list = listRef.current;
     const el = list?.children[activeIndex] as HTMLElement | undefined;
     if (!list || !el) return;
@@ -97,8 +87,6 @@ export function Select<T extends string>({
 
   useEffect(() => {
     if (!open) return;
-    // `preventScroll` keeps the page where the user left it — without it the
-    // browser scrolls the listbox into view, jumping the Settings panel.
     if (searchPlaceholder) {
       searchRef.current?.focus({ preventScroll: true });
     } else {
@@ -138,8 +126,6 @@ export function Select<T extends string>({
       e.preventDefault();
       commitActive();
     } else if (e.key === ' ' && !searchPlaceholder) {
-      // Space selects when there's no search input; with a search input,
-      // space must remain available to type into.
       e.preventDefault();
       commitActive();
     }
@@ -191,8 +177,6 @@ export function Select<T extends string>({
           >
             {filteredOptions.length === 0 ? (
               <li className="select-empty" role="presentation">
-                {/* Intentionally left empty so screen readers announce "no
-                    results" only via aria-live on the list, not as an option. */}
                 —
               </li>
             ) : (

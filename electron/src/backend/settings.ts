@@ -12,7 +12,7 @@ const DEFAULT_SETTINGS: AppSettings = {
   language: 'auto',
   uiLanguage: 'system',
   saveHistory: true,
-  precision: 'balanced',
+  precision: 'accurate',
   vocabulary: '',
   microphoneId: null,
   muteSystemAudioWhileRecording: false,
@@ -35,9 +35,19 @@ export function getSettings(): AppSettings {
   } catch {
     cached = { ...DEFAULT_SETTINGS };
   }
-  // Migrate legacy "Fn" hotkey: it's no longer supported, fall back to default.
+  let migrated = false;
   if (cached.hotkey === 'Fn') {
     cached = { ...cached, hotkey: BUILD_CONFIG.DEFAULT_HOTKEY };
+    migrated = true;
+  }
+  // Older builds shipped 'balanced' / 'high' / 'max' precisions; collapse any
+  // value other than 'fast' onto 'accurate' so existing users keep getting a
+  // quality-leaning transcription.
+  if (cached.precision !== 'fast' && cached.precision !== 'accurate') {
+    cached = { ...cached, precision: 'accurate' };
+    migrated = true;
+  }
+  if (migrated) {
     fs.writeFileSync(settingsPath(), JSON.stringify(cached, null, 2), 'utf8');
   }
   return cached;

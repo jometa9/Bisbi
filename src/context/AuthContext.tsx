@@ -72,8 +72,6 @@ export function AuthProvider({ children }: ProviderProps) {
     }
   }, []);
 
-  // Initial bootstrap: read the persisted session and any deep link the OS
-  // delivered before the renderer was ready.
   useEffect(() => {
     if (!window.bisbi) {
       setIsLoading(false);
@@ -97,7 +95,6 @@ export function AuthProvider({ children }: ProviderProps) {
     };
   }, [handleToken]);
 
-  // Live subscriptions: backend session changes and deep links while running.
   useEffect(() => {
     if (!window.bisbi) return;
     const offChange = window.bisbi.auth.onChange((s) => setSession(s));
@@ -118,8 +115,6 @@ export function AuthProvider({ children }: ProviderProps) {
     };
   }, [handleToken]);
 
-  // Auto-refresh on window focus so the plan updates after the user manages
-  // their subscription in the browser and comes back to the app.
   useEffect(() => {
     const onFocus = () => {
       if (!window.bisbi || !session.isAuthenticated) return;

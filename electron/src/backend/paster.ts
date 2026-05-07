@@ -4,7 +4,6 @@ import { spawn } from 'child_process';
 export async function deliverText(text: string): Promise<void> {
   if (!text) return;
   clipboard.writeText(text);
-  // Small delay so the OS clipboard is ready before the synthetic paste fires.
   await sleep(60);
   await simulatePaste();
 }
@@ -28,14 +27,11 @@ function pasteMac(): Promise<void> {
 }
 
 function pasteWin(): Promise<void> {
-  // PowerShell SendKeys: ^v = Ctrl+V. Avoid -Command parsing surprises by
-  // passing the script via -EncodedCommand-friendly inline text.
   const script = "Add-Type -AssemblyName System.Windows.Forms; [System.Windows.Forms.SendKeys]::SendWait('^v')";
   return run('powershell.exe', ['-NoProfile', '-NonInteractive', '-Command', script]);
 }
 
 function pasteLinux(): Promise<void> {
-  // Try xdotool first (X11), fall back to wtype (Wayland) silently.
   return run('xdotool', ['key', '--clearmodifiers', 'ctrl+v']).catch(() =>
     run('wtype', ['-M', 'ctrl', 'v'])
   );

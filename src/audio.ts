@@ -1,9 +1,3 @@
-// Mic capture → 16 kHz mono PCM 16-bit. Whisper expects exactly that.
-//
-// We use AudioContext + ScriptProcessor (deprecated but universally supported
-// inside Electron's bundled Chromium) to downsample on the fly so the WAV we
-// hand to whisper-cli is small and the inference is fast.
-
 const TARGET_SAMPLE_RATE = 16000;
 const CHANNELS = 1;
 
@@ -14,8 +8,6 @@ export interface RecordingHandle {
 
 export interface StartRecordingOptions {
   onLevel?: (level: number) => void;
-  // The user's preferred input device. If null/undefined or the device is no
-  // longer plugged in, we silently fall back to the OS default mic.
   deviceId?: string | null;
 }
 
@@ -124,9 +116,6 @@ export interface MicrophoneDevice {
   label: string;
 }
 
-// Returns just the audio inputs. Labels are empty strings until the user has
-// granted mic permission at least once, so the Settings UI may need to prompt
-// for access before showing real names.
 export async function listMicrophones(): Promise<MicrophoneDevice[]> {
   if (!navigator.mediaDevices?.enumerateDevices) return [];
   try {

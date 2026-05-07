@@ -3,7 +3,7 @@ export type RecordingState = 'idle' | 'recording' | 'transcribing';
 export type UiLanguage = 'en' | 'es' | 'zh' | 'hi' | 'ar';
 export type UiLanguageSetting = UiLanguage | 'system';
 
-export type Precision = 'fast' | 'balanced' | 'high' | 'max';
+export type Precision = 'fast' | 'accurate';
 
 export interface AppSettings {
   hotkey: string;
@@ -12,12 +12,7 @@ export interface AppSettings {
   uiLanguage: UiLanguageSetting;
   saveHistory: boolean;
   precision: Precision;
-  // Free-form text used as the whisper-cli `--prompt`. Helps the model
-  // recognise proper names, brand terms, jargon. Empty ⇒ no prompt.
   vocabulary: string;
-  // null means "use the operating-system default microphone". A non-null id is
-  // remembered even if the device is currently unplugged, so we automatically
-  // re-pick it the next time it shows up.
   microphoneId: string | null;
   muteSystemAudioWhileRecording: boolean;
 }

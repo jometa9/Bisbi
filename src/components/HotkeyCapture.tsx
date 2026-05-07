@@ -5,10 +5,6 @@ interface Props {
   onCancel: () => void;
 }
 
-// Captures a single key combo from the renderer. Returns the accelerator in
-// the same string format the backend's `parseAccelerator` understands
-// (Modifier+Modifier+Key). Bare modifier presses (e.g. just Right Cmd) are
-// recognised as standalone accelerators.
 export function HotkeyCapture({ onCapture, onCancel }: Props) {
   const [pressed, setPressed] = useState<string[]>([]);
 
@@ -23,8 +19,6 @@ export function HotkeyCapture({ onCapture, onCancel }: Props) {
       const accel = buildAccelerator(e);
       if (!accel) return;
       setPressed(accel.split('+'));
-      // Bare modifier? Capture immediately on keydown — the keyup of a bare
-      // modifier can produce inconsistent metaKey/ctrlKey flags.
       const isBareModifier =
         accel.endsWith('Right') ||
         accel.endsWith('Left') ||
@@ -39,8 +33,6 @@ export function HotkeyCapture({ onCapture, onCancel }: Props) {
       e.stopPropagation();
       const accel = buildAccelerator(e);
       if (!accel) return;
-      // Combo with a non-modifier key: commit on keyup so we capture the full
-      // combination the user actually held.
       const parts = accel.split('+');
       const last = parts[parts.length - 1] ?? '';
       const isBareModifier =
@@ -77,8 +69,6 @@ function buildAccelerator(e: KeyboardEvent): string | null {
   if (e.shiftKey) parts.push('Shift');
   if (e.metaKey) parts.push('Meta');
 
-  // Detect bare modifier presses by looking at e.code, since e.key is
-  // 'Control'/'Meta'/etc. with no left/right info.
   const code = e.code;
   const bareMap: Record<string, string> = {
     ControlLeft: 'CtrlLeft',
@@ -95,13 +85,11 @@ function buildAccelerator(e: KeyboardEvent): string | null {
   };
 
   if (bareMap[code]) {
-    // If a modifier is the *only* key being pressed, return it bare.
     const modifierCount = (e.ctrlKey ? 1 : 0) + (e.altKey ? 1 : 0) + (e.shiftKey ? 1 : 0) + (e.metaKey ? 1 : 0);
     if (modifierCount <= 1 && code !== 'CapsLock') return bareMap[code]!;
     if (code === 'CapsLock' && modifierCount === 0) return 'CapsLock';
   }
 
-  // Non-modifier key: pair with whatever modifiers were active.
   const key = normalizeKey(e);
   if (key && parts.length > 0) {
     return [...parts, key].join('+');

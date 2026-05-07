@@ -24,8 +24,6 @@ export function isRtl(lang: UiLanguage): boolean {
   return RTL_LANGUAGES.has(lang);
 }
 
-// Map an arbitrary BCP-47 / POSIX locale ("es-AR", "zh_CN.UTF-8") to one of
-// our supported UI languages. Falls back to 'en' if there is no match.
 export function resolveUiLanguage(
   setting: UiLanguageSetting,
   systemLocale: string | null | undefined
@@ -98,8 +96,6 @@ export function I18nProvider({ setting, systemLocale, children }: I18nProviderPr
   );
   const dir: 'ltr' | 'rtl' = isRtl(language) ? 'rtl' : 'ltr';
 
-  // Sync the document so global CSS hooks (like [dir="rtl"]) and screen
-  // readers pick up the active language.
   useEffect(() => {
     document.documentElement.lang = language;
     document.documentElement.dir = dir;

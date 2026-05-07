@@ -14,9 +14,6 @@ let currentLang: UiLanguage = 'en';
 type IconColor = 'black' | 'white';
 
 function pickIconColor(): IconColor {
-  // On macOS we always use the black variant and let the OS render it as a
-  // template image — that way the icon picks up the actual menubar tint
-  // (which depends on the wallpaper, not the system Light/Dark setting).
   if (process.platform === 'darwin') return 'black';
   return nativeTheme.shouldUseDarkColors ? 'white' : 'black';
 }
@@ -44,8 +41,6 @@ function buildIcon(state: RecordingState): Electron.NativeImage {
   }
   const resized = nativeImage.createFromPath(p).resize({ width: 18, height: 18 });
   if (process.platform === 'darwin') {
-    // Must set the template flag AFTER resize — resize() returns a new
-    // NativeImage and does not carry the flag over.
     resized.setTemplateImage(true);
   }
   return resized;
@@ -106,7 +101,6 @@ export function getRecordingState(): RecordingState {
 export function rebuildTrayLabels(lang: UiLanguage): void {
   currentLang = lang;
   if (!tray) return;
-  // Refresh tooltip for the current state and rebuild the context menu.
   setRecordingState(lastState);
   rebuildMenu();
 }

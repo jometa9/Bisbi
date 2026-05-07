@@ -8,7 +8,7 @@ import { BUILD_CONFIG, WHISPER_MODELS } from '../buildConfig';
 import type { Precision } from './types';
 
 export interface TranscribeOptions {
-  language: string; // 'auto' or ISO code (e.g. 'es', 'en')
+  language: string;
   precision: Precision;
   threads?: number;
   vocabulary?: string;
@@ -40,8 +40,6 @@ function whisperBinaryName(): string {
 }
 
 function resourceRoot(): string {
-  // In production, electron-builder copies `resources/whisper` to
-  // `process.resourcesPath/whisper`. In dev we read from the repo root.
   if (app.isPackaged) {
     return path.join(process.resourcesPath, 'whisper');
   }
@@ -83,7 +81,7 @@ function writeWavFile(pcm: Buffer, sampleRate: number, channels: number): string
   header.write('WAVE', 8);
   header.write('fmt ', 12);
   header.writeUInt32LE(16, 16);
-  header.writeUInt16LE(1, 20); // PCM format
+  header.writeUInt16LE(1, 20);
   header.writeUInt16LE(channels, 22);
   header.writeUInt32LE(sampleRate, 24);
   header.writeUInt32LE(byteRate, 28);
@@ -116,8 +114,6 @@ export async function transcribePcm(
 
   const wavPath = writeWavFile(pcm, sampleRate, channels);
   const startedAt = Date.now();
-  // 16-bit PCM ⇒ 2 bytes per sample per channel. This is the *spoken* duration
-  // of the clip, distinct from durationMs below which times the whisper run.
   const bytesPerFrame = 2 * Math.max(1, channels);
   const audioDurationMs = Math.round((pcm.length / (sampleRate * bytesPerFrame)) * 1000);
 
@@ -127,16 +123,16 @@ export async function transcribePcm(
       '-f', wavPath,
       '-l', opts.language || 'auto',
       '-otxt',
-      '-nt', // no timestamps in the txt output
+      '-nt',
       '-t', String(opts.threads ?? Math.max(2, Math.floor(os.cpus().length / 2))),
     ];
     args.push('--temperature', '0.0');
     args.push('--no-speech-thold', '0.6');
-    // Always suppress non-speech tokens — together with the higher no-speech
-    // threshold and the absence of a default prompt, this is what keeps
-    // whisper from hallucinating "gracias" / "thanks for watching" on quiet
-    // or very short clips.
     args.push('--suppress-nst');
+    if (opts.precision === 'accurate') {
+      args.push('-bs', '5');
+      args.push('-fa');
+    }
     const prompt = opts.vocabulary?.trim();
     if (prompt) {
       args.push('--prompt', prompt);
@@ -171,9 +167,6 @@ function runWhisper(bin: string, args: string[], wavPath: string): Promise<strin
         return;
       }
       const txtPath = `${wavPath}.txt`;
-      // whisper-cli skips writing the .txt file when no speech is detected
-      // (e.g. the user tapped the hotkey without speaking). Treat that as
-      // an empty transcript instead of crashing.
       if (!fs.existsSync(txtPath)) {
         resolve('');
         return;

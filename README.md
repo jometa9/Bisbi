@@ -50,9 +50,7 @@ App de escritorio para dictado por voz, local-first. Apretás un atajo, hablás,
 ├── build-resources/          # íconos (icon.icns, icon.ico, icon.png)
 └── resources/whisper/        # ⚠️ NO en git — ver más abajo
     ├── bsb-001.dat           # ggml-base-q5_1        (~57 MB,  precisión "fast")
-    ├── bsb-002.dat           # ggml-small-q5_1       (~181 MB, precisión "balanced")
-    ├── bsb-003.dat           # ggml-large-v3-turbo-q5_0 (~547 MB, precisión "high")
-    ├── bsb-004.dat           # ggml-large-v3-q5_0    (~1.0 GB, precisión "max")
+    ├── bsb-004.dat           # ggml-large-v3-q5_0    (~1.0 GB, precisión "accurate", default)
     ├── darwin-arm64/whisper-cli
     ├── darwin-x64/whisper-cli
     ├── win32-x64/whisper-cli.exe
@@ -69,16 +67,14 @@ npm install
 
 ### 2. Descargar los modelos de Whisper
 
-Los 4 modelos se descargan de Hugging Face y se guardan **renombrados** a `bsb-00*.dat` (los nombres en disco están desacoplados del modelo upstream para que el bundle no los revele). El mapeo está en [electron/src/buildConfig.ts](electron/src/buildConfig.ts).
+Los 2 modelos se descargan de Hugging Face y se guardan **renombrados** a `bsb-00*.dat` (los nombres en disco están desacoplados del modelo upstream para que el bundle no los revele). El mapeo está en [electron/src/buildConfig.ts](electron/src/buildConfig.ts).
 
 ```bash
 mkdir -p resources/whisper
 BASE=https://huggingface.co/ggerganov/whisper.cpp/resolve/main
 
-curl -L $BASE/ggml-base-q5_1.bin            -o resources/whisper/bsb-001.dat   # ~57 MB
-curl -L $BASE/ggml-small-q5_1.bin           -o resources/whisper/bsb-002.dat   # ~181 MB
-curl -L $BASE/ggml-large-v3-turbo-q5_0.bin  -o resources/whisper/bsb-003.dat   # ~547 MB
-curl -L $BASE/ggml-large-v3-q5_0.bin        -o resources/whisper/bsb-004.dat   # ~1.0 GB
+curl -L $BASE/ggml-base-q5_1.bin            -o resources/whisper/bsb-001.dat   # ~57 MB  (fast)
+curl -L $BASE/ggml-large-v3-q5_0.bin        -o resources/whisper/bsb-004.dat   # ~1.0 GB (accurate, default)
 ```
 
 ### 3. Compilar los binarios de whisper.cpp

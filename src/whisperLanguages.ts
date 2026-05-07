@@ -1,10 +1,3 @@
-// All 99 languages supported by OpenAI Whisper, sourced from
-// https://github.com/openai/whisper/blob/main/whisper/tokenizer.py
-// Each entry stores the ISO code, the English name, and the endonym
-// (autoglot — the language's own name in its own script). The endonym
-// keeps the picker readable for native speakers regardless of the UI
-// language; the English name keeps it searchable for everyone else.
-
 export interface WhisperLanguage {
   code: string;
   english: string;
