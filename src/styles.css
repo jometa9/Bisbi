@@ -1575,6 +1575,15 @@ html.recording-window #root {
   margin-bottom: 4px;
 }
 
+.login-brand-top {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 60px;
+  letter-spacing: -0.03em;
+  color: var(--accent);
+  line-height: 1;
+}
+
 .login-title {
   margin: 0;
   font-family: var(--font-display);
@@ -2140,6 +2149,10 @@ html.recording-window #root {
 
 .onb-welcome {
   gap: 24px;
+}
+
+.onb-welcome .onb-cta {
+  min-width: 240px;
 }
 
 .onb-welcome-owl {

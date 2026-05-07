@@ -30,6 +30,7 @@ export function Login({ onStartTour }: Props) {
       />
 
       <div className="login-card">
+        <div className="login-brand-top">{t('app.brand')}</div>
         <h1 className="login-title">{t('auth.welcome')}</h1>
         <p className="login-tagline">{t('auth.tagline')}</p>
 

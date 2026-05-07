@@ -64,6 +64,7 @@ export function FirstDictation({
             deviceId: microphoneId,
             onLevel: (lv) => {
               if (lv > 0.06) sawAudioRef.current = true;
+              window.bisbi.sendRecordingLevel(lv);
             },
           });
         } catch (err) {
