@@ -111,16 +111,18 @@ export function Permissions({ platform, onContinue }: Props) {
         )}
       </div>
 
-      <button
-        type="button"
-        className="btn-primary onb-cta"
-        onClick={allGranted ? onContinue : requestAll}
-        disabled={working}
-      >
-        {allGranted
-          ? t('onboarding.permissions.continue')
-          : t('onboarding.permissions.grant')}
-      </button>
+      <div className="onb-nav onb-nav--single">
+        <button
+          type="button"
+          className="btn-primary onb-cta"
+          onClick={allGranted ? onContinue : requestAll}
+          disabled={working}
+        >
+          {allGranted
+            ? t('onboarding.permissions.continue')
+            : t('onboarding.permissions.grant')}
+        </button>
+      </div>
     </div>
   );
 }

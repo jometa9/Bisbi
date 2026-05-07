@@ -308,7 +308,7 @@ export const zh: Translations = {
       title: 'Bisbi 需要两项权限。',
       subtitle: '没有这些权限就无法工作。',
       grant: '授予权限',
-      continue: '继续',
+      continue: '下一步',
       openSettings: '打开系统设置',
       microphone: {
         title: '麦克风',
@@ -327,7 +327,7 @@ export const zh: Translations = {
       recommended: '推荐',
       custom: '自定义…',
       pickOne: '请选择一个快捷键',
-      confirm: '确认',
+      confirm: '下一步',
       conflictInUse: '该组合已被占用，请尝试其它。',
       conflictInvalid: '该组合不受支持，请尝试其它。',
     },
@@ -342,7 +342,6 @@ export const zh: Translations = {
       failedError: '无法转写，请再试一次。',
       retry: '再试一次',
       continue: '继续',
-      skip: '稍后再配置',
     },
   },
 };

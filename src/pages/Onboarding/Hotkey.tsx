@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from '../../i18n';
 import { HotkeyKeys } from '../../components/HotkeyKeys';
-import { HotkeyCapture } from '../../components/HotkeyCapture';
 import { formatHotkeyAccelerator, useHotkeyLabels, type KeyPlatform } from '../../lib/hotkey';
 
 interface Props {
@@ -41,38 +40,17 @@ export function Hotkey({ platform, initialHotkey, onConfirm }: Props) {
   const [selected, setSelected] = useState<string>(
     initialMatch?.accelerator ?? presets[0]!.accelerator
   );
-  const [customAccel, setCustomAccel] = useState<string | null>(
-    initialMatch ? null : initialHotkey || null
-  );
-  const [capturing, setCapturing] = useState(false);
   const [conflict, setConflict] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  const isCustomActive = selected === '__custom__';
-  const finalAccelerator = isCustomActive ? (customAccel ?? '') : selected;
+  const finalAccelerator = selected;
 
   useEffect(() => {
     setConflict(null);
-  }, [selected, customAccel]);
+  }, [selected]);
 
   const onPickPreset = (accelerator: string) => {
     setSelected(accelerator);
-    setCapturing(false);
-  };
-
-  const onPickCustom = () => {
-    setSelected('__custom__');
-    setCapturing(true);
-  };
-
-  const onCaptureDone = async (accelerator: string) => {
-    setCapturing(false);
-    setCustomAccel(accelerator);
-    setSelected('__custom__');
-    const result = await window.bisbi.onboarding.validateHotkey(accelerator);
-    if (!result.ok) {
-      setConflict(result.reason ?? 'invalid');
-    }
   };
 
   const onSubmit = async () => {
@@ -97,15 +75,7 @@ export function Hotkey({ platform, initialHotkey, onConfirm }: Props) {
       <p className="onb-subtitle">{t('onboarding.hotkey.subtitle')}</p>
 
       <div className="onb-hotkey-preview">
-        {capturing ? (
-          <HotkeyCapture
-            onCapture={onCaptureDone}
-            onCancel={() => {
-              setCapturing(false);
-              if (!customAccel) setSelected(presets[0]!.accelerator);
-            }}
-          />
-        ) : finalAccelerator ? (
+        {finalAccelerator ? (
           <span className="onb-hotkey-preview-keys">
             <HotkeyKeys accel={finalAccelerator} platform={keyPlatform} visual="lit" size="md" />
           </span>
@@ -116,7 +86,7 @@ export function Hotkey({ platform, initialHotkey, onConfirm }: Props) {
         )}
       </div>
 
-      {finalAccelerator && !capturing && (
+      {finalAccelerator && (
         <p className="onb-hotkey-readout">
           {formatHotkeyAccelerator(finalAccelerator, keyPlatform, hotkeyLabels)}
         </p>

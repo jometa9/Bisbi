@@ -235,7 +235,6 @@ export const en: {
       failedError: string;
       retry: string;
       continue: string;
-      skip: string;
     };
   };
 } = {
@@ -547,13 +546,13 @@ export const en: {
       title: 'Welcome to Bisbi.',
       subtitle:
         'The fastest way to write is not to type. Let me show you in under 2 minutes.',
-      cta: 'Get started',
+      cta: 'Start',
     },
     permissions: {
       title: 'Bisbi needs two permissions.',
       subtitle: "Without these, it can't work.",
       grant: 'Grant permissions',
-      continue: 'Continue',
+      continue: 'Next',
       openSettings: 'Open System Settings',
       microphone: {
         title: 'Microphone',
@@ -574,7 +573,7 @@ export const en: {
       recommended: 'Recommended',
       custom: 'Custom…',
       pickOne: 'Pick a shortcut',
-      confirm: 'Confirm',
+      confirm: 'Next',
       conflictInUse: 'That combination is already in use. Try another.',
       conflictInvalid: "That combination isn't supported. Try another.",
     },
@@ -590,7 +589,6 @@ export const en: {
       failedError: "We couldn't transcribe. Try again.",
       retry: 'Try again',
       continue: 'Continue',
-      skip: 'Skip and configure later',
     },
   },
 };

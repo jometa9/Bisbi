@@ -316,7 +316,7 @@ export const es: Translations = {
       title: 'Bisbi necesita dos permisos.',
       subtitle: 'Sin estos, no puede funcionar.',
       grant: 'Otorgar permisos',
-      continue: 'Continuar',
+      continue: 'Siguiente',
       openSettings: 'Abrir Ajustes del Sistema',
       microphone: {
         title: 'Micrófono',
@@ -337,7 +337,7 @@ export const es: Translations = {
       recommended: 'Recomendada',
       custom: 'Personalizar…',
       pickOne: 'Elegí un atajo',
-      confirm: 'Confirmar',
+      confirm: 'Siguiente',
       conflictInUse: 'Esa combinación ya está en uso. Probá otra.',
       conflictInvalid: 'Esa combinación no está soportada. Probá otra.',
     },
@@ -353,7 +353,6 @@ export const es: Translations = {
       failedError: 'No pudimos transcribir. Probá de nuevo.',
       retry: 'Probar de nuevo',
       continue: 'Continuar',
-      skip: 'Saltear y configurar después',
     },
   },
 };

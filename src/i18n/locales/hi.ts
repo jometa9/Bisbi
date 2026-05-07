@@ -313,7 +313,7 @@ export const hi: Translations = {
       title: 'Bisbi को दो अनुमतियाँ चाहिए।',
       subtitle: 'इनके बिना यह काम नहीं कर सकता।',
       grant: 'अनुमति दें',
-      continue: 'जारी रखें',
+      continue: 'अगला',
       openSettings: 'सिस्टम सेटिंग्स खोलें',
       microphone: {
         title: 'माइक्रोफ़ोन',
@@ -334,7 +334,7 @@ export const hi: Translations = {
       recommended: 'अनुशंसित',
       custom: 'कस्टम…',
       pickOne: 'कोई शॉर्टकट चुनें',
-      confirm: 'पुष्टि करें',
+      confirm: 'अगला',
       conflictInUse: 'यह संयोजन पहले से उपयोग में है। दूसरा आज़माएँ।',
       conflictInvalid: 'यह संयोजन समर्थित नहीं है। दूसरा आज़माएँ।',
     },
@@ -350,7 +350,6 @@ export const hi: Translations = {
       failedError: 'ट्रांसक्राइब नहीं हो सका। फिर से कोशिश करें।',
       retry: 'फिर से कोशिश करें',
       continue: 'जारी रखें',
-      skip: 'छोड़ें और बाद में कॉन्फ़िगर करें',
     },
   },
 };

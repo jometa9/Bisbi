@@ -307,13 +307,13 @@ export const ar: Translations = {
       title: 'مرحبًا بك في Bisbi.',
       subtitle:
         'أسرع طريقة للكتابة هي ألّا تكتب. سأريك ذلك في أقل من دقيقتين.',
-      cta: 'لنبدأ',
+      cta: 'ابدأ',
     },
     permissions: {
       title: 'يحتاج Bisbi إلى صلاحيتين.',
       subtitle: 'لا يمكنه العمل بدونهما.',
       grant: 'منح الصلاحيات',
-      continue: 'متابعة',
+      continue: 'التالي',
       openSettings: 'فتح إعدادات النظام',
       microphone: {
         title: 'الميكروفون',
@@ -334,7 +334,7 @@ export const ar: Translations = {
       recommended: 'موصى به',
       custom: 'تخصيص…',
       pickOne: 'اختر اختصارًا',
-      confirm: 'تأكيد',
+      confirm: 'التالي',
       conflictInUse: 'هذا التركيب مستخدم بالفعل. جرّب آخر.',
       conflictInvalid: 'هذا التركيب غير مدعوم. جرّب آخر.',
     },
@@ -349,7 +349,6 @@ export const ar: Translations = {
       failedError: 'تعذّر التفريغ. حاول مرة أخرى.',
       retry: 'حاول مجددًا',
       continue: 'متابعة',
-      skip: 'تخطّي والإعداد لاحقًا',
     },
   },
 };

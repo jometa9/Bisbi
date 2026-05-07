@@ -1525,7 +1525,7 @@ html.recording-window #root {
   align-items: center;
   justify-content: center;
   height: 100vh;
-  background: var(--bg-soft);
+  background: var(--bg);
   padding: 32px;
   overflow: hidden;
 }
@@ -1966,7 +1966,7 @@ html.recording-window #root {
   flex-direction: column;
   align-items: center;
   height: 100vh;
-  background: var(--bg-soft);
+  background: var(--bg);
   padding: 56px 32px 32px;
   overflow: hidden;
 }
@@ -1976,6 +1976,7 @@ html.recording-window #root {
   position: absolute;
   top: 18px;
   inset-inline-end: 22px;
+  z-index: 1;
   font-size: 11px;
   font-weight: 500;
   letter-spacing: 0.08em;
@@ -1986,6 +1987,8 @@ html.recording-window #root {
 
 .onb-footer {
   -webkit-app-region: no-drag;
+  position: relative;
+  z-index: 1;
   width: 100%;
   display: flex;
   justify-content: center;
@@ -2012,6 +2015,8 @@ html.recording-window #root {
 
 .onb-content {
   -webkit-app-region: no-drag;
+  position: relative;
+  z-index: 1;
   width: 100%;
   max-width: 520px;
   display: flex;
@@ -2091,11 +2096,14 @@ html.recording-window #root {
 }
 
 .onb-nav.onb-nav--single {
-  justify-content: center;
+  justify-content: flex-end;
 }
 
 .onb-back {
   flex: 0 0 auto;
+  min-width: 200px;
+  padding: 12px 22px;
+  font-size: 14px;
 }
 
 .onb-error {
@@ -2150,7 +2158,7 @@ html.recording-window #root {
   padding: 14px 16px;
   border-radius: var(--radius);
   border: 1px solid var(--border);
-  background: var(--white);
+  background: var(--bg-soft);
   text-align: left;
   transition: border-color 160ms ease, background 160ms ease;
 }
@@ -2239,7 +2247,7 @@ html.recording-window #root {
   justify-content: center;
   padding: 14px 18px;
   border-radius: 14px;
-  background: var(--white);
+  background: var(--bg-soft);
   border: 1px solid var(--primary-light);
   box-shadow: 0 0 0 4px var(--primary-tint);
   margin-top: 8px;
@@ -2282,7 +2290,7 @@ html.recording-window #root {
   padding: 12px 14px;
   border-radius: var(--radius);
   border: 1px solid var(--border);
-  background: var(--white);
+  background: var(--bg-soft);
   cursor: pointer;
   text-align: left;
   font: inherit;

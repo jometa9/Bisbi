@@ -146,7 +146,7 @@ export function FirstDictation({
       ? t('home.watermark.transcribing')
       : state === 'success'
       ? transcript
-      : '';
+      : t('onboarding.dictation.samplePhrase');
   const showWatermark = watermarkText.length > 0;
 
   return (
@@ -195,25 +195,17 @@ export function FirstDictation({
         <button type="button" className="btn-secondary onb-back" onClick={onBack}>
           {t('onboarding.back')}
         </button>
-        {state === 'success' ? (
-          <button
-            type="button"
-            className="btn-primary onb-cta onb-cta--success"
-            onClick={onContinue}
-          >
+        <button
+          type="button"
+          className={`btn-primary onb-cta${state === 'success' ? ' onb-cta--success' : ''}`}
+          onClick={onContinue}
+        >
+          {state === 'success' && (
             <span className="onb-success-check" aria-hidden="true">✓</span>
-            {t('onboarding.dictation.continue')}
-          </button>
-        ) : (
-          <span className="onb-nav-spacer" />
-        )}
-      </div>
-
-      {state !== 'success' && (
-        <button type="button" className="onb-skip-link" onClick={onContinue}>
-          {t('onboarding.dictation.skip')}
+          )}
+          {t('onboarding.dictation.continue')}
         </button>
-      )}
+      </div>
     </div>
   );
 }
