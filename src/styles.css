@@ -1558,11 +1558,11 @@ html.recording-window #root {
   position: relative;
   z-index: 1;
   width: 100%;
-  max-width: 420px;
+  max-width: 520px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
+  gap: 24px;
   text-align: center;
 }
 
@@ -1586,11 +1586,11 @@ html.recording-window #root {
 }
 
 .login-tagline {
-  margin: 0 0 12px;
+  margin: 0;
   color: var(--text-muted);
   font-size: 13px;
   line-height: 1.45;
-  max-width: 360px;
+  max-width: 440px;
 }
 
 .btn-primary {
@@ -1618,7 +1618,7 @@ html.recording-window #root {
   min-width: 240px;
   padding: 12px 22px;
   font-size: 14px;
-  margin-top: 4px;
+  margin-top: 0;
 }
 
 .login-spinner {
@@ -1671,7 +1671,7 @@ html.recording-window #root {
   -webkit-app-region: no-drag;
   position: absolute;
   inset-inline: 0;
-  bottom: 24px;
+  bottom: 32px;
   z-index: 1;
   display: flex;
   justify-content: center;
@@ -2081,7 +2081,6 @@ html.recording-window #root {
 }
 
 .onb-cta {
-  min-width: 200px;
   padding: 12px 22px;
   font-size: 14px;
   margin-top: 8px;
@@ -2111,7 +2110,6 @@ html.recording-window #root {
 
 .onb-back {
   flex: 0 0 auto;
-  min-width: 200px;
   padding: 12px 22px;
   font-size: 14px;
 }

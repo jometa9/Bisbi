@@ -200,9 +200,6 @@ export function FirstDictation({
           className={`btn-primary onb-cta${state === 'success' ? ' onb-cta--success' : ''}`}
           onClick={onContinue}
         >
-          {state === 'success' && (
-            <span className="onb-success-check" aria-hidden="true">✓</span>
-          )}
           {t('onboarding.dictation.continue')}
         </button>
       </div>

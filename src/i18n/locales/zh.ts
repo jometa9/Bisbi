@@ -27,7 +27,7 @@ export const zh: Translations = {
     limitReached: '本月免费套餐已用完。',
   },
   auth: {
-    welcome: '欢迎使用 Bisbi',
+    welcome: '离开始口述只差一步',
     tagline: '在任何应用中最快的口述方式。',
     signIn: '使用 Google 登录',
     authenticating: '正在浏览器中验证…',

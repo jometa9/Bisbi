@@ -263,7 +263,7 @@ export const en: {
     limitReached: 'You’ve hit your free plan limit for this month.',
   },
   auth: {
-    welcome: 'Welcome to Bisbi',
+    welcome: 'One step away from dictating',
     tagline: 'The fastest way to dictate anywhere.',
     signIn: 'Sign in with Google',
     authenticating: 'Authenticating in browser…',

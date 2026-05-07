@@ -1,6 +1,5 @@
 import { useTranslation } from '../i18n';
 import { useAuth } from '../context/AuthContext';
-import { urls } from '../lib/urls';
 import owlIdleSvg from '../../build-resources/owl_head.svg';
 
 interface Props {
@@ -21,10 +20,6 @@ export function Login({ onStartTour }: Props) {
           ? t('auth.validating')
           : t('auth.signIn');
 
-  const onSignUp = () => {
-    void window.bisbi?.openExternal(urls.signUp);
-  };
-
   return (
     <div className="login-screen">
       <img
@@ -35,7 +30,6 @@ export function Login({ onStartTour }: Props) {
       />
 
       <div className="login-card">
-        <div className="login-brand">{t('app.brand')}</div>
         <h1 className="login-title">{t('auth.welcome')}</h1>
         <p className="login-tagline">{t('auth.tagline')}</p>
 
@@ -66,13 +60,6 @@ export function Login({ onStartTour }: Props) {
               : t('auth.connectionError')}
           </p>
         )}
-
-        <p className="login-footer">
-          {t('auth.noAccount')}{' '}
-          <button type="button" className="login-link" onClick={onSignUp}>
-            {t('auth.signUp')}
-          </button>
-        </p>
       </div>
 
       {onStartTour && (

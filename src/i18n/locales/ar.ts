@@ -27,7 +27,7 @@ export const ar: Translations = {
     limitReached: 'لقد بلغت حد الخطة المجانية لهذا الشهر.',
   },
   auth: {
-    welcome: 'مرحبًا بك في Bisbi',
+    welcome: 'على بُعد خطوة من الإملاء',
     tagline: 'أسرع طريقة للإملاء في أي تطبيق.',
     signIn: 'تسجيل الدخول بحساب Google',
     authenticating: 'جارٍ المصادقة في المتصفح…',

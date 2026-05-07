@@ -27,7 +27,7 @@ export const hi: Translations = {
     limitReached: 'इस महीने के मुफ़्त प्लान की सीमा पूरी हो गई।',
   },
   auth: {
-    welcome: 'Bisbi में आपका स्वागत है',
+    welcome: 'बोलकर लिखने से एक कदम दूर',
     tagline: 'किसी भी ऐप में बोलकर लिखने का सबसे तेज़ तरीका।',
     signIn: 'Google से साइन इन करें',
     authenticating: 'ब्राउज़र में प्रमाणीकरण हो रहा है…',

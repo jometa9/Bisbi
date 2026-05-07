@@ -27,7 +27,7 @@ export const es: Translations = {
     limitReached: 'Llegaste al límite del plan gratis de este mes.',
   },
   auth: {
-    welcome: 'Bienvenido a Bisbi',
+    welcome: 'A un paso de dictar',
     tagline: 'La forma más rápida de dictar en cualquier app.',
     signIn: 'Iniciar sesión con Google',
     authenticating: 'Autenticando en el navegador…',
