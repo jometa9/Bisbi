@@ -348,7 +348,6 @@ export const ar: Translations = {
       transcribing: 'جارٍ التفريغ…',
       silenceError: 'لا نسمعك. هل الميكروفون متصل؟',
       failedError: 'تعذّر التفريغ. حاول مرة أخرى.',
-      retry: 'حاول مجددًا',
       continue: 'متابعة',
     },
   },

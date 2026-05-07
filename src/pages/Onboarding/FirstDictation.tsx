@@ -135,11 +135,6 @@ export function FirstDictation({
     };
   }, [microphoneId]);
 
-  const retry = () => {
-    setTranscript('');
-    setState('waiting');
-  };
-
   const watermarkText =
     state === 'listening'
       ? t('home.watermark.listening')
@@ -178,20 +173,6 @@ export function FirstDictation({
           </div>
         </div>
       </div>
-
-      {(state === 'silence' || state === 'failed') && (
-        <p className="onb-error">
-          {state === 'silence'
-            ? t('onboarding.dictation.silenceError')
-            : t('onboarding.dictation.failedError')}
-        </p>
-      )}
-
-      {(state === 'silence' || state === 'failed') && (
-        <button type="button" className="btn-secondary onb-retry" onClick={retry}>
-          {t('onboarding.dictation.retry')}
-        </button>
-      )}
 
       <div className="onb-nav">
         <button type="button" className="btn-secondary onb-back" onClick={onBack}>

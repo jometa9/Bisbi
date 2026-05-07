@@ -341,7 +341,6 @@ export const zh: Translations = {
       transcribing: '正在转写…',
       silenceError: '听不到声音，麦克风连接了吗？',
       failedError: '无法转写，请再试一次。',
-      retry: '再试一次',
       continue: '继续',
     },
   },

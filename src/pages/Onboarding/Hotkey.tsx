@@ -19,13 +19,11 @@ function buildPresets(platform: NodeJS.Platform | null): Preset[] {
   if (platform === 'darwin') {
     return [
       { id: 'recommended', accelerator: 'MetaRight', recommended: true },
-      { id: 'rctrl', accelerator: 'CtrlRight' },
       { id: 'caps', accelerator: 'CapsLock' },
     ];
   }
   return [
     { id: 'recommended', accelerator: 'AltRight', recommended: true },
-    { id: 'rctrl', accelerator: 'CtrlRight' },
     { id: 'caps', accelerator: 'CapsLock' },
   ];
 }
@@ -51,7 +49,7 @@ export function Hotkey({ platform, initialHotkey, onConfirm }: Props) {
   }, [selected]);
 
   const userPressingRef = useRef(false);
-  const onSubmitRef = useRef<() => void>(() => {});
+  const onSubmitRef = useRef<(accelerator?: string) => void>(() => {});
 
   useEffect(() => {
     if (!finalAccelerator) return;
@@ -70,21 +68,39 @@ export function Hotkey({ platform, initialHotkey, onConfirm }: Props) {
     };
   }, [finalAccelerator]);
 
+  const pressedAcceleratorRef = useRef<string | null>(null);
+  const advanceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   useEffect(() => {
-    if (!finalAccelerator) return;
-    const targetCodes = finalAccelerator.split('+').filter(Boolean);
-    const onDown = (e: KeyboardEvent) => {
-      if (targetCodes.includes(e.code)) {
-        userPressingRef.current = true;
-        setSimPressed(true);
+    const codeToAccelerator = new Map<string, string>();
+    for (const preset of presets) {
+      for (const code of preset.accelerator.split('+').filter(Boolean)) {
+        codeToAccelerator.set(code, preset.accelerator);
       }
+    }
+    const onDown = (e: KeyboardEvent) => {
+      const matched = codeToAccelerator.get(e.code);
+      if (!matched) return;
+      if (advanceTimerRef.current) {
+        clearTimeout(advanceTimerRef.current);
+        advanceTimerRef.current = null;
+      }
+      userPressingRef.current = true;
+      pressedAcceleratorRef.current = matched;
+      if (matched !== selected) setSelected(matched);
+      setSimPressed(true);
     };
     const onUp = (e: KeyboardEvent) => {
-      if (targetCodes.includes(e.code) && userPressingRef.current) {
-        userPressingRef.current = false;
-        setSimPressed(false);
-        onSubmitRef.current();
-      }
+      const matched = codeToAccelerator.get(e.code);
+      if (!matched || !userPressingRef.current) return;
+      if (pressedAcceleratorRef.current !== matched) return;
+      userPressingRef.current = false;
+      pressedAcceleratorRef.current = null;
+      setSimPressed(false);
+      advanceTimerRef.current = setTimeout(() => {
+        advanceTimerRef.current = null;
+        onSubmitRef.current(matched);
+      }, 2000);
     };
     window.addEventListener('keydown', onDown);
     window.addEventListener('keyup', onUp);
@@ -92,32 +108,39 @@ export function Hotkey({ platform, initialHotkey, onConfirm }: Props) {
       window.removeEventListener('keydown', onDown);
       window.removeEventListener('keyup', onUp);
     };
-  }, [finalAccelerator]);
+  }, [presets, selected]);
+
+  useEffect(() => {
+    return () => {
+      if (advanceTimerRef.current) clearTimeout(advanceTimerRef.current);
+    };
+  }, []);
 
   const onPickPreset = (accelerator: string) => {
     setSelected(accelerator);
   };
 
-  const onSubmit = async () => {
-    if (!finalAccelerator) return;
+  const onSubmit = async (accelerator?: string) => {
+    const target = accelerator ?? finalAccelerator;
+    if (!target) return;
     setSubmitting(true);
     try {
-      const result = await window.bisbi.onboarding.validateHotkey(finalAccelerator);
+      const result = await window.bisbi.onboarding.validateHotkey(target);
       if (!result.ok) {
         setConflict(result.reason ?? 'invalid');
         setSubmitting(false);
         return;
       }
-      await onConfirm(finalAccelerator);
+      await onConfirm(target);
     } finally {
       setSubmitting(false);
     }
   };
 
   useEffect(() => {
-    onSubmitRef.current = () => {
+    onSubmitRef.current = (accelerator?: string) => {
       if (submitting) return;
-      void onSubmit();
+      void onSubmit(accelerator);
     };
   });
 
@@ -187,7 +210,7 @@ export function Hotkey({ platform, initialHotkey, onConfirm }: Props) {
         <button
           type="button"
           className="btn-primary onb-cta"
-          onClick={onSubmit}
+          onClick={() => onSubmit()}
           disabled={submitting || !finalAccelerator}
         >
           {t('onboarding.hotkey.confirm')}

@@ -233,7 +233,6 @@ export const en: {
       transcribing: string;
       silenceError: string;
       failedError: string;
-      retry: string;
       continue: string;
     };
   };
@@ -588,7 +587,6 @@ export const en: {
       transcribing: 'Transcribing…',
       silenceError: "We can't hear you. Is your microphone connected?",
       failedError: "We couldn't transcribe. Try again.",
-      retry: 'Try again',
       continue: 'Continue',
     },
   },

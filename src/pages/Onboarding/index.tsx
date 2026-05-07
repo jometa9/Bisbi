@@ -55,7 +55,7 @@ export function Onboarding({ settings, onSettingsChange, onExit, onMicNeeded }: 
     }
   };
 
-  const totalSteps = 4;
+  const totalSteps = 5;
 
   const content = useMemo(() => {
     switch (step) {

@@ -25,7 +25,7 @@ export function App() {
   const [appVersion, setAppVersion] = useState('');
   const [resourcesOk, setResourcesOk] = useState<boolean | null>(null);
   const [showLimitBanner, setShowLimitBanner] = useState(false);
-  const [tourActive, setTourActive] = useState(false);
+  const [tourActive, setTourActive] = useState(true);
   const [tourMicNeeded, setTourMicNeeded] = useState(false);
 
   useEffect(() => {
@@ -67,6 +67,8 @@ export function App() {
       setTab('home');
       setTourActive(false);
       setTourMicNeeded(false);
+    } else {
+      setTourActive(true);
     }
   }, [isAuthenticated]);
 

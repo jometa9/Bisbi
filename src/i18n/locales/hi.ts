@@ -349,7 +349,6 @@ export const hi: Translations = {
       transcribing: 'ट्रांसक्राइब हो रहा है…',
       silenceError: 'आवाज़ नहीं आ रही। क्या आपका माइक्रोफ़ोन जुड़ा है?',
       failedError: 'ट्रांसक्राइब नहीं हो सका। फिर से कोशिश करें।',
-      retry: 'फिर से कोशिश करें',
       continue: 'जारी रखें',
     },
   },

@@ -352,7 +352,6 @@ export const es: Translations = {
       transcribing: 'Transcribiendo…',
       silenceError: 'No te escucho. ¿Está conectado tu micrófono?',
       failedError: 'No pudimos transcribir. Probá de nuevo.',
-      retry: 'Probar de nuevo',
       continue: 'Continuar',
     },
   },

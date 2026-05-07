@@ -29,6 +29,12 @@ export function Login({ onStartTour }: Props) {
         className="login-owl login-owl--left"
       />
 
+      <div className="onb-progress">
+        <span className="onb-progress-text">
+          {t('onboarding.progress', { current: 5, total: 5 })}
+        </span>
+      </div>
+
       <div className="login-card">
         <div className="login-brand-top">{t('app.brand')}</div>
         <h1 className="login-title">{t('auth.welcome')}</h1>
