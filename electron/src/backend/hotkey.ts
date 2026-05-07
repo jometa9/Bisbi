@@ -1,17 +1,7 @@
-// Global hotkey handling backed by uiohook-napi so we can observe both
-// keydown and keyup. Electron's `globalShortcut` only fires once on press,
-// which is not enough for push-to-talk or double-tap detection.
-//
-// macOS note: uiohook-napi requires Accessibility permission. Without it
-// keydown/keyup events never arrive. Bisbi prompts for it the first time
-// the hook starts.
 import { uIOhook, UiohookKey } from 'uiohook-napi';
 
 export interface HotkeyConfig {
   accelerator: string;
-  // When true: tap to start, tap to stop. When false: hold to record (push-
-  // to-talk), and a quick double-tap locks the current session so the user
-  // can release the key while recording continues.
   handsFreeMode: boolean;
 }
 
@@ -24,13 +14,10 @@ interface ParsedAccelerator {
   raw: string;
   keycode: number;
   modifiers: { ctrl: boolean; alt: boolean; shift: boolean; meta: boolean };
-  // True when the accelerator IS a bare modifier (e.g. "AltRight" alone).
-  // We then accept it without requiring extra modifier flags.
   bareModifier: boolean;
 }
 
 const KEY_TOKEN_MAP: Record<string, number> = {
-  // Letters and digits
   ...Object.fromEntries(
     'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
       .split('')
@@ -39,7 +26,6 @@ const KEY_TOKEN_MAP: Record<string, number> = {
   ...Object.fromEntries(
     '0123456789'.split('').map((d) => [d, (UiohookKey as Record<string, number>)[d]])
   ),
-  // Function row
   ...Object.fromEntries(
     Array.from({ length: 24 }, (_, i) => [
       `F${i + 1}`,
@@ -61,7 +47,6 @@ const KEY_TOKEN_MAP: Record<string, number> = {
   PageUp: UiohookKey.PageUp,
   PageDown: UiohookKey.PageDown,
   CapsLock: UiohookKey.CapsLock,
-  // Bare modifier keys (used standalone, not as modifier flags)
   AltRight: UiohookKey.AltRight,
   AltLeft: UiohookKey.Alt,
   CtrlRight: UiohookKey.CtrlRight,
@@ -110,7 +95,6 @@ function parseAccelerator(accel: string): ParsedAccelerator | null {
         modifiers.meta = true;
         break;
       default:
-        // Last non-modifier wins; we don't support multi-key accelerators.
         key = part;
     }
   }
@@ -141,9 +125,6 @@ interface UiohookEvent {
 
 function eventMatches(parsed: ParsedAccelerator, e: UiohookEvent): boolean {
   if (e.keycode !== parsed.keycode) return false;
-  // For bare modifier accelerators (e.g. "AltRight" alone) we don't compare
-  // modifier flags — pressing the key itself toggles its own flag and we
-  // don't want to require it to be pressed in addition to itself.
   if (parsed.bareModifier) return true;
   return (
     e.ctrlKey === parsed.modifiers.ctrl &&
@@ -153,9 +134,6 @@ function eventMatches(parsed: ParsedAccelerator, e: UiohookEvent): boolean {
   );
 }
 
-// Push-to-talk timing. After a short tap (release within TAP_THRESHOLD_MS)
-// we delay the stop by DOUBLE_TAP_GRACE_MS waiting for a second press; if
-// that press arrives we promote the session to "locked" and skip the stop.
 const TAP_THRESHOLD_MS = 250;
 const DOUBLE_TAP_GRACE_MS = 280;
 
@@ -193,7 +171,6 @@ function ensureHookStarted(): void {
 function onKeydown(e: UiohookEvent): void {
   if (!state) return;
   if (!eventMatches(state.parsed, e)) return;
-  // libuiohook fires keydown on auto-repeat; ignore until we see a keyup.
   if (state.keyHeld) return;
   state.keyHeld = true;
   state.pressStartedAt = Date.now();
@@ -202,9 +179,6 @@ function onKeydown(e: UiohookEvent): void {
 
 function onKeyup(e: UiohookEvent): void {
   if (!state) return;
-  // Bare-modifier hotkeys (e.g. Fn, AltRight) get a keyup event whose
-  // modifier-flag values can differ from keydown, so match purely on
-  // keycode for the release.
   if (e.keycode !== state.parsed.keycode) return;
   if (!state.keyHeld) return;
   state.keyHeld = false;
@@ -216,7 +190,6 @@ function handlePress(): void {
   const s = state;
 
   if (s.cfg.handsFreeMode) {
-    // Toggle: tap to start, tap to stop.
     if (s.mode === 'idle') {
       s.mode = 'locked';
       s.cb.onStartRecording();
@@ -227,16 +200,12 @@ function handlePress(): void {
     return;
   }
 
-  // Push-to-talk
   if (s.mode === 'idle') {
     s.mode = 'ptt';
     s.cb.onStartRecording();
     return;
   }
   if (s.mode === 'ptt') {
-    // We get here only when a short release scheduled a deferred stop and
-    // the second press arrived inside the grace window — a double-tap.
-    // Promote the live session to locked instead of stopping.
     if (s.pendingStopTimer) {
       clearTimeout(s.pendingStopTimer);
       s.pendingStopTimer = null;
@@ -245,7 +214,6 @@ function handlePress(): void {
     return;
   }
   if (s.mode === 'locked') {
-    // Second tap of a locked session ends it.
     s.mode = 'idle';
     s.cb.onStopRecording();
   }
@@ -254,18 +222,15 @@ function handlePress(): void {
 function handleRelease(): void {
   if (!state) return;
   const s = state;
-  if (s.cfg.handsFreeMode) return; // releases ignored in hands-free mode
-  if (s.mode !== 'ptt') return; // 'locked' ignores release; 'idle' shouldn't happen
+  if (s.cfg.handsFreeMode) return;
+  if (s.mode !== 'ptt') return;
 
   const heldFor = Date.now() - s.pressStartedAt;
   if (heldFor >= TAP_THRESHOLD_MS) {
-    // User held the key — straightforward push-to-talk.
     s.mode = 'idle';
     s.cb.onStopRecording();
     return;
   }
-  // Short tap: defer the stop so a second press inside the grace window
-  // can promote the session to locked.
   if (s.pendingStopTimer) clearTimeout(s.pendingStopTimer);
   s.pendingStopTimer = setTimeout(() => {
     if (!state) return;
@@ -283,7 +248,6 @@ export function registerHotkey(cfg: HotkeyConfig, cb: HotkeyCallbacks): boolean 
     console.warn('[hotkey] unable to parse accelerator:', cfg.accelerator);
     return false;
   }
-  // Reset any pending state from a previous registration.
   if (state?.pendingStopTimer) clearTimeout(state.pendingStopTimer);
   state = {
     parsed,

@@ -199,15 +199,11 @@ export async function registerBackend(opts: BackendOptions): Promise<void> {
 
   applyHotkey(settings);
 
-  // The usage-sync worker drains the offline queue and reconciles the local
-  // word-count cache with the external API. It also lets us notify the
-  // renderer when the server's response says the user just hit the limit.
   setUsageEventHandlers({
     onLimitReached: (info) => broadcast('usage:limitReached', info),
   });
   startUsageSync();
 
-  // ---------- IPC: settings ----------
   ipcMain.handle('settings:get', (): AppSettings => getSettings());
   ipcMain.handle(
     'settings:update',
@@ -220,7 +216,6 @@ export async function registerBackend(opts: BackendOptions): Promise<void> {
       if (hotkeyChanged || handsFreeChanged) {
         const ok = applyHotkey(next);
         if (!ok) {
-          // Revert to previous values if the new accelerator couldn't register.
           const reverted = updateSettings({
             hotkey: prev.hotkey,
             handsFreeMode: prev.handsFreeMode,
@@ -248,20 +243,13 @@ export async function registerBackend(opts: BackendOptions): Promise<void> {
     return next;
   });
 
-  // ---------- IPC: recording state ----------
   ipcMain.handle('recording:getState', () => recordingState);
 
-  // Mic levels arrive ~12 fps from the renderer; we forward them to the
-  // floating recording window so the waveform reacts to the user's voice.
   ipcMain.on('recording:level', (_e, level: number) => {
     if (!isRecording) return;
     setRecordingWindowLevel(typeof level === 'number' ? level : 0);
   });
 
-  // The renderer captures audio via getUserMedia and sends the raw PCM here
-  // when the user toggles the hotkey off. The job is enqueued and processed
-  // serially in the background; the renderer doesn't block on the result so
-  // a new recording can start immediately while older clips finish.
   ipcMain.handle(
     'recording:submitAudio',
     (
@@ -269,19 +257,12 @@ export async function registerBackend(opts: BackendOptions): Promise<void> {
       payload: { pcm: ArrayBuffer; sampleRate: number; channels: number }
     ): void => {
       const pcm = Buffer.from(payload.pcm);
-      // Drop clips shorter than ~100ms — whisper-cli skips the .txt output
-      // for empty/near-empty audio, and there is nothing to transcribe anyway.
       const bytesPerSample = 2 * Math.max(1, payload.channels);
       const minBytes = Math.floor(payload.sampleRate * 0.1) * bytesPerSample;
       if (pcm.length < minBytes) {
         syncState();
         return;
       }
-      // Free-plan monthly word cap. If already at/over the cap, drop the clip
-      // and notify the renderer so it can prompt to upgrade. The cap and the
-      // current count are reconciled with the external API after every
-      // transcription and on every license refresh, so they're authoritative
-      // even across reinstalls.
       const session = getSession();
       const isPro = session.userInfo?.plan === 'pro';
       if (!isPro) {
@@ -303,14 +284,11 @@ export async function registerBackend(opts: BackendOptions): Promise<void> {
     }
   );
 
-  // Cancel only the current recording capture. Anything already queued for
-  // transcription keeps processing — the user already committed to those clips.
   ipcMain.handle('recording:cancel', () => {
     isRecording = false;
     syncState();
   });
 
-  // ---------- IPC: history ----------
   ipcMain.handle('history:list', (_e, limit?: number) => listTranscriptions(limit ?? 100));
   ipcMain.handle('history:delete', (_e, id: string) => {
     deleteTranscription(id);
@@ -323,22 +301,18 @@ export async function registerBackend(opts: BackendOptions): Promise<void> {
     broadcast('stats:totals', getStatsTotals());
   });
 
-  // ---------- IPC: stats ----------
   ipcMain.handle('stats:totals', () => getStatsTotals());
 
-  // ---------- IPC: resources / system ----------
   ipcMain.handle('resources:check', () => checkResources(getSettings().precision));
   ipcMain.handle('app:getVersion', () => app.getVersion());
   ipcMain.handle('app:getPlatform', () => process.platform);
   ipcMain.handle('app:getSystemLocale', () => getSystemLocale());
   ipcMain.handle('app:openSettings', () => activeMainWindowOpener?.());
 
-  // ---------- IPC: updater ----------
   ipcMain.handle('updater:getState', () => getUpdateStatus());
   ipcMain.handle('updater:check', () => checkForUpdatesManual());
   ipcMain.handle('updater:install', () => installUpdateAndRestart());
 
-  // ---------- IPC: auth ----------
   ipcMain.handle('auth:getSession', (): AuthSession => getSession());
   ipcMain.handle(
     'auth:loginWithToken',
@@ -362,7 +336,6 @@ export async function registerBackend(opts: BackendOptions): Promise<void> {
     return startCheckout(billingPeriod);
   });
 
-  // ---------- IPC: usage ----------
   ipcMain.handle('usage:getMonthly', () => ({
     used: getMonthlyWordUsage(),
     limit: getMonthlyWordLimit(),
@@ -371,7 +344,6 @@ export async function registerBackend(opts: BackendOptions): Promise<void> {
     await flushUsageQueue();
   });
 
-  // ---------- IPC: onboarding ----------
   ipcMain.handle('onboarding:getState', (): OnboardingState => getOnboardingState());
   ipcMain.handle(
     'onboarding:setState',
@@ -401,9 +373,6 @@ export async function registerBackend(opts: BackendOptions): Promise<void> {
     (_e, accelerator: string): { ok: boolean; reason?: string } =>
       validateHotkey(accelerator)
   );
-  // Run whisper on a buffer the renderer captured but skip the paste/clipboard
-  // delivery and the history insert. Used by the onboarding "first dictation"
-  // screen to show the result inline.
   ipcMain.handle(
     'onboarding:transcribePreview',
     async (
@@ -421,7 +390,6 @@ export async function registerBackend(opts: BackendOptions): Promise<void> {
     }
   );
 
-  // ---------- IPC: deep link / external links ----------
   ipcMain.handle('deepLink:getPending', () => getPendingDeepLink());
   ipcMain.handle('deepLink:clearPending', (_e, url?: string) => {
     clearPendingDeepLink(url);
@@ -436,18 +404,14 @@ export async function registerBackend(opts: BackendOptions): Promise<void> {
 }
 
 function handleStartRecording(): void {
-  if (isRecording) return; // mic already open
+  if (isRecording) return;
   isRecording = true;
   showRecordingWindow('recording');
   syncState();
   broadcast('recording:start');
-  // Fire-and-forget: muting can take ~100-300ms (AppleScript / PowerShell
-  // spawn) and must never block the mic from opening.
   const cfg = getSettings();
   if (cfg.muteSystemAudioWhileRecording) {
     void muteSystemAudio().then((snap) => {
-      // If the user already stopped recording before this resolved, restore
-      // immediately instead of leaving their audio muted.
       if (!isRecording) {
         void restoreSystemAudio(snap);
         return;
@@ -459,18 +423,9 @@ function handleStartRecording(): void {
 
 function handleStopRecording(): void {
   if (!isRecording) return;
-  // Flip the flag now so a quick re-tap can immediately start a new mic
-  // session even before the renderer ships the audio buffer back.
   isRecording = false;
-  // Don't downgrade the recording window yet; if the queue is non-empty
-  // syncState() will switch it to the transcribing variant. The renderer's
-  // submitAudio call is what actually enqueues the clip for processing.
   syncState();
   broadcast('recording:stop');
-  // Restore whatever we changed at start. The snapshot may still be null if
-  // the start-side promise hasn't resolved yet (very short recordings) — in
-  // that case the start-side .then() handles the restore by checking
-  // !isRecording.
   if (muteSnapshot) {
     const snap = muteSnapshot;
     muteSnapshot = null;

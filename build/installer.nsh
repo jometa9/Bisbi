@@ -53,6 +53,12 @@
   WriteRegStr HKCR "bisbi" "" "URL:bisbi Protocol"
   WriteRegStr HKCR "bisbi" "URL Protocol" ""
   WriteRegStr HKCR "bisbi\shell\open\command" "" '"$INSTDIR\${PRODUCT_FILENAME}.exe" "$INSTDIR\${PRODUCT_FILENAME}.exe" "%1"'
+  ; Hide the bundled model + binaries from casual users in Explorer.
+  ; The folder is still accessible if the user enables "Show hidden files".
+  ${if} ${FileExists} "$INSTDIR\resources\whisper"
+    nsExec::ExecToLog 'cmd.exe /c attrib +H "$INSTDIR\resources\whisper" /D'
+    nsExec::ExecToLog 'cmd.exe /c attrib +H "$INSTDIR\resources\whisper\*" /S /D'
+  ${endif}
 !macroend
 
 !macro customUnInstall

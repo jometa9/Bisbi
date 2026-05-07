@@ -19,9 +19,7 @@ function loadDriver(): typeof import('better-sqlite3') {
 export function countWords(text: string): number {
   const trimmed = text.trim();
   if (!trimmed) return 0;
-  // Latin/whitespace-separated tokens.
   const tokens = trimmed.match(/\S+/g)?.length ?? 0;
-  // CJK languages don't separate words with spaces, so each ideograph counts.
   const cjk = trimmed.match(/[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}]/gu)?.length ?? 0;
   return tokens + cjk;
 }
@@ -61,9 +59,6 @@ function migrate(db: Database): void {
   }
 
   if (current < 2) {
-    // Single-row table for the current logged-in session. Token is stored as
-    // an encrypted BLOB (safeStorage) and user info as encrypted JSON, so the
-    // sqlite file is useless if copied off-device.
     db.exec(`
       CREATE TABLE IF NOT EXISTS auth_session (
         id INTEGER PRIMARY KEY CHECK (id = 1),
@@ -76,9 +71,6 @@ function migrate(db: Database): void {
   }
 
   if (current < 3) {
-    // Capture the actual audio duration and word count of each transcription so
-    // the Home page can show all-time totals (and derive words-per-minute) by
-    // summing across the table instead of relying on a separate counter.
     db.exec(`
       ALTER TABLE transcriptions ADD COLUMN audio_duration_ms INTEGER;
       ALTER TABLE transcriptions ADD COLUMN word_count INTEGER;
@@ -92,15 +84,11 @@ function migrate(db: Database): void {
       for (const r of items) update.run(countWords(r.text), r.id);
     });
     tx(rows);
-    // Drop the old cached counter — totals are now derived from the table.
     db.prepare('DELETE FROM meta WHERE key = ?').run('total_words');
     db.pragma('user_version = 3');
   }
 
   if (current < 4) {
-    // Persistent retry queue for usage events that need to be POSTed to the
-    // external API. Each row is one transcription's contribution; rows are
-    // deleted when the server acknowledges them.
     db.exec(`
       CREATE TABLE IF NOT EXISTS usage_queue (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -254,9 +242,6 @@ export function addMonthlyWordUsage(
   return next;
 }
 
-// Overwrite the local cache with the server's authoritative count. Called
-// after a successful POST /api/usage or GET /api/license response so the
-// next limit-check uses the server's view, not the optimistic local one.
 export function setMonthlyWordUsageFromServer(
   words: number,
   monthKey: string = currentMonthKey()

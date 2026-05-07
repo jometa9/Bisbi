@@ -1,7 +1,3 @@
-// Tiny i18n module for the main process. Only carries strings that live in
-// the main process (tray menu, hotkey-registration errors). The renderer has
-// its own, richer dictionaries — keep these in sync manually if you change a
-// shared label.
 import { app } from 'electron';
 import type { UiLanguage, UiLanguageSetting } from './types';
 
@@ -13,11 +9,11 @@ interface BackendStrings {
     openSettings: string;
     history: string;
     checkUpdates: string;
-    version: string; // uses {v}
+    version: string;
     quit: string;
   };
   errors: {
-    hotkeyRegister: string; // uses {accel}
+    hotkeyRegister: string;
   };
 }
 
@@ -114,7 +110,6 @@ export function matchUiLanguage(locale: string | null | undefined): UiLanguage |
 }
 
 export function getSystemLocale(): string {
-  // Electron returns the OS locale (e.g. "es-AR", "zh-CN") once the app is ready.
   try {
     return app.getLocale() || '';
   } catch {

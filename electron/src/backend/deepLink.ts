@@ -2,10 +2,6 @@ import { BrowserWindow } from 'electron';
 
 export const PROTOCOL = 'bisbi';
 
-// A pending URL is set when the deep link arrives before the renderer is
-// ready to receive it (e.g. macOS open-url before the window is created, or
-// Windows launching the app fresh from the protocol). The renderer fetches
-// it via IPC on mount and clears it once consumed.
 let pendingUrl: string | null = null;
 
 type WindowGetter = () => BrowserWindow | null;

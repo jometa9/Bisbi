@@ -107,8 +107,6 @@ export function getSession(): AuthSession {
   };
 }
 
-// Exposed for the usage-sync module so it can authenticate POST /api/usage
-// without going through a renderer round-trip.
 export function getAuthToken(): string | null {
   loadFromDisk();
   return memCache?.token ?? null;
@@ -142,9 +140,6 @@ async function validateTokenWithApi(token: string): Promise<UserInfo> {
       remaining: number | null;
     } | null;
   };
-  // Reconcile local usage cache with the server's authoritative counts. The
-  // server is the source of truth — if the user reinstalled, the local cache
-  // is empty/optimistic, and this overwrites it back to reality.
   if (data.usage) {
     setMonthlyWordUsageFromServer(data.usage.wordsUsed, data.usage.monthKey);
     setMonthlyWordLimit(data.usage.wordsLimit);
