@@ -1,15 +1,31 @@
 #!/usr/bin/env python3
 """Generate the DMG installer background (cream + green Bisbi wordmark)."""
+from urllib.request import urlretrieve
 from PIL import Image, ImageDraw, ImageFont
 from pathlib import Path
 
 OUT_DIR = Path(__file__).resolve().parent.parent / "build-resources"
+FONTS_DIR = OUT_DIR / "fonts"
 W, H = 540, 380
 CREAM = "#F0EDE6"
 GREEN = "#5A8C83"
 
-FONT_DISPLAY = OUT_DIR / "fonts" / "PlusJakartaSans.ttf"
-FONT_BODY = OUT_DIR / "fonts" / "DMSans.ttf"
+FONT_DISPLAY = FONTS_DIR / "PlusJakartaSans.ttf"
+FONT_BODY = FONTS_DIR / "DMSans.ttf"
+
+FONT_SOURCES = {
+    FONT_DISPLAY: "https://github.com/google/fonts/raw/main/ofl/plusjakartasans/PlusJakartaSans%5Bwght%5D.ttf",
+    FONT_BODY: "https://github.com/google/fonts/raw/main/ofl/dmsans/DMSans%5Bopsz%2Cwght%5D.ttf",
+}
+
+
+def ensure_fonts() -> None:
+    FONTS_DIR.mkdir(parents=True, exist_ok=True)
+    for path, url in FONT_SOURCES.items():
+        if path.exists():
+            continue
+        print(f"downloading {path.name}…")
+        urlretrieve(url, path)
 
 
 def load(path: Path, size: int, weight: int) -> ImageFont.FreeTypeFont:
@@ -37,5 +53,6 @@ def render(scale: int, path: Path) -> None:
 
 
 if __name__ == "__main__":
+    ensure_fonts()
     render(1, OUT_DIR / "dmg-background.png")
     render(2, OUT_DIR / "dmg-background@2x.png")
