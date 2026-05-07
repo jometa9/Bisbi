@@ -16,6 +16,10 @@ if (isRecordingWindow) {
   document.body.classList.add('recording-window');
 }
 
+void window.bisbi?.getPlatform().then((p) => {
+  document.body.dataset.platform = p;
+});
+
 root.render(
   <React.StrictMode>
     <I18nGate>

@@ -34,7 +34,10 @@ function getActiveDisplay(): Electron.Display {
 
 function placeBottomCenter(w: BrowserWindow): void {
   const display = getActiveDisplay();
-  const { x, y, width, height } = display.bounds;
+  // workArea excluye taskbar (Windows), dock + menu bar (macOS) y paneles
+  // (Linux), así que el pill queda siempre justo encima de esas zonas
+  // reservadas sin pelear z-order con ellas.
+  const { x, y, width, height } = display.workArea;
   const changed = display.id !== lastDisplayId;
   lastDisplayId = display.id;
   w.setBounds({

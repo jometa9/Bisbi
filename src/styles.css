@@ -63,6 +63,17 @@
 
 * { box-sizing: border-box; }
 
+* {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+*::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
+}
+
 html, body, #root {
   margin: 0;
   padding: 0;
@@ -2442,6 +2453,15 @@ html.recording-window #root {
   margin-top: 6px;
 }
 
+.onb-mic-picker {
+  width: 100%;
+  margin-top: 4px;
+}
+
+.onb-mic-picker .select {
+  width: 100%;
+}
+
 .onb-dictation-box {
   width: 100%;
   min-height: 120px;
@@ -2610,6 +2630,22 @@ html.recording-window #root {
 [dir="rtl"] .onb-progress {
   inset-inline-end: auto;
   inset-inline-start: 22px;
+}
+
+/* Windows/Linux place the native window controls on the visual right via
+   titleBarOverlay, so the onboarding step counter moves to the visual left
+   to avoid overlapping. macOS keeps it on the right (traffic lights are
+   on the left). */
+body[data-platform="win32"] .onb-progress,
+body[data-platform="linux"] .onb-progress {
+  inset-inline-end: auto;
+  inset-inline-start: 22px;
+}
+
+[dir="rtl"] body[data-platform="win32"] .onb-progress,
+[dir="rtl"] body[data-platform="linux"] .onb-progress {
+  inset-inline-start: auto;
+  inset-inline-end: 22px;
 }
 
 /* RTL adjustments. Most of the layout is flex-based and flips automatically

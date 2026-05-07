@@ -1,16 +1,25 @@
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from '../../i18n';
 import { HotkeyKeys } from '../../components/HotkeyKeys';
-import { startRecording, type RecordingHandle } from '../../audio';
+import { Select } from '../../components/Select';
+import {
+  listMicrophones,
+  startRecording,
+  type MicrophoneDevice,
+  type RecordingHandle,
+} from '../../audio';
 import { formatHotkeyAccelerator, useHotkeyLabels, type KeyPlatform } from '../../lib/hotkey';
 
 interface Props {
   hotkey: string;
   platform: NodeJS.Platform | null;
   microphoneId: string | null;
+  onMicrophoneChange: (id: string | null) => void;
   onContinue: () => void;
   onBack: () => void;
 }
+
+const DEFAULT_MIC_VALUE = '__system_default__';
 
 type DictationState =
   | 'waiting'
@@ -30,6 +39,7 @@ export function FirstDictation({
   hotkey,
   platform,
   microphoneId,
+  onMicrophoneChange,
   onContinue,
   onBack,
 }: Props) {
@@ -39,11 +49,40 @@ export function FirstDictation({
 
   const [state, setState] = useState<DictationState>('waiting');
   const [transcript, setTranscript] = useState('');
+  const [devices, setDevices] = useState<MicrophoneDevice[]>([]);
 
   const handleRef = useRef<RecordingHandle | null>(null);
   const chainRef = useRef<Promise<void>>(Promise.resolve());
   const sawAudioRef = useRef(false);
   const silenceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    const refresh = async () => {
+      const list = await listMicrophones();
+      if (!cancelled) setDevices(list);
+    };
+    void refresh();
+    const md = navigator.mediaDevices;
+    md?.addEventListener?.('devicechange', refresh);
+    return () => {
+      cancelled = true;
+      md?.removeEventListener?.('devicechange', refresh);
+    };
+  }, []);
+
+  const persistedAvailable =
+    microphoneId !== null && devices.some((d) => d.deviceId === microphoneId);
+  const selectedMic = persistedAvailable
+    ? (microphoneId as string)
+    : DEFAULT_MIC_VALUE;
+  const micOptions = [
+    { value: DEFAULT_MIC_VALUE, label: t('settings.microphone.systemDefault') },
+    ...devices.map((d, i) => ({
+      value: d.deviceId,
+      label: d.label || t('settings.microphone.unnamed', { index: i + 1 }),
+    })),
+  ];
 
   useEffect(() => {
     if (!window.bisbi) return;
@@ -155,6 +194,17 @@ export function FirstDictation({
       </p>
 
       <div className="onb-phrase">{t('onboarding.dictation.samplePhrase')}</div>
+
+      <div className="onb-mic-picker">
+        <Select<string>
+          value={selectedMic}
+          onChange={(next) =>
+            onMicrophoneChange(next === DEFAULT_MIC_VALUE ? null : next)
+          }
+          ariaLabel={t('settings.microphone.title')}
+          options={micOptions}
+        />
+      </div>
 
       <div className="home-hotkey">
         {showWatermark && (

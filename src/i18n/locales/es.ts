@@ -20,8 +20,7 @@ export const es: Translations = {
       devHint:
         'Si estás en desarrollo, corré {cmd} en la raíz del repo y dejá que Electron abra su propia ventana. No abras {url} directamente en el browser.',
     },
-    resourcesMissing:
-      'Faltan los recursos de Bisbi. Mirá el README para descargar el binario y el modelo en {path}.',
+    resourcesMissing: 'Ocurrió un error. Por favor, contactá con soporte.',
     micError:
       'No se pudo acceder al micrófono. Asegurate de que Bisbi tenga permiso en los ajustes del sistema.',
     limitReached: 'Llegaste al límite del plan gratis de este mes.',

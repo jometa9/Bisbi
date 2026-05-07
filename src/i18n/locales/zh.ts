@@ -20,8 +20,7 @@ export const zh: Translations = {
       devHint:
         '如果你在开发模式下,请在仓库根目录运行 {cmd},让 Electron 打开它自己的窗口。不要直接在浏览器中打开 {url}。',
     },
-    resourcesMissing:
-      '缺少 Bisbi 资源。请查看 README 以了解如何将二进制文件和模型下载到 {path}。',
+    resourcesMissing: '发生错误,请联系支持团队。',
     micError:
       '无法访问麦克风。请确保 Bisbi 在系统设置中拥有权限。',
     limitReached: '本月免费套餐已用完。',

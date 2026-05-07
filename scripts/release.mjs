@@ -1,13 +1,16 @@
 #!/usr/bin/env node
 // Local release script. Two modes:
-//   node scripts/release.mjs patch|minor|major   → bump version, tag, build, create release
+//   node scripts/release.mjs patch|minor|major   → sync models, bump version, build host OS, tag, push, create release
 //   node scripts/release.mjs add                 → build current platform, upload to existing release
 //
+// On bump mode the pushed tag triggers `.github/workflows/release.yml`, which
+// builds Linux + Windows in CI and uploads them to the same release.
+//
 // No tokens in the repo. Uses `gh` CLI (Keychain-stored creds).
-// Builds only for the host OS — run on each platform you want to ship.
 
 import { execSync, spawnSync } from 'node:child_process';
-import { existsSync, readFileSync, readdirSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
+import { createHash } from 'node:crypto';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
@@ -16,6 +19,9 @@ const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const PKG_PATH = join(ROOT, 'package.json');
 const RELEASE_DIR = join(ROOT, 'release');
 const RELEASES_REPO = 'jometa9/bisbi-releases';
+const MODELS_REPO = 'jometa9/Bisbi';
+const MODELS_RELEASE = 'whisper-models';
+const MODELS_DIR = join(ROOT, 'resources/whisper');
 
 const COLOR = { red: '\x1b[31m', green: '\x1b[32m', yellow: '\x1b[33m', cyan: '\x1b[36m', bold: '\x1b[1m', reset: '\x1b[0m' };
 const log = {
@@ -59,6 +65,70 @@ log.ok('Working tree clean');
 log.step('Type-checking');
 run('npm run typecheck');
 log.ok('Type-check passed');
+
+// ───────── Sync whisper models to private release ─────────
+
+if (MODE !== 'add') {
+  syncModels();
+}
+
+function syncModels() {
+  log.step(`Syncing whisper models to ${MODELS_REPO} (${MODELS_RELEASE})`);
+
+  if (!existsSync(MODELS_DIR)) log.fail(`Models dir not found: ${MODELS_DIR}`);
+  const localFiles = readdirSync(MODELS_DIR)
+    .filter((f) => f.endsWith('.dat'))
+    .map((f) => {
+      const path = join(MODELS_DIR, f);
+      const size = statSync(path).size;
+      const sha256 = createHash('sha256').update(readFileSync(path)).digest('hex');
+      return { name: f, path, size, sha256 };
+    });
+
+  if (!localFiles.length) log.fail(`No .dat models found in ${MODELS_DIR}`);
+  console.log(`    Local: ${localFiles.map((f) => `${f.name} (${(f.size / 1024 / 1024).toFixed(1)} MB)`).join(', ')}`);
+
+  const view = tryRun(`gh release view ${MODELS_RELEASE} --repo ${MODELS_REPO} --json assets`);
+
+  if (!view.ok) {
+    log.warn(`Release "${MODELS_RELEASE}" does not exist — creating it`);
+    const fileArgs = localFiles.map((f) => `"${f.path}"`).join(' ');
+    run(
+      `gh release create ${MODELS_RELEASE} --repo ${MODELS_REPO} --title "Whisper models" --notes "Internal — synced by release.mjs" --prerelease ${fileArgs}`,
+    );
+    log.ok(`Created ${MODELS_RELEASE} with ${localFiles.length} model(s)`);
+    return;
+  }
+
+  const remoteAssets = (JSON.parse(view.stdout).assets || []);
+  const remoteByName = Object.fromEntries(remoteAssets.map((a) => [a.name, a]));
+  const toUpload = [];
+
+  for (const f of localFiles) {
+    const remote = remoteByName[f.name];
+    if (!remote) {
+      toUpload.push({ ...f, reason: 'missing on remote' });
+      continue;
+    }
+    const remoteSha = (remote.digest || '').replace(/^sha256:/, '');
+    if (remoteSha && remoteSha !== f.sha256) {
+      toUpload.push({ ...f, reason: 'sha256 mismatch' });
+    } else if (!remoteSha && remote.size !== f.size) {
+      toUpload.push({ ...f, reason: 'size mismatch' });
+    }
+  }
+
+  if (!toUpload.length) {
+    log.ok(`All ${localFiles.length} model(s) already in sync`);
+    return;
+  }
+
+  log.step(`Uploading ${toUpload.length} model(s) (this can take a while)`);
+  for (const f of toUpload) console.log(`    ${f.name} — ${f.reason}`);
+  const fileArgs = toUpload.map((f) => `"${f.path}"`).join(' ');
+  run(`gh release upload ${MODELS_RELEASE} --repo ${MODELS_REPO} --clobber ${fileArgs}`);
+  log.ok('Models synced');
+}
 
 // ───────── Determine version ─────────
 

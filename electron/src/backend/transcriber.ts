@@ -105,11 +105,7 @@ export async function transcribePcm(
 ): Promise<TranscribeOutput> {
   const check = checkResources(opts.precision);
   if (!check.ok) {
-    throw new Error(
-      `Falta el binario o el modelo de whisper.cpp.\n` +
-        `Esperados:\n  - ${check.binaryPath}\n  - ${check.modelPath}\n` +
-        `Ver README para descargarlos.`
-    );
+    throw new Error('Resources missing');
   }
 
   const wavPath = writeWavFile(pcm, sampleRate, channels);

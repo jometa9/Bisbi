@@ -55,6 +55,15 @@ export function Onboarding({ settings, onSettingsChange, onExit, onMicNeeded }: 
     }
   };
 
+  const onMicrophoneChange = async (microphoneId: string | null) => {
+    try {
+      const next = await window.bisbi.updateSettings({ microphoneId });
+      onSettingsChange(next);
+    } catch (err) {
+      console.error('[onboarding] microphone update failed:', err);
+    }
+  };
+
   const totalSteps = 5;
 
   const content = useMemo(() => {
@@ -77,6 +86,7 @@ export function Onboarding({ settings, onSettingsChange, onExit, onMicNeeded }: 
             hotkey={settings.hotkey}
             platform={platform}
             microphoneId={settings.microphoneId}
+            onMicrophoneChange={onMicrophoneChange}
             onContinue={onExit}
             onBack={() => setStep(3)}
           />

@@ -260,10 +260,7 @@ export function App() {
         )}
         {resourcesOk === false && (
           <div className="banner banner-error">
-            {renderWithTokens(
-              t('app.resourcesMissing', { path: '__PATH__' }),
-              { __PATH__: <code key="path">resources/whisper</code> }
-            )}
+            {t('app.resourcesMissing')}
           </div>
         )}
         <div className="content-inner">

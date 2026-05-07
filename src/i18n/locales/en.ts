@@ -255,8 +255,7 @@ export const en: {
       body: 'This window must be opened from Electron so the global hotkey, the microphone, and transcription work.',
       devHint: 'If you are in development, run {cmd} in the repo root and let Electron open its own window. Do not open {url} directly in the browser.',
     },
-    resourcesMissing:
-      'Bisbi resources are missing. See the README for how to download the binary and the model into {path}.',
+    resourcesMissing: 'Something went wrong. Please contact support.',
     micError:
       'Could not access the microphone. Make sure Bisbi has permission in your system settings.',
     limitReached: 'You’ve hit your free plan limit for this month.',

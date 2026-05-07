@@ -226,11 +226,20 @@ function openSettingsWindow(): void {
     title: PRODUCT_NAME,
     show: false,
     fullscreenable: false,
+    maximizable: false,
     backgroundColor: '#FFFFFF',
     ...(iconPath && { icon: nativeImage.createFromPath(iconPath) }),
     ...(process.platform === 'darwin' && {
       titleBarStyle: 'hiddenInset',
       trafficLightPosition: { x: 12, y: 12 },
+    }),
+    ...(process.platform !== 'darwin' && {
+      titleBarStyle: 'hidden',
+      titleBarOverlay: {
+        color: '#00000000',
+        symbolColor: '#1a1a1a',
+        height: 32,
+      },
     }),
     webPreferences: {
       preload: preloadPath,

@@ -1,4 +1,4 @@
-export const WEB_BASE = 'http://localhost:3001';
+export const WEB_BASE = 'https://bisbi.io';
 
 export const WHISPER_MODELS = {
   fast: 'bsb-001.dat',
@@ -11,6 +11,6 @@ export const BUILD_CONFIG = {
   PRODUCT_NAME: 'Bisbi',
   WHISPER_MODELS,
   DEFAULT_PRECISION: 'accurate' as const,
-  DEFAULT_HOTKEY: process.platform === 'darwin' ? 'MetaRight' : 'AltRight',
+  DEFAULT_HOTKEY: process.platform === 'darwin' ? 'MetaRight' : 'CtrlRight',
   DEFAULT_HANDS_FREE: false,
 } as const;

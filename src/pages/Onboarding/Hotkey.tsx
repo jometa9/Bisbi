@@ -23,7 +23,7 @@ function buildPresets(platform: NodeJS.Platform | null): Preset[] {
     ];
   }
   return [
-    { id: 'recommended', accelerator: 'AltRight', recommended: true },
+    { id: 'recommended', accelerator: 'CtrlRight', recommended: true },
     { id: 'caps', accelerator: 'CapsLock' },
   ];
 }
@@ -72,10 +72,18 @@ export function Hotkey({ platform, initialHotkey, onConfirm }: Props) {
   const advanceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
+    // uiohook nombra al Ctrl como `CtrlLeft`/`CtrlRight`, pero el DOM
+    // expone `KeyboardEvent.code` como `ControlLeft`/`ControlRight`. El
+    // resto de los modifiers coinciden de casualidad entre los dos.
+    const acceleratorToDomCode = (part: string): string =>
+      part === 'CtrlLeft' ? 'ControlLeft'
+      : part === 'CtrlRight' ? 'ControlRight'
+      : part;
+
     const codeToAccelerator = new Map<string, string>();
     for (const preset of presets) {
       for (const code of preset.accelerator.split('+').filter(Boolean)) {
-        codeToAccelerator.set(code, preset.accelerator);
+        codeToAccelerator.set(acceleratorToDomCode(code), preset.accelerator);
       }
     }
     const onDown = (e: KeyboardEvent) => {
