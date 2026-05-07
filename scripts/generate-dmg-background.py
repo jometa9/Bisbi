@@ -30,7 +30,7 @@ def render(scale: int, path: Path) -> None:
 
     tw = d.textlength("Bisbi", font=title)
     bbox = title.getbbox("Bisbi")
-    d.text(((w - tw) / 2, 40 * scale - bbox[1]), "Bisbi", font=title, fill=GREEN)
+    d.text(((w - tw) / 2, 120 * scale - bbox[1]), "Bisbi", font=title, fill=GREEN)
 
     img.save(path, "PNG")
     print(f"wrote {path} ({w}x{h})")
