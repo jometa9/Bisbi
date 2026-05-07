@@ -106,7 +106,6 @@ export const es: Translations = {
     titleHint: 'Apretá el atajo y hablá.',
     hotkeyLabel: 'Atajo',
     hotkeyHintPaste: 'El texto se pega automáticamente donde estés escribiendo.',
-    hotkeyHintClipboard: 'El texto se copia al portapapeles.',
     activitySection: 'Tu actividad',
     transcriptionsOne: 'transcripción',
     transcriptionsOther: 'transcripciones',
@@ -176,12 +175,6 @@ export const es: Translations = {
         'Idioma usado en la interfaz. Por defecto sigue al sistema operativo.',
       system: 'Sistema ({detected})',
     },
-    pasteMode: {
-      title: 'Inserción del texto',
-      description: 'Cómo entregamos el texto transcripto.',
-      paste: 'Pegar automáticamente (Cmd/Ctrl+V) en la app activa',
-      clipboard: 'Solo copiar al portapapeles (yo pego cuando quiera)',
-    },
     saveHistory: {
       title: 'Historial',
       description: 'Decidí si guardamos tus transcripciones para que puedas revisarlas más tarde.',
@@ -210,18 +203,9 @@ export const es: Translations = {
         label: 'Alta',
         hint: 'Mayor esfuerzo y demora, pero mejor con mezcla de idiomas, términos técnicos o audios ruidosos.',
       },
-    },
-    suppressNonSpeech: {
-      title: 'Sonidos no verbales',
-      description:
-        'Bisbi puede transcribir anotaciones como "[Música]", "[Risas]" o "(suspiro)". Elegí si querés que aparezcan en el texto.',
-      enabled: {
-        label: 'Ocultarlos (recomendado)',
-        hint: 'Solo se inserta lo que se habla. Los sonidos y ruidos de fondo se ignoran.',
-      },
-      disabled: {
-        label: 'Mantenerlos',
-        hint: 'Las anotaciones como [Música] o (suspiro) se incluyen en la transcripción.',
+      max: {
+        label: 'Máxima',
+        hint: 'La opción más precisa. Bastante más lenta y pesada, ideal para audios difíciles, varias personas hablando o contenido crítico.',
       },
     },
     muteAudio: {

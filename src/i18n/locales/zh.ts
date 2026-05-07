@@ -106,7 +106,6 @@ export const zh: Translations = {
     titleHint: '按下快捷键开始说话。',
     hotkeyLabel: '快捷键',
     hotkeyHintPaste: '文本会自动粘贴到你正在输入的位置。',
-    hotkeyHintClipboard: '文本会复制到剪贴板。',
     activitySection: '你的活动',
     transcriptionsOne: '条转写',
     transcriptionsOther: '条转写',
@@ -172,12 +171,6 @@ export const zh: Translations = {
       description: '界面使用的语言。默认情况下跟随操作系统。',
       system: '系统({detected})',
     },
-    pasteMode: {
-      title: '文本插入',
-      description: '如何投放转写后的文本。',
-      paste: '自动粘贴(Cmd/Ctrl+V)到当前应用',
-      clipboard: '仅复制到剪贴板(由我自己粘贴)',
-    },
     saveHistory: {
       title: '历史记录',
       description: '决定是否保留你的转写,以便稍后查看。',
@@ -205,17 +198,9 @@ export const zh: Translations = {
         label: '高',
         hint: '处理更多、速度更慢,但对多语言混合、专业术语或嘈杂音频效果更好。',
       },
-    },
-    suppressNonSpeech: {
-      title: '非语音声音',
-      description: 'Bisbi 可以转录"[音乐]"、"[笑声]"或"(叹气)"等注释。选择是否在文本中显示它们。',
-      enabled: {
-        label: '隐藏(推荐)',
-        hint: '只插入说出的内容。背景声音和噪音将被忽略。',
-      },
-      disabled: {
-        label: '保留',
-        hint: '[音乐] 或 (叹气) 等注释会出现在转录文本中。',
+      max: {
+        label: '最高',
+        hint: '最精确的选项。明显更慢且更重,适合困难音频、多人发言或关键内容。',
       },
     },
     muteAudio: {

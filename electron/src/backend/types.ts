@@ -3,7 +3,7 @@ export type RecordingState = 'idle' | 'recording' | 'transcribing';
 export type UiLanguage = 'en' | 'es' | 'zh' | 'hi' | 'ar';
 export type UiLanguageSetting = UiLanguage | 'system';
 
-export type Precision = 'fast' | 'balanced' | 'high';
+export type Precision = 'fast' | 'balanced' | 'high' | 'max';
 
 export interface AppSettings {
   hotkey: string;
@@ -15,14 +15,8 @@ export interface AppSettings {
   handsFreeMode: boolean;
   language: string;
   uiLanguage: UiLanguageSetting;
-  pasteMode: 'paste' | 'clipboard';
   saveHistory: boolean;
   precision: Precision;
-  // When true, whisper-cli is invoked with --suppress-nst so non-speech
-  // tokens like "[Música]", "[Risas]" or "(suspiro)" are stripped from the
-  // transcript. Defaults to true because most users dictate text and don't
-  // want these annotations leaking into the output.
-  suppressNonSpeech: boolean;
   // Free-form text passed to whisper-cli as `--prompt`. Used as initial
   // context so the model is more likely to recognise proper names, brand
   // terms, technical jargon, etc. Empty string ⇒ no prompt is forwarded.

@@ -99,9 +99,7 @@ export function Home({ settings, recState, onNavigateToHistory }: Props) {
             />
           </div>
           <span className="home-hotkey-hint">
-            {settings.pasteMode === 'paste'
-              ? t('home.hotkeyHintPaste')
-              : t('home.hotkeyHintClipboard')}
+            {t('home.hotkeyHintPaste')}
           </span>
         </div>
       </div>

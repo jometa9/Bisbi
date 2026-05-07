@@ -1,12 +1,9 @@
 import { clipboard } from 'electron';
 import { spawn } from 'child_process';
 
-export type PasteMode = 'paste' | 'clipboard';
-
-export async function deliverText(text: string, mode: PasteMode): Promise<void> {
+export async function deliverText(text: string): Promise<void> {
   if (!text) return;
   clipboard.writeText(text);
-  if (mode === 'clipboard') return;
   // Small delay so the OS clipboard is ready before the synthetic paste fires.
   await sleep(60);
   await simulatePaste();

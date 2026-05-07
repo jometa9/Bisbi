@@ -11,7 +11,6 @@ export interface TranscribeOptions {
   language: string; // 'auto' or ISO code (e.g. 'es', 'en')
   precision: Precision;
   threads?: number;
-  suppressNonSpeech?: boolean;
   vocabulary?: string;
 }
 

@@ -80,15 +80,8 @@ let registered = false;
 let recordingState: RecordingState = 'idle';
 let activeMainWindowOpener: (() => void) | null = null;
 
-// Recording state is split from transcription work so the user can start a
-// new recording while a previous one is still being transcribed. Jobs run
-// serially in the order they were captured (FIFO) so pasted output keeps
-// the user's intended sequence even when later clips are shorter and would
-// otherwise finish first.
 let isRecording = false;
 let workerRunning = false;
-// Snapshot of side effects taken at recording-start so we can undo exactly
-// what we did at recording-stop. Cleared after restore.
 let muteSnapshot: MuteSnapshot | null = null;
 interface TranscriptionJob {
   pcm: Buffer;
@@ -120,10 +113,6 @@ function syncState(): void {
   if (next === 'idle') {
     hideRecordingWindow();
   } else {
-    // Use showRecordingWindow (not just setState) so that if the pill was
-    // mid fade-out — e.g. we briefly hit `idle` between releasing the
-    // hotkey and the renderer shipping the PCM buffer — it fades back in
-    // for the transcribing phase instead of staying invisible.
     showRecordingWindow(next);
   }
 }
@@ -140,13 +129,12 @@ async function processQueue(): Promise<void> {
         const out = await transcribePcm(job.pcm, job.sampleRate, job.channels, {
           language: cfg.language,
           precision: cfg.precision,
-          suppressNonSpeech: cfg.suppressNonSpeech,
           vocabulary: cfg.vocabulary,
         });
         const meaningful = out.text.replace(/\s/g, '').length >= 2;
         const wordCount = meaningful ? countWords(out.text) : 0;
         if (meaningful) {
-          await deliverText(out.text, cfg.pasteMode);
+          await deliverText(out.text);
         }
         if (cfg.saveHistory && meaningful) {
           insertTranscription({
@@ -155,19 +143,13 @@ async function processQueue(): Promise<void> {
             text: out.text,
             language: null,
             durationMs: out.durationMs,
-            model: out.modelFile.replace(/\.bin$/, ''),
+            model: cfg.precision,
             audioDurationMs: out.audioDurationMs,
             wordCount,
           });
           broadcast('history:changed');
           broadcast('stats:totals', getStatsTotals());
         }
-        // Track monthly usage regardless of saveHistory — the limit must be
-        // enforced even when history is off. We update the local cache
-        // optimistically so the UI reflects the new count immediately, then
-        // enqueue a usage event for the external API. The flusher will
-        // overwrite the cache with the server's authoritative count once the
-        // POST succeeds.
         if (meaningful && wordCount > 0) {
           addMonthlyWordUsage(wordCount);
           enqueueUsage({
@@ -433,7 +415,6 @@ export async function registerBackend(opts: BackendOptions): Promise<void> {
       const out = await transcribePcm(pcm, payload.sampleRate, payload.channels, {
         language: cfg.language,
         precision: cfg.precision,
-        suppressNonSpeech: cfg.suppressNonSpeech,
         vocabulary: cfg.vocabulary,
       });
       return out.text;

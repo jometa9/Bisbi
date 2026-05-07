@@ -3,19 +3,15 @@ export type RecordingState = 'idle' | 'recording' | 'transcribing';
 export type UiLanguage = 'en' | 'es' | 'zh' | 'hi' | 'ar';
 export type UiLanguageSetting = UiLanguage | 'system';
 
-export type Precision = 'fast' | 'balanced' | 'high';
+export type Precision = 'fast' | 'balanced' | 'high' | 'max';
 
 export interface AppSettings {
   hotkey: string;
   handsFreeMode: boolean;
   language: string;
   uiLanguage: UiLanguageSetting;
-  pasteMode: 'paste' | 'clipboard';
   saveHistory: boolean;
   precision: Precision;
-  // When true, whisper-cli strips non-speech tokens like "[Música]" or
-  // "(suspiro)" from the transcript. Defaults to true.
-  suppressNonSpeech: boolean;
   // Free-form text used as the whisper-cli `--prompt`. Helps the model
   // recognise proper names, brand terms, jargon. Empty ⇒ no prompt.
   vocabulary: string;

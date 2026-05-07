@@ -20,7 +20,7 @@ interface Props {
   onClearHistory: () => Promise<void>;
 }
 
-const PRECISION_OPTIONS: Precision[] = ['fast', 'balanced', 'high'];
+const PRECISION_OPTIONS: Precision[] = ['fast', 'balanced', 'high', 'max'];
 
 export function Settings({ settings, onChange, onReset, onClearHistory }: Props) {
   const { t, systemLocale } = useTranslation();
@@ -150,28 +150,6 @@ export function Settings({ settings, onChange, onReset, onClearHistory }: Props)
       </Section>
 
       <Section
-        title={t('settings.suppressNonSpeech.title')}
-        description={t('settings.suppressNonSpeech.description')}
-      >
-        <div className="option-cards">
-          <OptionCard
-            name="suppressNonSpeech"
-            selected={settings.suppressNonSpeech}
-            title={t('settings.suppressNonSpeech.enabled.label')}
-            hint={t('settings.suppressNonSpeech.enabled.hint')}
-            onSelect={() => onChange({ suppressNonSpeech: true })}
-          />
-          <OptionCard
-            name="suppressNonSpeech"
-            selected={!settings.suppressNonSpeech}
-            title={t('settings.suppressNonSpeech.disabled.label')}
-            hint={t('settings.suppressNonSpeech.disabled.hint')}
-            onSelect={() => onChange({ suppressNonSpeech: false })}
-          />
-        </div>
-      </Section>
-
-      <Section
         title={t('settings.muteAudio.title')}
         description={t('settings.muteAudio.description')}
       >
@@ -189,26 +167,6 @@ export function Settings({ settings, onChange, onReset, onClearHistory }: Props)
             title={t('settings.muteAudio.disabled.label')}
             hint={t('settings.muteAudio.disabled.hint')}
             onSelect={() => onChange({ muteSystemAudioWhileRecording: false })}
-          />
-        </div>
-      </Section>
-
-      <Section
-        title={t('settings.pasteMode.title')}
-        description={t('settings.pasteMode.description')}
-      >
-        <div className="option-cards">
-          <OptionCard
-            name="pasteMode"
-            selected={settings.pasteMode === 'paste'}
-            title={t('settings.pasteMode.paste')}
-            onSelect={() => onChange({ pasteMode: 'paste' })}
-          />
-          <OptionCard
-            name="pasteMode"
-            selected={settings.pasteMode === 'clipboard'}
-            title={t('settings.pasteMode.clipboard')}
-            onSelect={() => onChange({ pasteMode: 'clipboard' })}
           />
         </div>
       </Section>

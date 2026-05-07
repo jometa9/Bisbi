@@ -3,7 +3,7 @@
 App de escritorio para dictado por voz, local-first. Apretás un atajo, hablás, soltás el atajo y el texto transcripto aparece pegado en la app activa.
 
 - **Captura de audio:** mic predeterminado, vía `getUserMedia` en el renderer.
-- **Transcripción:** [whisper.cpp](https://github.com/ggerganov/whisper.cpp) corriendo localmente con el modelo `ggml-base-q5_1` (multilenguaje, ~57 MB).
+- **Transcripción:** [whisper.cpp](https://github.com/ggerganov/whisper.cpp) corriendo localmente con 4 modelos seleccionables (ver `electron/src/buildConfig.ts`). Los archivos se distribuyen renombrados como `bsb-00*.dat` para que el bundle no exponga el modelo subyacente.
 - **Inserción:** simulación de Cmd/Ctrl+V tras copiar al clipboard.
 - **Plataformas:** macOS (arm64 + x64), Windows x64, Linux x64.
 
@@ -49,7 +49,10 @@ App de escritorio para dictado por voz, local-first. Apretás un atajo, hablás,
 ├── build/installer.nsh       # macros NSIS para Windows
 ├── build-resources/          # íconos (icon.icns, icon.ico, icon.png)
 └── resources/whisper/        # ⚠️ NO en git — ver más abajo
-    ├── ggml-base-q5_1.bin
+    ├── bsb-001.dat           # ggml-base-q5_1        (~57 MB,  precisión "fast")
+    ├── bsb-002.dat           # ggml-small-q5_1       (~181 MB, precisión "balanced")
+    ├── bsb-003.dat           # ggml-large-v3-turbo-q5_0 (~547 MB, precisión "high")
+    ├── bsb-004.dat           # ggml-large-v3-q5_0    (~1.0 GB, precisión "max")
     ├── darwin-arm64/whisper-cli
     ├── darwin-x64/whisper-cli
     ├── win32-x64/whisper-cli.exe
@@ -64,16 +67,19 @@ App de escritorio para dictado por voz, local-first. Apretás un atajo, hablás,
 npm install
 ```
 
-### 2. Descargar el modelo de Whisper
+### 2. Descargar los modelos de Whisper
+
+Los 4 modelos se descargan de Hugging Face y se guardan **renombrados** a `bsb-00*.dat` (los nombres en disco están desacoplados del modelo upstream para que el bundle no los revele). El mapeo está en [electron/src/buildConfig.ts](electron/src/buildConfig.ts).
 
 ```bash
 mkdir -p resources/whisper
-curl -L \
-  https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-base-q5_1.bin \
-  -o resources/whisper/ggml-base-q5_1.bin
-```
+BASE=https://huggingface.co/ggerganov/whisper.cpp/resolve/main
 
-(`ggml-base-q5_1.bin` ≈ 57 MB)
+curl -L $BASE/ggml-base-q5_1.bin            -o resources/whisper/bsb-001.dat   # ~57 MB
+curl -L $BASE/ggml-small-q5_1.bin           -o resources/whisper/bsb-002.dat   # ~181 MB
+curl -L $BASE/ggml-large-v3-turbo-q5_0.bin  -o resources/whisper/bsb-003.dat   # ~547 MB
+curl -L $BASE/ggml-large-v3-q5_0.bin        -o resources/whisper/bsb-004.dat   # ~1.0 GB
+```
 
 ### 3. Compilar los binarios de whisper.cpp
 

@@ -71,7 +71,6 @@ export const en: {
     titleHint: string;
     hotkeyLabel: string;
     hotkeyHintPaste: string;
-    hotkeyHintClipboard: string;
     activitySection: string;
     transcriptionsOne: string;
     transcriptionsOther: string;
@@ -113,7 +112,6 @@ export const en: {
     };
     transcriptionLanguage: { title: string; description: string; searchPlaceholder: string };
     uiLanguage: { title: string; description: string; system: string };
-    pasteMode: { title: string; description: string; paste: string; clipboard: string };
     saveHistory: {
       title: string;
       description: string;
@@ -126,12 +124,7 @@ export const en: {
       fast: { label: string; hint: string };
       balanced: { label: string; hint: string };
       high: { label: string; hint: string };
-    };
-    suppressNonSpeech: {
-      title: string;
-      description: string;
-      enabled: { label: string; hint: string };
-      disabled: { label: string; hint: string };
+      max: { label: string; hint: string };
     };
     muteAudio: {
       title: string;
@@ -328,7 +321,6 @@ export const en: {
     titleHint: 'Press the hotkey and speak.',
     hotkeyLabel: 'Hotkey',
     hotkeyHintPaste: 'The text is pasted automatically wherever you are typing.',
-    hotkeyHintClipboard: 'The text is copied to the clipboard.',
     activitySection: 'Your activity',
     transcriptionsOne: 'transcription',
     transcriptionsOther: 'transcriptions',
@@ -398,12 +390,6 @@ export const en: {
         'Language used for the interface. By default it follows your operating system.',
       system: 'System ({detected})',
     },
-    pasteMode: {
-      title: 'Text insertion',
-      description: 'How we deliver the transcribed text.',
-      paste: 'Auto-paste (Cmd/Ctrl+V) into the active app',
-      clipboard: 'Copy to clipboard only (I will paste it myself)',
-    },
     saveHistory: {
       title: 'History',
       description: 'Decide whether your transcriptions are kept so you can review them later.',
@@ -432,18 +418,9 @@ export const en: {
         label: 'High',
         hint: 'More effort and slower, but better with mixed languages, technical terms, or noisy audio.',
       },
-    },
-    suppressNonSpeech: {
-      title: 'Non-speech sounds',
-      description:
-        'Bisbi can transcribe annotations like "[Music]", "[Laughter]" or "(sigh)". Choose whether they should appear in your text.',
-      enabled: {
-        label: 'Hide them (recommended)',
-        hint: 'Only spoken words are inserted. Background sounds and noises are ignored.',
-      },
-      disabled: {
-        label: 'Keep them',
-        hint: 'Annotations like [Music] or (sigh) are included in the transcription.',
+      max: {
+        label: 'Maximum',
+        hint: 'The most accurate option. Significantly slower and heavier, ideal for difficult audio, multiple speakers, or critical content.',
       },
     },
     muteAudio: {

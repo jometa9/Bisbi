@@ -106,7 +106,6 @@ export const ar: Translations = {
     titleHint: 'اضغط الاختصار وتحدّث.',
     hotkeyLabel: 'الاختصار',
     hotkeyHintPaste: 'يتم لصق النص تلقائيًا حيث تكتب.',
-    hotkeyHintClipboard: 'يتم نسخ النص إلى الحافظة.',
     activitySection: 'نشاطك',
     transcriptionsOne: 'كتابة',
     transcriptionsOther: 'كتابات',
@@ -173,12 +172,6 @@ export const ar: Translations = {
       description: 'اللغة المستخدمة في الواجهة. تتبع نظام التشغيل افتراضيًا.',
       system: 'النظام ({detected})',
     },
-    pasteMode: {
-      title: 'إدراج النص',
-      description: 'كيف نُسلّم النص المكتوب.',
-      paste: 'لصق تلقائي (Cmd/Ctrl+V) في التطبيق النشط',
-      clipboard: 'النسخ إلى الحافظة فقط (سألصقه بنفسي)',
-    },
     saveHistory: {
       title: 'السجل',
       description: 'حدّد ما إذا كنا سنحتفظ بكتاباتك لتراجعها لاحقًا.',
@@ -207,18 +200,9 @@ export const ar: Translations = {
         label: 'عالٍ',
         hint: 'جهد أكبر وأبطأ، لكن أفضل مع لغات مختلطة أو مصطلحات تقنية أو صوت مزعج.',
       },
-    },
-    suppressNonSpeech: {
-      title: 'الأصوات غير الكلامية',
-      description:
-        'يمكن لـ Bisbi نسخ تعليقات مثل "[موسيقى]" أو "[ضحك]" أو "(تنهيدة)". اختر ما إذا كنت تريد ظهورها في النص.',
-      enabled: {
-        label: 'إخفاؤها (موصى به)',
-        hint: 'يتم إدراج الكلمات المنطوقة فقط. يتم تجاهل الأصوات والضوضاء في الخلفية.',
-      },
-      disabled: {
-        label: 'الاحتفاظ بها',
-        hint: 'تظهر التعليقات مثل [موسيقى] أو (تنهيدة) ضمن النص المنسوخ.',
+      max: {
+        label: 'الأقصى',
+        hint: 'الخيار الأكثر دقة. أبطأ وأثقل بكثير، مثالي للصوت الصعب أو تعدد المتحدثين أو المحتوى الحساس.',
       },
     },
     muteAudio: {

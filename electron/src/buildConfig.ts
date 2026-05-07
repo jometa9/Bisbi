@@ -1,9 +1,13 @@
 export const WEB_BASE = 'http://localhost:3001';
 
+// Model files are renamed from their upstream `ggml-*.bin` names to opaque
+// `bsb-*.dat` names so they don't reveal the underlying Whisper model when a
+// curious user inspects the bundled app. whisper-cli accepts any path.
 export const WHISPER_MODELS = {
-  fast: 'ggml-base-q5_1.bin',
-  balanced: 'ggml-small-q5_1.bin',
-  high: 'ggml-large-v3-turbo-q5_0.bin',
+  fast: 'bsb-001.dat',
+  balanced: 'bsb-002.dat',
+  high: 'bsb-003.dat',
+  max: 'bsb-004.dat',
 } as const;
 
 export const BUILD_CONFIG = {
