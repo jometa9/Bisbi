@@ -344,7 +344,7 @@ export const es: Translations = {
     },
     dictation: {
       title: 'Probemos.',
-      subtitle: 'Mantené presionada',
+      subtitle: 'Mantené apretado {hotkey} y leé la frase de abajo en voz alta para probar tu primer dictado.',
       samplePhrase:
         'Hola Bisbi, esta es mi primera dictada. Hablar es más rápido que escribir.',
       waiting: 'Esperando tu voz…',

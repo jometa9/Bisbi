@@ -580,7 +580,7 @@ export const en: {
     },
     dictation: {
       title: "Let's try it.",
-      subtitle: 'Hold down',
+      subtitle: 'Hold down {hotkey} and read the phrase below out loud to try your first dictation.',
       samplePhrase:
         'Hi Bisbi, this is my first dictation. Speaking is faster than typing.',
       waiting: 'Waiting for your voice…',

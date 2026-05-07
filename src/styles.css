@@ -1564,6 +1564,7 @@ html.recording-window #root {
   align-items: center;
   gap: 24px;
   text-align: center;
+  animation: onb-slide-in 250ms ease-in-out;
 }
 
 .login-brand {

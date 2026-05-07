@@ -154,8 +154,9 @@ export function FirstDictation({
     <div className="onb-screen">
       <h1 className="onb-title">{t('onboarding.dictation.title')}</h1>
       <p className="onb-subtitle">
-        {t('onboarding.dictation.subtitle')}{' '}
-        {formatHotkeyAccelerator(hotkey, keyPlatform, hotkeyLabels)}
+        {t('onboarding.dictation.subtitle', {
+          hotkey: formatHotkeyAccelerator(hotkey, keyPlatform, hotkeyLabels),
+        })}
       </p>
 
       <div className="onb-phrase">{t('onboarding.dictation.samplePhrase')}</div>

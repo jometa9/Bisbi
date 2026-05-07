@@ -341,7 +341,7 @@ export const ar: Translations = {
     },
     dictation: {
       title: 'لنجرّب.',
-      subtitle: 'اضغط مع الاستمرار',
+      subtitle: 'اضغط مع الاستمرار على {hotkey} واقرأ الجملة أدناه بصوت عالٍ لتجربة أول إملاء لك.',
       samplePhrase: 'مرحبًا Bisbi، هذه أول إملاءاتي. التحدث أسرع من الكتابة.',
       waiting: 'في انتظار صوتك…',
       listening: 'جارٍ الاستماع…',

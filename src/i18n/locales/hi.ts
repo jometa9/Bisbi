@@ -341,7 +341,7 @@ export const hi: Translations = {
     },
     dictation: {
       title: 'आज़माते हैं।',
-      subtitle: 'दबाए रखें',
+      subtitle: '{hotkey} दबाए रखें और अपने पहले डिक्टेशन के लिए नीचे दिया वाक्य ज़ोर से पढ़ें।',
       samplePhrase:
         'नमस्ते Bisbi, यह मेरी पहली डिक्टेशन है। बोलना टाइप करने से तेज़ है।',
       waiting: 'आपकी आवाज़ का इंतज़ार…',

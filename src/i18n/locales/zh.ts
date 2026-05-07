@@ -334,7 +334,7 @@ export const zh: Translations = {
     },
     dictation: {
       title: '试一下。',
-      subtitle: '按住',
+      subtitle: '按住 {hotkey}，朗读下方句子来尝试你的第一次口述。',
       samplePhrase: '你好 Bisbi,这是我的第一次听写。说话比打字更快。',
       waiting: '等待你的声音…',
       listening: '正在聆听…',
