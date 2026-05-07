@@ -80,10 +80,8 @@ export function Account() {
         </span>
       </header>
 
-      {/* Pricing table — shown only when on free plan */}
       {!isPro && (
         <Section title={t('account.subscriptionSection.title')} description={t('account.subscriptionSection.description')}>
-          {/* Billing toggle */}
           <div className="billing-toggle">
             <button
               type="button"
@@ -104,9 +102,7 @@ export function Account() {
             </button>
           </div>
 
-          {/* Plan cards */}
           <div className="plan-cards">
-            {/* Free card */}
             <div className="plan-card plan-card-free">
               <div className="plan-card-header">
                 <span className="plan-card-name">{t('account.planFree')}</span>
@@ -123,7 +119,6 @@ export function Account() {
               </div>
             </div>
 
-            {/* Pro card */}
             <div className="plan-card plan-card-pro">
               <div className="plan-card-header">
                 <span className="plan-card-name">Pro</span>
@@ -161,7 +156,6 @@ export function Account() {
         </Section>
       )}
 
-      {/* Subscription management — shown only when Pro */}
       {isPro && (
         <Section title={t('account.subscriptionSection.title')} description={t('account.subscriptionSection.description')}>
           <div className="account-card">

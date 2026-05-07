@@ -55,9 +55,6 @@ export function Home({ settings, recState, onNavigateToHistory }: Props) {
 
   const statusText = t(`home.statusTitle.${recState}` as const);
   const lastTranscription = rows[0]?.text?.trim() ?? '';
-  // Watermark text replaces the last-transcription preview while recording or
-  // transcribing, so the active state is conveyed by the same big rotated
-  // background instead of a separate inline indicator.
   const watermarkText =
     recState === 'recording'
       ? t('home.watermark.listening')
