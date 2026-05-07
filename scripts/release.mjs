@@ -84,11 +84,13 @@ const tag = `v${version}`;
 // ───────── Build for current platform ─────────
 
 const PLATFORM = process.platform; // 'darwin' | 'win32'
-const BUILD_CMD = { darwin: 'package:mac', win32: 'package:win' }[PLATFORM];
-if (!BUILD_CMD) log.fail(`Unsupported platform: ${PLATFORM}. Only macOS and Windows are supported.`);
+const ARCH = process.arch; // 'arm64' | 'x64'
+const BUILDER_FLAG = { darwin: '--mac', win32: '--win' }[PLATFORM];
+if (!BUILDER_FLAG) log.fail(`Unsupported platform: ${PLATFORM}. Only macOS and Windows are supported.`);
 
-log.step(`Building for ${PLATFORM}`);
-run(`npm run ${BUILD_CMD}`);
+log.step(`Building for ${PLATFORM}/${ARCH}`);
+run(`npm run build`);
+run(`npx electron-builder ${BUILDER_FLAG} --${ARCH}`);
 log.ok('Build finished');
 
 // ───────── Collect artifacts ─────────
