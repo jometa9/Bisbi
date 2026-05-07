@@ -203,18 +203,6 @@ export function Account() {
           <Field label={t('account.name')} value={userInfo.name || '—'} />
           <Field label={t('account.email')} value={userInfo.email} />
         </div>
-        <div className="actions">
-          <button
-            type="button"
-            className="tx-icon-btn"
-            onClick={() => void refreshSession()}
-            disabled={isRefreshing}
-            title={t('account.refresh')}
-            aria-label={t('account.refresh')}
-          >
-            <RefreshIcon spinning={isRefreshing} />
-          </button>
-        </div>
       </Section>
 
       <Section title={t('account.sessionSection.title')} description={t('account.sessionSection.description')}>
