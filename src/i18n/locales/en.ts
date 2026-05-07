@@ -157,6 +157,33 @@ export const en: {
     ar: string;
   };
   uiLanguageOption: { en: string; es: string; zh: string; hi: string; ar: string };
+  keys: {
+    command: string;
+    leftCommand: string;
+    rightCommand: string;
+    control: string;
+    leftControl: string;
+    rightControl: string;
+    option: string;
+    leftOption: string;
+    rightOption: string;
+    alt: string;
+    leftAlt: string;
+    rightAlt: string;
+    shift: string;
+    leftShift: string;
+    rightShift: string;
+    win: string;
+    leftWin: string;
+    rightWin: string;
+    ctrl: string;
+    leftCtrl: string;
+    rightCtrl: string;
+    space: string;
+    capsLock: string;
+    shortLeft: string;
+    shortRight: string;
+  };
   tray: {
     tooltipIdle: string;
     tooltipRecording: string;
@@ -200,6 +227,7 @@ export const en: {
     dictation: {
       title: string;
       subtitle: string;
+      samplePhrase: string;
       waiting: string;
       listening: string;
       transcribing: string;
@@ -208,12 +236,6 @@ export const en: {
       retry: string;
       continue: string;
       skip: string;
-    };
-    account: {
-      title: string;
-      subtitle: string;
-      signIn: string;
-      microcopy: string;
     };
   };
 } = {
@@ -254,7 +276,7 @@ export const en: {
     noAccount: "Don't have an account?",
     signUp: 'Sign up',
     takeTour: 'Take a tour',
-    backToLogin: 'Back to login',
+    backToLogin: 'Go to login',
   },
   account: {
     title: 'Account',
@@ -469,6 +491,33 @@ export const en: {
     hi: 'हिन्दी',
     ar: 'العربية',
   },
+  keys: {
+    command: 'Command',
+    leftCommand: 'Left Command',
+    rightCommand: 'Right Command',
+    control: 'Control',
+    leftControl: 'Left Control',
+    rightControl: 'Right Control',
+    option: 'Option',
+    leftOption: 'Left Option',
+    rightOption: 'Right Option',
+    alt: 'Alt',
+    leftAlt: 'Left Alt',
+    rightAlt: 'Right Alt',
+    shift: 'Shift',
+    leftShift: 'Left Shift',
+    rightShift: 'Right Shift',
+    win: 'Win',
+    leftWin: 'Left Win',
+    rightWin: 'Right Win',
+    ctrl: 'Ctrl',
+    leftCtrl: 'Left Ctrl',
+    rightCtrl: 'Right Ctrl',
+    space: 'Space',
+    capsLock: 'Caps Lock',
+    shortLeft: 'L',
+    shortRight: 'R',
+  },
   tray: {
     tooltipIdle: 'Bisbi — ready to dictate',
     tooltipRecording: 'Bisbi — recording…',
@@ -532,6 +581,8 @@ export const en: {
     dictation: {
       title: "Let's try it.",
       subtitle: 'Hold down',
+      samplePhrase:
+        'Hi Bisbi, this is my first dictation. Speaking is faster than typing.',
       waiting: 'Waiting for your voice…',
       listening: 'Listening…',
       transcribing: 'Transcribing…',
@@ -540,12 +591,6 @@ export const en: {
       retry: 'Try again',
       continue: 'Continue',
       skip: 'Skip and configure later',
-    },
-    account: {
-      title: 'It worked, right?',
-      subtitle: 'Create your account to save your settings and start using Bisbi.',
-      signIn: 'Continue with Google',
-      microcopy: 'Free to start. No credit card required.',
     },
   },
 };

@@ -26,6 +26,7 @@ export function App() {
   const [resourcesOk, setResourcesOk] = useState<boolean | null>(null);
   const [showLimitBanner, setShowLimitBanner] = useState(false);
   const [tourActive, setTourActive] = useState(false);
+  const [tourMicNeeded, setTourMicNeeded] = useState(false);
 
   useEffect(() => {
     settingsRef.current = settings;
@@ -65,8 +66,15 @@ export function App() {
     if (isAuthenticated) {
       setTab('home');
       setTourActive(false);
+      setTourMicNeeded(false);
     }
   }, [isAuthenticated]);
+
+  useEffect(() => {
+    if (!window.bisbi) return;
+    const armed = isAuthenticated || tourMicNeeded;
+    void window.bisbi.setRecordingArmed(armed);
+  }, [isAuthenticated, tourMicNeeded]);
 
   useEffect(() => {
     if (!window.bisbi) return;
@@ -155,6 +163,7 @@ export function App() {
           settings={settings}
           onSettingsChange={setSettings}
           onExit={() => setTourActive(false)}
+          onMicNeeded={setTourMicNeeded}
         />
       );
     }

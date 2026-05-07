@@ -1,4 +1,4 @@
-import { formatHotkeyPart, type KeyPlatform } from '../lib/hotkey';
+import { formatHotkeyPart, useHotkeyLabels, type KeyPlatform } from '../lib/hotkey';
 
 export type HotkeyVisualState = 'idle' | 'pressed' | 'lit';
 
@@ -10,6 +10,7 @@ interface Props {
 }
 
 export function HotkeyKeys({ accel, platform, visual = 'idle', size = 'md' }: Props) {
+  const labels = useHotkeyLabels();
   const parts = accel.split('+').filter(Boolean);
   const stateClass = visual === 'idle' ? '' : ` kbd-${visual}`;
   const sizeClass = size === 'sm' ? ' kbd-sm' : '';
@@ -18,7 +19,7 @@ export function HotkeyKeys({ accel, platform, visual = 'idle', size = 'md' }: Pr
       {parts.flatMap((part, i) => {
         const node = (
           <kbd key={`k-${i}`} className={`kbd kbd-${platform}${sizeClass}${stateClass}`}>
-            {formatHotkeyPart(part, platform)}
+            {formatHotkeyPart(part, platform, labels)}
           </kbd>
         );
         if (i === parts.length - 1) return [node];

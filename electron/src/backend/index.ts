@@ -81,6 +81,7 @@ let recordingState: RecordingState = 'idle';
 let activeMainWindowOpener: (() => void) | null = null;
 
 let isRecording = false;
+let recordingArmed = false;
 let workerRunning = false;
 let muteSnapshot: MuteSnapshot | null = null;
 interface TranscriptionJob {
@@ -290,6 +291,13 @@ export async function registerBackend(opts: BackendOptions): Promise<void> {
     syncState();
   });
 
+  ipcMain.handle('recording:setArmed', (_e, armed: boolean) => {
+    recordingArmed = !!armed;
+    if (!recordingArmed && isRecording) {
+      handleCancelRecording();
+    }
+  });
+
   ipcMain.handle('history:list', (_e, limit?: number) => listTranscriptions(limit ?? 100));
   ipcMain.handle('history:delete', (_e, id: string) => {
     deleteTranscription(id);
@@ -323,8 +331,8 @@ export async function registerBackend(opts: BackendOptions): Promise<void> {
       return session;
     }
   );
-  ipcMain.handle('auth:logout', (): AuthSession => {
-    const session = authLogout();
+  ipcMain.handle('auth:logout', async (): Promise<AuthSession> => {
+    const session = await authLogout();
     broadcast('auth:changed', session);
     return session;
   });
@@ -406,6 +414,16 @@ export async function registerBackend(opts: BackendOptions): Promise<void> {
 
 function handleStartRecording(): void {
   if (isRecording) return;
+  if (!recordingArmed) return;
+  const session = getSession();
+  if (session.isAuthenticated && session.userInfo?.plan !== 'pro') {
+    const used = getMonthlyWordUsage();
+    const limit = getMonthlyWordLimit();
+    if (used >= limit) {
+      broadcast('usage:limitReached', { used, limit });
+      return;
+    }
+  }
   isRecording = true;
   showRecordingWindow('recording');
   syncState();

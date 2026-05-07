@@ -194,10 +194,10 @@ if (!gotTheLock) {
       logMain('[main] running in tray; click the tray icon to open settings');
     }
 
-    // On macOS, hide the dock icon only when running fully headless (packaged
-    // and not first-run). Otherwise the user can't find the window.
-    if (process.platform === 'darwin' && app.dock && !shouldOpenWindow) {
-      app.dock.hide();
+    // Keep the dock icon visible whenever the app is running, even when no
+    // window is open. It only disappears when the user fully quits Bisbi.
+    if (process.platform === 'darwin' && app.dock) {
+      app.dock.show();
     }
 
     app.on('activate', () => openSettingsWindow());
@@ -272,13 +272,12 @@ function openSettingsWindow(): void {
   settingsWindow.on('move', scheduleSave);
 
   // Closing the settings window doesn't quit Bisbi — the app keeps running
-  // in the tray. Use the tray menu's "Salir" or Cmd+Q to quit.
+  // in the tray, and the dock icon stays visible until the user fully quits.
   settingsWindow.on('close', (e) => {
     if (settingsWindow && !settingsWindow.isDestroyed()) saveWindowState(settingsWindow);
     if (isQuitting) return;
     e.preventDefault();
     settingsWindow?.hide();
-    if (process.platform === 'darwin' && app.dock) app.dock.hide();
   });
   settingsWindow.on('closed', () => { settingsWindow = null; });
 }

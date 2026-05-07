@@ -193,7 +193,19 @@ export async function startCheckout(billingPeriod: 'monthly' | 'annual'): Promis
   return data.checkoutUrl;
 }
 
-export function logout(): AuthSession {
+export async function logout(): Promise<AuthSession> {
+  loadFromDisk();
+  const token = memCache?.token ?? null;
+  if (token) {
+    try {
+      await fetch(`${WEB_BASE}/api/desktop-logout`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+    } catch {
+      // Best-effort; clear local state regardless so user can sign out offline.
+    }
+  }
   memCache = null;
   authClear();
   return { isAuthenticated: false, userInfo: null };

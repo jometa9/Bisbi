@@ -86,7 +86,7 @@ export interface AuthSession {
   userInfo: UserInfo | null;
 }
 
-export type OnboardingStep = 1 | 2 | 3 | 4 | 5;
+export type OnboardingStep = 1 | 2 | 3 | 4;
 
 export interface OnboardingState {
   completed: boolean;
@@ -116,6 +116,7 @@ declare global {
         channels: number
       ) => Promise<void>;
       cancelRecording: () => Promise<void>;
+      setRecordingArmed: (armed: boolean) => Promise<void>;
       onRecordingStart: (cb: () => void) => () => void;
       onRecordingStop: (cb: () => void) => () => void;
       onRecordingCancel: (cb: () => void) => () => void;

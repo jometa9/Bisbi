@@ -2,13 +2,12 @@ import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from '../../i18n';
 import { HotkeyKeys } from '../../components/HotkeyKeys';
 import { HotkeyCapture } from '../../components/HotkeyCapture';
-import { formatHotkeyAccelerator, type KeyPlatform } from '../../lib/hotkey';
+import { formatHotkeyAccelerator, useHotkeyLabels, type KeyPlatform } from '../../lib/hotkey';
 
 interface Props {
   platform: NodeJS.Platform | null;
   initialHotkey: string;
   onConfirm: (accelerator: string) => Promise<void> | void;
-  onBack: () => void;
 }
 
 interface Preset {
@@ -32,10 +31,11 @@ function buildPresets(platform: NodeJS.Platform | null): Preset[] {
   ];
 }
 
-export function Hotkey({ platform, initialHotkey, onConfirm, onBack }: Props) {
+export function Hotkey({ platform, initialHotkey, onConfirm }: Props) {
   const { t } = useTranslation();
   const presets = useMemo(() => buildPresets(platform), [platform]);
   const keyPlatform: KeyPlatform = platform === 'darwin' ? 'mac' : 'win';
+  const hotkeyLabels = useHotkeyLabels();
 
   const initialMatch = presets.find((p) => p.accelerator === initialHotkey);
   const [selected, setSelected] = useState<string>(
@@ -118,7 +118,7 @@ export function Hotkey({ platform, initialHotkey, onConfirm, onBack }: Props) {
 
       {finalAccelerator && !capturing && (
         <p className="onb-hotkey-readout">
-          {formatHotkeyAccelerator(finalAccelerator, keyPlatform)}
+          {formatHotkeyAccelerator(finalAccelerator, keyPlatform, hotkeyLabels)}
         </p>
       )}
 
@@ -133,7 +133,7 @@ export function Hotkey({ platform, initialHotkey, onConfirm, onBack }: Props) {
             <span className="onb-hotkey-option-radio" aria-hidden="true" />
             <span className="onb-hotkey-option-body">
               <span className="onb-hotkey-option-name">
-                {formatHotkeyAccelerator(preset.accelerator, keyPlatform)}
+                {formatHotkeyAccelerator(preset.accelerator, keyPlatform, hotkeyLabels)}
                 {preset.recommended && (
                   <span className="onb-hotkey-option-badge">
                     {t('onboarding.hotkey.recommended')}
@@ -158,7 +158,7 @@ export function Hotkey({ platform, initialHotkey, onConfirm, onBack }: Props) {
             </span>
             {isCustomActive && customAccel && !capturing && (
               <span className="onb-hotkey-option-hint">
-                {formatHotkeyAccelerator(customAccel, keyPlatform)}
+                {formatHotkeyAccelerator(customAccel, keyPlatform, hotkeyLabels)}
               </span>
             )}
           </span>
@@ -173,10 +173,7 @@ export function Hotkey({ platform, initialHotkey, onConfirm, onBack }: Props) {
         </p>
       )}
 
-      <div className="onb-nav">
-        <button type="button" className="btn-secondary onb-back" onClick={onBack}>
-          {t('onboarding.back')}
-        </button>
+      <div className="onb-nav onb-nav--single">
         <button
           type="button"
           className="btn-primary onb-cta"

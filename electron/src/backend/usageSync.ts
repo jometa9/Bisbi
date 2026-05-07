@@ -46,10 +46,15 @@ export function setUsageEventHandlers(handlers: {
   onLimitReached = handlers.onLimitReached ?? null;
 }
 
+interface PostUsageResult {
+  status: number;
+  body: UsageResponse | null;
+}
+
 async function postUsage(
   token: string,
   payload: { words: number; audioSeconds: number; transcribedAt: number }
-): Promise<UsageResponse> {
+): Promise<PostUsageResult> {
   const resp = await fetch(`${WEB_BASE}/api/usage`, {
     method: 'POST',
     headers: {
@@ -62,10 +67,16 @@ async function postUsage(
       transcribedAt: new Date(payload.transcribedAt).toISOString(),
     }),
   });
-  if (!resp.ok) {
+  let body: UsageResponse | null = null;
+  try {
+    body = (await resp.json()) as UsageResponse;
+  } catch {
+    body = null;
+  }
+  if (!resp.ok && resp.status !== 429) {
     throw new Error(`POST /api/usage failed: ${resp.status}`);
   }
-  return (await resp.json()) as UsageResponse;
+  return { status: resp.status, body };
 }
 
 function applyServerResponse(res: UsageResponse): void {
@@ -90,8 +101,8 @@ export async function flushUsageQueue(): Promise<void> {
           audioSeconds: row.audioSeconds,
           transcribedAt: row.transcribedAt,
         });
+        if (res.body) applyServerResponse(res.body);
         deleteUsageQueueRow(row.id);
-        applyServerResponse(res);
       } catch (err) {
         const attempts = row.attempts + 1;
         const next = Date.now() + backoffFor(attempts);

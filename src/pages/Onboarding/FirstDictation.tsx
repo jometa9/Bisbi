@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from '../../i18n';
 import { HotkeyKeys } from '../../components/HotkeyKeys';
 import { startRecording, type RecordingHandle } from '../../audio';
-import { formatHotkeyAccelerator, type KeyPlatform } from '../../lib/hotkey';
+import { formatHotkeyAccelerator, useHotkeyLabels, type KeyPlatform } from '../../lib/hotkey';
 
 interface Props {
   hotkey: string;
@@ -20,10 +20,7 @@ type DictationState =
   | 'silence'
   | 'failed';
 
-const SAMPLE_PHRASE =
-  'Hola Bisbi, esta es mi primera dictada. Hablar es más rápido que escribir.';
 const NO_VOICE_TIMEOUT_MS = 5000;
-const MAX_RETRIES_BEFORE_SKIP = 3;
 
 // Screen 4 — combined mic test + first real transcription. We tap into the
 // global hotkey events the backend already broadcasts; on stop we ship the
@@ -38,10 +35,10 @@ export function FirstDictation({
 }: Props) {
   const { t } = useTranslation();
   const keyPlatform: KeyPlatform = platform === 'darwin' ? 'mac' : 'win';
+  const hotkeyLabels = useHotkeyLabels();
 
   const [state, setState] = useState<DictationState>('waiting');
   const [transcript, setTranscript] = useState('');
-  const [failures, setFailures] = useState(0);
 
   const handleRef = useRef<RecordingHandle | null>(null);
   const chainRef = useRef<Promise<void>>(Promise.resolve());
@@ -105,7 +102,6 @@ export function FirstDictation({
           );
           const cleaned = text.trim();
           if (!cleaned) {
-            setFailures((f) => f + 1);
             setState('failed');
             return;
           }
@@ -113,7 +109,6 @@ export function FirstDictation({
           setState('success');
         } catch (err) {
           console.error('[onboarding] preview transcription failed:', err);
-          setFailures((f) => f + 1);
           setState('failed');
         }
       });
@@ -144,8 +139,6 @@ export function FirstDictation({
     setState('waiting');
   };
 
-  const reachedSkipThreshold = failures >= MAX_RETRIES_BEFORE_SKIP;
-
   const watermarkText =
     state === 'listening'
       ? t('home.watermark.listening')
@@ -161,10 +154,10 @@ export function FirstDictation({
       <h1 className="onb-title">{t('onboarding.dictation.title')}</h1>
       <p className="onb-subtitle">
         {t('onboarding.dictation.subtitle')}{' '}
-        {formatHotkeyAccelerator(hotkey, keyPlatform)}
+        {formatHotkeyAccelerator(hotkey, keyPlatform, hotkeyLabels)}
       </p>
 
-      <div className="onb-phrase">{SAMPLE_PHRASE}</div>
+      <div className="onb-phrase">{t('onboarding.dictation.samplePhrase')}</div>
 
       <div className="home-hotkey">
         {showWatermark && (
@@ -216,7 +209,7 @@ export function FirstDictation({
         )}
       </div>
 
-      {reachedSkipThreshold && state !== 'success' && (
+      {state !== 'success' && (
         <button type="button" className="onb-skip-link" onClick={onContinue}>
           {t('onboarding.dictation.skip')}
         </button>

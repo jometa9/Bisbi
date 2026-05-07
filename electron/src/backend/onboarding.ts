@@ -2,7 +2,7 @@ import { app, systemPreferences, shell, globalShortcut } from 'electron';
 import fs from 'fs';
 import path from 'path';
 
-export type OnboardingStep = 1 | 2 | 3 | 4 | 5;
+export type OnboardingStep = 1 | 2 | 3 | 4;
 
 export interface OnboardingState {
   completed: boolean;

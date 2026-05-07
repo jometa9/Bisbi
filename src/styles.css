@@ -449,6 +449,7 @@ button { font-family: inherit; }
 
 .home-hotkey {
   position: relative;
+  width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1205,8 +1206,8 @@ button { font-family: inherit; }
   border: 1px solid var(--border-strong);
   background: var(--bg);
   color: var(--text);
-  padding: 7px 14px;
-  border-radius: var(--radius-sm);
+  padding: 7px 16px;
+  border-radius: 999px;
   font-size: 13px;
   font-weight: 450;
   cursor: pointer;
@@ -1223,10 +1224,10 @@ button { font-family: inherit; }
   border: 1px solid rgba(192, 57, 43, 0.25);
   background: #FBEAE7;
   color: var(--danger);
-  padding: 7px 14px;
-  border-radius: var(--radius-sm);
+  padding: 7px 16px;
+  border-radius: 999px;
   font-size: 13px;
-  font-weight: 500;
+  font-weight: 450;
   cursor: pointer;
   transition: background 0.12s, border-color 0.12s, color 0.12s;
 }
@@ -1531,7 +1532,7 @@ html.recording-window #root {
 
 .login-owl {
   position: absolute;
-  bottom: -40%;
+  bottom: -20%;
   width: clamp(600px, 32vw, 360px);
   height: auto;
   opacity: 0.07;
@@ -1595,10 +1596,10 @@ html.recording-window #root {
 .btn-primary {
   appearance: none;
   border: none;
-  background: var(--primary-dark);
+  background: var(--primary);
   color: var(--white);
-  padding: 11px 18px;
-  border-radius: var(--radius-sm);
+  padding: 11px 22px;
+  border-radius: 999px;
   font-family: inherit;
   font-size: 13.5px;
   font-weight: 500;
@@ -1610,7 +1611,7 @@ html.recording-window #root {
   transition: background 0.12s, opacity 0.12s;
 }
 
-.btn-primary:hover { background: var(--accent); }
+.btn-primary:hover { background: var(--primary-dark); }
 .btn-primary:disabled { opacity: 0.7; cursor: default; }
 
 .login-btn {
@@ -1665,6 +1666,25 @@ html.recording-window #root {
 }
 
 .login-link:hover { color: var(--accent-hover); text-decoration: underline; }
+
+.login-tour {
+  -webkit-app-region: no-drag;
+  appearance: none;
+  margin: 12px 0 0;
+  background: none;
+  border: none;
+  padding: 4px 8px;
+  font: inherit;
+  font-size: 12.5px;
+  color: var(--text-soft);
+  cursor: pointer;
+  transition: color 120ms ease;
+}
+
+.login-tour:hover,
+.login-tour:focus-visible {
+  color: var(--primary-dark);
+}
 
 /* Account page — reuses .settings/.section spacing for visual consistency. */
 
@@ -1964,6 +1984,32 @@ html.recording-window #root {
   text-transform: uppercase;
 }
 
+.onb-footer {
+  -webkit-app-region: no-drag;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  padding-top: 16px;
+}
+
+.onb-exit {
+  appearance: none;
+  background: none;
+  border: none;
+  padding: 4px 8px;
+  font: inherit;
+  font-size: 12.5px;
+  color: var(--text-soft);
+  opacity: 0.4;
+  cursor: pointer;
+  transition: opacity 120ms ease;
+}
+
+.onb-exit:hover,
+.onb-exit:focus-visible {
+  opacity: 0.6;
+}
+
 .onb-content {
   -webkit-app-region: no-drag;
   width: 100%;
@@ -2042,6 +2088,10 @@ html.recording-window #root {
 .onb-nav-spacer {
   flex: 0 0 auto;
   width: 92px;
+}
+
+.onb-nav.onb-nav--single {
+  justify-content: center;
 }
 
 .onb-back {

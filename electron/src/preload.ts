@@ -37,6 +37,8 @@ const bisbi = {
       channels,
     }),
   cancelRecording: () => invoke<void>('recording:cancel'),
+  setRecordingArmed: (armed: boolean) =>
+    invoke<void>('recording:setArmed', armed),
   onRecordingStart: (cb: () => void) =>
     listen<void>('recording:start', () => cb()),
   onRecordingStop: (cb: () => void) =>
