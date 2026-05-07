@@ -1533,9 +1533,9 @@ html.recording-window #root {
 .login-owl {
   position: absolute;
   bottom: -20%;
-  width: clamp(600px, 32vw, 360px);
+  width: clamp(500px, 32vw, 360px);
   height: auto;
-  opacity: 0.07;
+  opacity: 0.03;
   pointer-events: none;
   user-select: none;
   filter: grayscale(1);
@@ -1543,7 +1543,7 @@ html.recording-window #root {
 }
 
 .login-owl--left {
-  left: -6%;
+  left: -18%;
 }
 
 .login-owl--right {
@@ -1667,23 +1667,33 @@ html.recording-window #root {
 
 .login-link:hover { color: var(--accent-hover); text-decoration: underline; }
 
+.login-tour-footer {
+  -webkit-app-region: no-drag;
+  position: absolute;
+  inset-inline: 0;
+  bottom: 24px;
+  z-index: 1;
+  display: flex;
+  justify-content: center;
+}
+
 .login-tour {
   -webkit-app-region: no-drag;
   appearance: none;
-  margin: 12px 0 0;
   background: none;
   border: none;
   padding: 4px 8px;
   font: inherit;
   font-size: 12.5px;
   color: var(--text-soft);
+  opacity: 0.4;
   cursor: pointer;
-  transition: color 120ms ease;
+  transition: opacity 120ms ease;
 }
 
 .login-tour:hover,
 .login-tour:focus-visible {
-  color: var(--primary-dark);
+  opacity: 0.6;
 }
 
 /* Account page — reuses .settings/.section spacing for visual consistency. */
@@ -2408,7 +2418,7 @@ html.recording-window #root {
   width: 100%;
   padding: 18px 20px;
   border-radius: var(--radius);
-  background: var(--white);
+  background: var(--bg-soft);
   border: 1px solid var(--border);
   font-family: var(--font-display);
   font-size: 18px;

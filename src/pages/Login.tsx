@@ -73,13 +73,15 @@ export function Login({ onStartTour }: Props) {
             {t('auth.signUp')}
           </button>
         </p>
+      </div>
 
-        {onStartTour && (
+      {onStartTour && (
+        <div className="login-tour-footer">
           <button type="button" className="login-tour" onClick={onStartTour}>
             {t('auth.takeTour')}
           </button>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }

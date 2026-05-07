@@ -102,6 +102,7 @@ export const hi: Translations = {
       transcribing: 'ट्रांसक्राइब हो रहा है',
     },
     watermark: {
+      idle: 'आपको सुनने के लिए तैयार',
       listening: 'सुन रहा है',
       transcribing: 'ट्रांसक्राइब हो रहा है',
     },

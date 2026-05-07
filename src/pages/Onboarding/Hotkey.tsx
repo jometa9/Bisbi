@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from '../../i18n';
 import { HotkeyKeys } from '../../components/HotkeyKeys';
 import { formatHotkeyAccelerator, useHotkeyLabels, type KeyPlatform } from '../../lib/hotkey';
@@ -42,12 +42,57 @@ export function Hotkey({ platform, initialHotkey, onConfirm }: Props) {
   );
   const [conflict, setConflict] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [simPressed, setSimPressed] = useState(false);
 
   const finalAccelerator = selected;
 
   useEffect(() => {
     setConflict(null);
   }, [selected]);
+
+  const userPressingRef = useRef(false);
+  const onSubmitRef = useRef<() => void>(() => {});
+
+  useEffect(() => {
+    if (!finalAccelerator) return;
+    let cancelled = false;
+    let timeout: ReturnType<typeof setTimeout>;
+    const cycle = (pressed: boolean) => {
+      if (cancelled) return;
+      if (!userPressingRef.current) setSimPressed(pressed);
+      timeout = setTimeout(() => cycle(!pressed), pressed ? 900 : 1400);
+    };
+    cycle(true);
+    return () => {
+      cancelled = true;
+      clearTimeout(timeout);
+      setSimPressed(false);
+    };
+  }, [finalAccelerator]);
+
+  useEffect(() => {
+    if (!finalAccelerator) return;
+    const targetCodes = finalAccelerator.split('+').filter(Boolean);
+    const onDown = (e: KeyboardEvent) => {
+      if (targetCodes.includes(e.code)) {
+        userPressingRef.current = true;
+        setSimPressed(true);
+      }
+    };
+    const onUp = (e: KeyboardEvent) => {
+      if (targetCodes.includes(e.code) && userPressingRef.current) {
+        userPressingRef.current = false;
+        setSimPressed(false);
+        onSubmitRef.current();
+      }
+    };
+    window.addEventListener('keydown', onDown);
+    window.addEventListener('keyup', onUp);
+    return () => {
+      window.removeEventListener('keydown', onDown);
+      window.removeEventListener('keyup', onUp);
+    };
+  }, [finalAccelerator]);
 
   const onPickPreset = (accelerator: string) => {
     setSelected(accelerator);
@@ -69,28 +114,40 @@ export function Hotkey({ platform, initialHotkey, onConfirm }: Props) {
     }
   };
 
+  useEffect(() => {
+    onSubmitRef.current = () => {
+      if (submitting) return;
+      void onSubmit();
+    };
+  });
+
   return (
     <div className="onb-screen">
       <h1 className="onb-title">{t('onboarding.hotkey.title')}</h1>
       <p className="onb-subtitle">{t('onboarding.hotkey.subtitle')}</p>
 
-      <div className="onb-hotkey-preview">
-        {finalAccelerator ? (
-          <span className="onb-hotkey-preview-keys">
-            <HotkeyKeys accel={finalAccelerator} platform={keyPlatform} visual="lit" size="md" />
-          </span>
-        ) : (
-          <span className="onb-hotkey-preview-empty">
-            {t('onboarding.hotkey.pickOne')}
-          </span>
-        )}
+      <div className="home-hotkey">
+        <div className="home-hotkey-watermark" aria-hidden="true">
+          {simPressed ? t('home.watermark.listening') : t('home.watermark.idle')}
+        </div>
+        <div className="home-hotkey-content">
+          <span className="home-hotkey-label">{t('home.hotkeyLabel')}</span>
+          <div className="home-hotkey-keys">
+            {finalAccelerator ? (
+              <HotkeyKeys
+                accel={finalAccelerator}
+                platform={keyPlatform}
+                visual={simPressed ? 'pressed' : 'idle'}
+                size="md"
+              />
+            ) : (
+              <span className="onb-hotkey-preview-empty">
+                {t('onboarding.hotkey.pickOne')}
+              </span>
+            )}
+          </div>
+        </div>
       </div>
-
-      {finalAccelerator && (
-        <p className="onb-hotkey-readout">
-          {formatHotkeyAccelerator(finalAccelerator, keyPlatform, hotkeyLabels)}
-        </p>
-      )}
 
       <div className="onb-hotkey-options">
         {presets.map((preset) => (
@@ -116,23 +173,6 @@ export function Hotkey({ platform, initialHotkey, onConfirm }: Props) {
             </span>
           </button>
         ))}
-        <button
-          type="button"
-          className={`onb-hotkey-option${isCustomActive ? ' selected' : ''}`}
-          onClick={onPickCustom}
-        >
-          <span className="onb-hotkey-option-radio" aria-hidden="true" />
-          <span className="onb-hotkey-option-body">
-            <span className="onb-hotkey-option-name">
-              {t('onboarding.hotkey.custom')}
-            </span>
-            {isCustomActive && customAccel && !capturing && (
-              <span className="onb-hotkey-option-hint">
-                {formatHotkeyAccelerator(customAccel, keyPlatform, hotkeyLabels)}
-              </span>
-            )}
-          </span>
-        </button>
       </div>
 
       {conflict && (
@@ -148,7 +188,7 @@ export function Hotkey({ platform, initialHotkey, onConfirm }: Props) {
           type="button"
           className="btn-primary onb-cta"
           onClick={onSubmit}
-          disabled={submitting || !finalAccelerator || capturing}
+          disabled={submitting || !finalAccelerator}
         >
           {t('onboarding.hotkey.confirm')}
         </button>

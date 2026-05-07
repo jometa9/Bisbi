@@ -102,6 +102,7 @@ export const zh: Translations = {
       transcribing: '正在转写',
     },
     watermark: {
+      idle: '准备好聆听',
       listening: '聆听中',
       transcribing: '转写中',
     },

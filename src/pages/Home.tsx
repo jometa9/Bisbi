@@ -60,7 +60,7 @@ export function Home({ settings, recState, onNavigateToHistory }: Props) {
       ? t('home.watermark.listening')
       : recState === 'transcribing'
       ? t('home.watermark.transcribing')
-      : lastTranscription;
+      : lastTranscription || t('home.watermark.idle');
   const showWatermark = watermarkText.length > 0;
   const transcriptionsLabel =
     totals.totalTranscriptions === 1

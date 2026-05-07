@@ -102,6 +102,7 @@ export const ar: Translations = {
       transcribing: 'يكتب',
     },
     watermark: {
+      idle: 'جاهز للاستماع إليك',
       listening: 'يستمع',
       transcribing: 'يكتب',
     },

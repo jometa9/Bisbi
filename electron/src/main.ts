@@ -225,6 +225,7 @@ function openSettingsWindow(): void {
     ...(state.x != null && state.y != null && { x: state.x, y: state.y }),
     title: PRODUCT_NAME,
     show: false,
+    fullscreenable: false,
     backgroundColor: '#FFFFFF',
     ...(iconPath && { icon: nativeImage.createFromPath(iconPath) }),
     ...(process.platform === 'darwin' && {

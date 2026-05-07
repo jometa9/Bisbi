@@ -102,6 +102,7 @@ export const es: Translations = {
       transcribing: 'Transcribiendo',
     },
     watermark: {
+      idle: 'Listo para escucharte',
       listening: 'Escuchando',
       transcribing: 'Transcribiendo',
     },
