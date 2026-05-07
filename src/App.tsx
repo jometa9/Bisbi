@@ -7,12 +7,7 @@ import { Login } from './pages/Login';
 import { Onboarding } from './pages/Onboarding';
 import { UpdateLabel } from './components/UpdateLabel';
 import { startRecording, type RecordingHandle } from './audio';
-import type {
-  AppSettings,
-  RecordingState,
-  OnboardingState,
-  OnboardingStep,
-} from './types';
+import type { AppSettings, RecordingState } from './types';
 import { useTranslation } from './i18n';
 import { useAuth } from './context/AuthContext';
 import owlIdleSvg from '../build-resources/owl_head.svg';
@@ -30,7 +25,7 @@ export function App() {
   const [appVersion, setAppVersion] = useState('');
   const [resourcesOk, setResourcesOk] = useState<boolean | null>(null);
   const [showLimitBanner, setShowLimitBanner] = useState(false);
-  const [onboarding, setOnboarding] = useState<OnboardingState | null>(null);
+  const [tourActive, setTourActive] = useState(false);
 
   useEffect(() => {
     settingsRef.current = settings;
@@ -42,10 +37,8 @@ export function App() {
     void window.bisbi.getAppVersion().then(setAppVersion);
     void window.bisbi.getRecordingState().then(setRecState);
     void window.bisbi.checkResources().then((c) => setResourcesOk(c.ok));
-    void window.bisbi.onboarding.getState().then(setOnboarding);
 
     const offSettings = window.bisbi.onSettingsChange(setSettings);
-    const offOnboarding = window.bisbi.onboarding.onStateChange(setOnboarding);
     const offState = window.bisbi.onRecordingState(setRecState);
     const offNav = window.bisbi.onNavigate(({ to }) => {
       if (to === '/history') setTab('history');
@@ -61,7 +54,6 @@ export function App() {
       offState();
       offNav();
       offLimit();
-      offOnboarding();
     };
   }, []);
 
@@ -70,14 +62,15 @@ export function App() {
   }, [userInfo?.plan]);
 
   useEffect(() => {
-    if (isAuthenticated) setTab('home');
+    if (isAuthenticated) {
+      setTab('home');
+      setTourActive(false);
+    }
   }, [isAuthenticated]);
 
-  const isOnboardingActive =
-    !isAuthLoading && !isAuthenticated && onboarding !== null && !onboarding.completed;
   useEffect(() => {
     if (!window.bisbi) return;
-    if (isOnboardingActive) return;
+    if (!isAuthenticated) return;
     let handle: RecordingHandle | null = null;
     let chain: Promise<void> = Promise.resolve();
 
@@ -114,12 +107,21 @@ export function App() {
       });
     });
 
+    const offCancel = window.bisbi.onRecordingCancel(() => {
+      chain = chain.then(async () => {
+        const cur = handle;
+        handle = null;
+        cur?.cancel();
+      });
+    });
+
     return () => {
       offStart();
       offStop();
+      offCancel();
       handle?.cancel();
     };
-  }, [t, isOnboardingActive]);
+  }, [t, isAuthenticated]);
 
   if (!window.bisbi) {
     return (
@@ -142,22 +144,21 @@ export function App() {
     );
   }
 
-  if (isAuthLoading || !settings || onboarding === null) {
+  if (isAuthLoading || !settings) {
     return <div className="loading">{t('app.loading')}</div>;
   }
 
-  if (!isAuthenticated && !onboarding.completed) {
-    return (
-      <Onboarding
-        settings={settings}
-        onSettingsChange={setSettings}
-        initialStep={(onboarding.lastStep || 1) as OnboardingStep}
-      />
-    );
-  }
-
   if (!isAuthenticated) {
-    return <Login />;
+    if (tourActive) {
+      return (
+        <Onboarding
+          settings={settings}
+          onSettingsChange={setSettings}
+          onExit={() => setTourActive(false)}
+        />
+      );
+    }
+    return <Login onStartTour={() => setTourActive(true)} />;
   }
 
   const accountInitial = (

@@ -41,6 +41,8 @@ const bisbi = {
     listen<void>('recording:start', () => cb()),
   onRecordingStop: (cb: () => void) =>
     listen<void>('recording:stop', () => cb()),
+  onRecordingCancel: (cb: () => void) =>
+    listen<void>('recording:cancel', () => cb()),
   onRecordingState: (cb: (s: import('./backend/types').RecordingState) => void) =>
     listen<import('./backend/types').RecordingState>('recording:state', cb),
   onPillState: (cb: (s: import('./backend/types').RecordingState) => void) =>

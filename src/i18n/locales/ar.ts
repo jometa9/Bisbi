@@ -38,6 +38,8 @@ export const ar: Translations = {
     connectionError: 'خطأ في الاتصال. تحقق من الإنترنت وحاول مرة أخرى.',
     noAccount: 'ليس لديك حساب؟',
     signUp: 'إنشاء حساب',
+    takeTour: 'شاهد كيف يعمل',
+    backToLogin: 'العودة لتسجيل الدخول',
   },
   account: {
     title: 'الحساب',

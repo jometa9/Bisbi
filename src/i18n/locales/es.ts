@@ -38,6 +38,8 @@ export const es: Translations = {
     connectionError: 'Error de conexión. Revisá tu internet e intentá de nuevo.',
     noAccount: '¿No tenés cuenta?',
     signUp: 'Registrate',
+    takeTour: 'Ver cómo funciona',
+    backToLogin: 'Volver al login',
   },
   account: {
     title: 'Cuenta',

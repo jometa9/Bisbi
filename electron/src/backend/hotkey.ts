@@ -8,6 +8,7 @@ export interface HotkeyConfig {
 export interface HotkeyCallbacks {
   onStartRecording: () => void;
   onStopRecording: () => void;
+  onCancelRecording: () => void;
 }
 
 interface ParsedAccelerator {
@@ -170,6 +171,23 @@ function ensureHookStarted(): void {
 
 function onKeydown(e: UiohookEvent): void {
   if (!state) return;
+  if (
+    e.keycode === UiohookKey.Escape &&
+    !e.ctrlKey &&
+    !e.altKey &&
+    !e.shiftKey &&
+    !e.metaKey &&
+    state.parsed.keycode !== UiohookKey.Escape &&
+    state.mode !== 'idle'
+  ) {
+    if (state.pendingStopTimer) {
+      clearTimeout(state.pendingStopTimer);
+      state.pendingStopTimer = null;
+    }
+    state.mode = 'idle';
+    state.cb.onCancelRecording();
+    return;
+  }
   if (!eventMatches(state.parsed, e)) return;
   if (state.keyHeld) return;
   state.keyHeld = true;

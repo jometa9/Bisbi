@@ -3,7 +3,11 @@ import { useAuth } from '../context/AuthContext';
 import { urls } from '../lib/urls';
 import owlIdleSvg from '../../build-resources/owl_head.svg';
 
-export function Login() {
+interface Props {
+  onStartTour?: () => void;
+}
+
+export function Login({ onStartTour }: Props) {
   const { t } = useTranslation();
   const { startWebLogin, loginStatus, error } = useAuth();
 
@@ -69,6 +73,12 @@ export function Login() {
             {t('auth.signUp')}
           </button>
         </p>
+
+        {onStartTour && (
+          <button type="button" className="login-tour" onClick={onStartTour}>
+            {t('auth.takeTour')}
+          </button>
+        )}
       </div>
     </div>
   );

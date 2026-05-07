@@ -24,6 +24,8 @@ export const en: {
     connectionError: string;
     noAccount: string;
     signUp: string;
+    takeTour: string;
+    backToLogin: string;
   };
   account: {
     title: string;
@@ -251,6 +253,8 @@ export const en: {
     connectionError: 'Connection error. Check your internet and try again.',
     noAccount: "Don't have an account?",
     signUp: 'Sign up',
+    takeTour: 'Take a tour',
+    backToLogin: 'Back to login',
   },
   account: {
     title: 'Account',

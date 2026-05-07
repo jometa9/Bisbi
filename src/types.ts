@@ -118,6 +118,7 @@ declare global {
       cancelRecording: () => Promise<void>;
       onRecordingStart: (cb: () => void) => () => void;
       onRecordingStop: (cb: () => void) => () => void;
+      onRecordingCancel: (cb: () => void) => () => void;
       onRecordingState: (cb: (s: RecordingState) => void) => () => void;
       onPillState: (cb: (s: RecordingState) => void) => () => void;
       sendRecordingLevel: (level: number) => void;

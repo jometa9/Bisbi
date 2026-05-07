@@ -38,6 +38,8 @@ export const zh: Translations = {
     connectionError: '连接错误。请检查网络后重试。',
     noAccount: '还没有账户?',
     signUp: '注册',
+    takeTour: '了解如何使用',
+    backToLogin: '返回登录',
   },
   account: {
     title: '账户',

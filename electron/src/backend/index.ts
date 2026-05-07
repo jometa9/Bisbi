@@ -174,6 +174,7 @@ function applyHotkey(settings: AppSettings): boolean {
     {
       onStartRecording: handleStartRecording,
       onStopRecording: handleStopRecording,
+      onCancelRecording: handleCancelRecording,
     }
   );
 }
@@ -426,6 +427,18 @@ function handleStopRecording(): void {
   isRecording = false;
   syncState();
   broadcast('recording:stop');
+  if (muteSnapshot) {
+    const snap = muteSnapshot;
+    muteSnapshot = null;
+    void restoreSystemAudio(snap);
+  }
+}
+
+function handleCancelRecording(): void {
+  if (!isRecording) return;
+  isRecording = false;
+  syncState();
+  broadcast('recording:cancel');
   if (muteSnapshot) {
     const snap = muteSnapshot;
     muteSnapshot = null;

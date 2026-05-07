@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from '../../i18n';
-import { Waveform } from '../../components/Waveform';
 import { HotkeyKeys } from '../../components/HotkeyKeys';
 import { startRecording, type RecordingHandle } from '../../audio';
 import { formatHotkeyAccelerator, type KeyPlatform } from '../../lib/hotkey';
@@ -42,7 +41,6 @@ export function FirstDictation({
 
   const [state, setState] = useState<DictationState>('waiting');
   const [transcript, setTranscript] = useState('');
-  const [level, setLevel] = useState(0);
   const [failures, setFailures] = useState(0);
 
   const handleRef = useRef<RecordingHandle | null>(null);
@@ -58,7 +56,6 @@ export function FirstDictation({
         sawAudioRef.current = false;
         setTranscript('');
         setState('listening');
-        setLevel(0);
         if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
         silenceTimerRef.current = setTimeout(() => {
           if (!sawAudioRef.current) {
@@ -69,7 +66,6 @@ export function FirstDictation({
           handleRef.current = await startRecording({
             deviceId: microphoneId,
             onLevel: (lv) => {
-              setLevel(lv);
               if (lv > 0.06) sawAudioRef.current = true;
             },
           });
@@ -123,9 +119,20 @@ export function FirstDictation({
       });
     });
 
+    const offCancel = window.bisbi.onRecordingCancel(() => {
+      chainRef.current = chainRef.current.then(async () => {
+        if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
+        const cur = handleRef.current;
+        handleRef.current = null;
+        cur?.cancel();
+        setState('waiting');
+      });
+    });
+
     return () => {
       offStart();
       offStop();
+      offCancel();
       if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
       handleRef.current?.cancel();
       handleRef.current = null;
@@ -139,53 +146,51 @@ export function FirstDictation({
 
   const reachedSkipThreshold = failures >= MAX_RETRIES_BEFORE_SKIP;
 
+  const watermarkText =
+    state === 'listening'
+      ? t('home.watermark.listening')
+      : state === 'transcribing'
+      ? t('home.watermark.transcribing')
+      : state === 'success'
+      ? transcript
+      : '';
+  const showWatermark = watermarkText.length > 0;
+
   return (
     <div className="onb-screen">
       <h1 className="onb-title">{t('onboarding.dictation.title')}</h1>
       <p className="onb-subtitle">
         {t('onboarding.dictation.subtitle')}{' '}
-        <span className="onb-inline-keys">
-          <HotkeyKeys accel={hotkey} platform={keyPlatform} size="sm" visual="lit" />
-        </span>
-        {' — '}
         {formatHotkeyAccelerator(hotkey, keyPlatform)}
       </p>
 
       <div className="onb-phrase">{SAMPLE_PHRASE}</div>
 
-      <div className={`onb-dictation-box onb-dictation-box--${state}`}>
-        <Waveform level={level} active={state === 'listening'} />
-        <div className="onb-dictation-result">
-          {state === 'waiting' && (
-            <span className="onb-dictation-placeholder">
-              {t('onboarding.dictation.waiting')}
-            </span>
-          )}
-          {state === 'listening' && (
-            <span className="onb-dictation-status">
-              {t('onboarding.dictation.listening')}
-            </span>
-          )}
-          {state === 'transcribing' && (
-            <span className="onb-dictation-status">
-              {t('onboarding.dictation.transcribing')}
-            </span>
-          )}
-          {state === 'success' && (
-            <span className="onb-dictation-text">{transcript}</span>
-          )}
-          {state === 'silence' && (
-            <span className="onb-dictation-error">
-              {t('onboarding.dictation.silenceError')}
-            </span>
-          )}
-          {state === 'failed' && (
-            <span className="onb-dictation-error">
-              {t('onboarding.dictation.failedError')}
-            </span>
-          )}
+      <div className="home-hotkey">
+        {showWatermark && (
+          <div className="home-hotkey-watermark" aria-hidden="true">
+            {watermarkText}
+          </div>
+        )}
+        <div className="home-hotkey-content">
+          <span className="home-hotkey-label">{t('home.hotkeyLabel')}</span>
+          <div className="home-hotkey-keys">
+            <HotkeyKeys
+              accel={hotkey}
+              platform={keyPlatform}
+              visual={state === 'listening' ? 'pressed' : 'idle'}
+            />
+          </div>
         </div>
       </div>
+
+      {(state === 'silence' || state === 'failed') && (
+        <p className="onb-error">
+          {state === 'silence'
+            ? t('onboarding.dictation.silenceError')
+            : t('onboarding.dictation.failedError')}
+        </p>
+      )}
 
       {(state === 'silence' || state === 'failed') && (
         <button type="button" className="btn-secondary onb-retry" onClick={retry}>

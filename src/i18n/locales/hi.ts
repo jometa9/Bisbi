@@ -38,6 +38,8 @@ export const hi: Translations = {
     connectionError: 'कनेक्शन त्रुटि। अपना इंटरनेट जांचें और पुनः प्रयास करें।',
     noAccount: 'खाता नहीं है?',
     signUp: 'साइन अप करें',
+    takeTour: 'देखें कैसे काम करता है',
+    backToLogin: 'लॉगिन पर वापस जाएं',
   },
   account: {
     title: 'खाता',

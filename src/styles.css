@@ -1543,7 +1543,6 @@ html.recording-window #root {
 
 .login-owl--left {
   left: -6%;
-  transform: rotate(-8deg);
 }
 
 .login-owl--right {
@@ -1558,39 +1557,18 @@ html.recording-window #root {
   position: relative;
   z-index: 1;
   width: 100%;
-  max-width: 380px;
+  max-width: 420px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 14px;
-  padding: 40px 32px 28px;
-  background: var(--white);
-  border: 1px solid var(--primary-light);
-  border-radius: 16px;
-  box-shadow:
-    var(--shadow-md),
-    0 0 0 4px var(--primary-tint);
+  gap: 12px;
   text-align: center;
-  animation: login-card-breathe 3.6s ease-in-out infinite;
-}
-
-@keyframes login-card-breathe {
-  0%, 100% {
-    box-shadow:
-      var(--shadow-md),
-      0 0 0 4px var(--primary-tint);
-  }
-  50% {
-    box-shadow:
-      var(--shadow-md),
-      0 0 0 6px rgba(184, 208, 203, 0.45);
-  }
 }
 
 .login-brand {
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: 36px;
+  font-size: 32px;
   letter-spacing: -0.03em;
   color: var(--accent);
   margin-bottom: 4px;
@@ -1599,10 +1577,11 @@ html.recording-window #root {
 .login-title {
   margin: 0;
   font-family: var(--font-display);
-  font-size: 22px;
+  font-size: 28px;
   font-weight: 600;
   letter-spacing: -0.02em;
   color: var(--text);
+  line-height: 1.25;
 }
 
 .login-tagline {
@@ -1610,6 +1589,7 @@ html.recording-window #root {
   color: var(--text-muted);
   font-size: 13px;
   line-height: 1.45;
+  max-width: 360px;
 }
 
 .btn-primary {
@@ -1634,7 +1614,10 @@ html.recording-window #root {
 .btn-primary:disabled { opacity: 0.7; cursor: default; }
 
 .login-btn {
-  width: 100%;
+  min-width: 240px;
+  padding: 12px 22px;
+  font-size: 14px;
+  margin-top: 4px;
 }
 
 .login-spinner {
@@ -1975,7 +1958,7 @@ html.recording-window #root {
   inset-inline-end: 22px;
   font-size: 11px;
   font-weight: 500;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.08em;
   color: var(--text-soft);
   font-variant-numeric: tabular-nums;
   text-transform: uppercase;
@@ -2015,17 +1998,23 @@ html.recording-window #root {
 .onb-title {
   margin: 0;
   font-family: var(--font-display);
-  font-size: 26px;
-  font-weight: 700;
-  letter-spacing: -0.025em;
+  font-size: 28px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
   color: var(--text);
-  line-height: 1.2;
+  line-height: 1.25;
+}
+
+.onb-title em {
+  font-style: normal;
+  color: var(--text-muted);
+  font-weight: 400;
 }
 
 .onb-subtitle {
   margin: 0;
-  font-size: 14px;
-  line-height: 1.5;
+  font-size: 13px;
+  line-height: 1.45;
   color: var(--text-muted);
   max-width: 440px;
 }
