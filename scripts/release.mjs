@@ -45,7 +45,7 @@ log.step('Pre-flight checks');
 
 if (!tryRun('gh --version').ok) log.fail('gh CLI not found. Install: brew install gh');
 const auth = tryRun('gh auth status');
-if (!auth.ok || !auth.stderr.includes('Logged in')) log.fail('gh not authenticated. Run: gh auth login');
+if (!auth.ok || !`${auth.stdout}\n${auth.stderr}`.includes('Logged in')) log.fail('gh not authenticated. Run: gh auth login');
 log.ok('gh CLI authenticated');
 
 const branch = run('git rev-parse --abbrev-ref HEAD', { silent: true }).trim();
