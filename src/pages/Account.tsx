@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from '../i18n';
 import { useAuth } from '../context/AuthContext';
-import { urls } from '../lib/urls';
 import { ConfirmButton } from '../components/ConfirmButton';
 import type { Pricing } from '../types';
 
@@ -10,6 +9,7 @@ export function Account() {
   const { userInfo, logout, isRefreshing, refreshSession } = useAuth();
   const [billingPeriod, setBillingPeriod] = useState<'monthly' | 'annual'>('monthly');
   const [isCheckingOut, setIsCheckingOut] = useState(false);
+  const [isOpeningPortal, setIsOpeningPortal] = useState(false);
 
   if (!userInfo) return null;
 
@@ -40,7 +40,17 @@ export function Account() {
     return null;
   };
 
-  const openBilling = () => void window.bisbi?.openExternal(urls.billing);
+  const openBilling = async () => {
+    if (!window.bisbi || isOpeningPortal) return;
+    setIsOpeningPortal(true);
+    try {
+      const url = await window.bisbi.auth.billingPortal();
+      await window.bisbi.openExternal(url);
+    } catch {
+    } finally {
+      setIsOpeningPortal(false);
+    }
+  };
 
   const handleCheckout = async () => {
     if (!window.bisbi || isCheckingOut) return;
@@ -166,8 +176,13 @@ export function Account() {
             {detail && <Field label={t('account.billing')} value={detail} />}
           </div>
           <div className="actions">
-            <button type="button" className="btn-secondary" onClick={openBilling}>
-              {t('account.manageSubscription')}
+            <button
+              type="button"
+              className="btn-secondary"
+              onClick={() => void openBilling()}
+              disabled={isOpeningPortal}
+            >
+              {isOpeningPortal ? t('account.opening') : t('account.manageSubscription')}
             </button>
             <button
               type="button"

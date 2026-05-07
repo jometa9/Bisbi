@@ -64,7 +64,7 @@ export function Hotkey({ platform, initialHotkey, onConfirm }: Props) {
     return () => {
       cancelled = true;
       clearTimeout(timeout);
-      setSimPressed(false);
+      if (!userPressingRef.current) setSimPressed(false);
     };
   }, [finalAccelerator]);
 
@@ -79,6 +79,7 @@ export function Hotkey({ platform, initialHotkey, onConfirm }: Props) {
       }
     }
     const onDown = (e: KeyboardEvent) => {
+      if (e.repeat) return;
       const matched = codeToAccelerator.get(e.code);
       if (!matched) return;
       if (advanceTimerRef.current) {
@@ -89,24 +90,14 @@ export function Hotkey({ platform, initialHotkey, onConfirm }: Props) {
       pressedAcceleratorRef.current = matched;
       if (matched !== selected) setSelected(matched);
       setSimPressed(true);
-    };
-    const onUp = (e: KeyboardEvent) => {
-      const matched = codeToAccelerator.get(e.code);
-      if (!matched || !userPressingRef.current) return;
-      if (pressedAcceleratorRef.current !== matched) return;
-      userPressingRef.current = false;
-      pressedAcceleratorRef.current = null;
-      setSimPressed(false);
       advanceTimerRef.current = setTimeout(() => {
         advanceTimerRef.current = null;
         onSubmitRef.current(matched);
       }, 2000);
     };
     window.addEventListener('keydown', onDown);
-    window.addEventListener('keyup', onUp);
     return () => {
       window.removeEventListener('keydown', onDown);
-      window.removeEventListener('keyup', onUp);
     };
   }, [presets, selected]);
 
@@ -128,6 +119,9 @@ export function Hotkey({ platform, initialHotkey, onConfirm }: Props) {
       const result = await window.bisbi.onboarding.validateHotkey(target);
       if (!result.ok) {
         setConflict(result.reason ?? 'invalid');
+        userPressingRef.current = false;
+        pressedAcceleratorRef.current = null;
+        setSimPressed(false);
         setSubmitting(false);
         return;
       }

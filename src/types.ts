@@ -145,6 +145,7 @@ declare global {
         refresh: () => Promise<AuthSession>;
         onChange: (cb: (s: AuthSession) => void) => () => void;
         checkout: (billingPeriod: 'monthly' | 'annual') => Promise<string>;
+        billingPortal: () => Promise<string>;
       };
       deepLink: {
         getPending: () => Promise<string | null>;

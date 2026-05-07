@@ -99,6 +99,7 @@ const bisbi = {
       listen<import('./backend/auth').AuthSession>('auth:changed', cb),
     checkout: (billingPeriod: 'monthly' | 'annual') =>
       invoke<string>('auth:checkout', billingPeriod),
+    billingPortal: () => invoke<string>('auth:billingPortal'),
   },
 
   // Deep link / external links

@@ -193,6 +193,18 @@ export async function startCheckout(billingPeriod: 'monthly' | 'annual'): Promis
   return data.checkoutUrl;
 }
 
+export async function openBillingPortal(): Promise<string> {
+  loadFromDisk();
+  if (!memCache?.token) throw new Error('Not authenticated');
+  const resp = await fetch(`${WEB_BASE}/api/billing-portal`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${memCache.token}` },
+  });
+  if (!resp.ok) throw new Error(`Billing portal failed: ${resp.status}`);
+  const data = await resp.json() as { portalUrl: string };
+  return data.portalUrl;
+}
+
 export async function logout(): Promise<AuthSession> {
   loadFromDisk();
   const token = memCache?.token ?? null;

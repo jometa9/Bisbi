@@ -24,6 +24,7 @@ import {
   logout as authLogout,
   refreshSession,
   startCheckout,
+  openBillingPortal,
   type AuthSession,
 } from './auth';
 import {
@@ -343,6 +344,9 @@ export async function registerBackend(opts: BackendOptions): Promise<void> {
   });
   ipcMain.handle('auth:checkout', async (_e, billingPeriod: 'monthly' | 'annual'): Promise<string> => {
     return startCheckout(billingPeriod);
+  });
+  ipcMain.handle('auth:billingPortal', async (): Promise<string> => {
+    return openBillingPortal();
   });
 
   ipcMain.handle('usage:getMonthly', () => ({
