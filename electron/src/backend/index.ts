@@ -203,7 +203,12 @@ export async function registerBackend(opts: BackendOptions): Promise<void> {
     onLimitReached: (info) => broadcast('usage:limitReached', info),
   });
   setAuthEventHandlers({
-    onPlanDowngrade: () => { void flushUsageQueue(true); },
+    onPlanDowngrade: () => {
+      void flushUsageQueue(true);
+      broadcast('auth:changed', getSession());
+      broadcast('stats:totals', getStatsTotals());
+      broadcast('usage:planChanged', { plan: 'free' });
+    },
   });
   startUsageSync();
   startPeriodicAuthRefresh();

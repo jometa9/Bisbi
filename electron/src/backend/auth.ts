@@ -233,6 +233,13 @@ export function canTranscribe(getLocalUsage: () => { used: number; limit: number
     if (sinceValidation > PRO_GRACE_MS) {
       return { allowed: false, reason: 'session-expired' };
     }
+    const expiresAtRaw = memCache.userInfo?.subscriptionExpiresAt;
+    if (expiresAtRaw) {
+      const expiresAt = Date.parse(expiresAtRaw);
+      if (Number.isFinite(expiresAt) && expiresAt <= Date.now()) {
+        return { allowed: false, reason: 'session-expired' };
+      }
+    }
     return { allowed: true };
   }
 
