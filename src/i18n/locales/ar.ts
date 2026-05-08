@@ -24,7 +24,7 @@ export const ar: Translations = {
     micError:
       'تعذّر الوصول إلى الميكروفون. تأكد من أن Bisbi يملك إذن الوصول في إعدادات النظام.',
     limitReached: 'لقد بلغت حد الخطة المجانية لهذا الشهر.',
-    updateAvailable: 'يتوفر إصدار جديد من Bisbi ({version}).',
+    updateAvailable: 'يتوفر إصدار جديد من Bisbi.',
     updateAction: 'تنزيل',
   },
   auth: {

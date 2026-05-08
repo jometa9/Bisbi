@@ -1,15 +1,11 @@
-import { app } from 'electron';
 import { WEB_BASE } from '../buildConfig';
 import { getHwid } from './hwid';
 import { captureFromJson } from './release';
+import { getAppVersion } from './appVersion';
 
 export interface ApiFetchInit extends Omit<RequestInit, 'headers'> {
   token?: string | null;
   headers?: Record<string, string>;
-}
-
-function appVersionSafe(): string {
-  try { return app.getVersion(); } catch { return '0.0.0'; }
 }
 
 function captureReleaseFromResponse(resp: Response): void {
@@ -31,7 +27,7 @@ export async function apiFetch(pathOrUrl: string, init: ApiFetchInit = {}): Prom
 
   const headers: Record<string, string> = {
     'X-Bisbi-Device': getHwid(),
-    'X-Bisbi-Version': appVersionSafe(),
+    'X-Bisbi-Version': getAppVersion(),
     'X-Bisbi-Platform': `${process.platform}-${process.arch}`,
     ...(init.headers ?? {}),
   };

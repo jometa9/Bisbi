@@ -1,4 +1,4 @@
-import { Tray, Menu, nativeImage, nativeTheme, app } from 'electron';
+import { Tray, Menu, nativeImage, nativeTheme } from 'electron';
 import path from 'path';
 import fs from 'fs';
 import type { RecordingState, UiLanguage } from './types';
@@ -122,10 +122,6 @@ function rebuildMenu(): void {
       click: () => onShowHistory?.(),
     },
     { type: 'separator' },
-    {
-      label: tBackend(currentLang, 'tray.version', { v: app.getVersion() }),
-      enabled: false,
-    },
     {
       label: tBackend(currentLang, 'tray.quit'),
       click: () => opts.onQuit(),

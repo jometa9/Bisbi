@@ -1,4 +1,5 @@
-import { BrowserWindow, app } from 'electron';
+import { BrowserWindow } from 'electron';
+import { getAppVersion } from './appVersion';
 
 export type ReleaseDownloadUrls = {
   mac: string | null;
@@ -23,11 +24,7 @@ let latest: ReleaseInfo | null = null;
 let fetchedAt: number | null = null;
 
 function currentVersion(): string {
-  try {
-    return app.getVersion();
-  } catch {
-    return '0.0.0';
-  }
+  return getAppVersion();
 }
 
 function platformKey(): keyof ReleaseDownloadUrls {
@@ -88,7 +85,14 @@ function isReleaseInfo(value: unknown): value is ReleaseInfo {
 export function captureFromJson(payload: unknown): void {
   if (!payload || typeof payload !== 'object') return;
   const release = (payload as Record<string, unknown>).release;
-  if (!isReleaseInfo(release)) return;
+  if (!isReleaseInfo(release)) {
+    console.log('[release] captureFromJson: no valid release field in payload', {
+      hasReleaseKey: !!release,
+      releaseShape: release && typeof release === 'object' ? Object.keys(release) : typeof release,
+    });
+    return;
+  }
+  console.log('[release] captureFromJson: capturing release', release);
 
   const prev = latest;
   latest = {

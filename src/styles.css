@@ -218,65 +218,73 @@ button { font-family: inherit; }
   padding: 8px 12px 14px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 2px;
 }
 
 .sidebar-update {
   position: relative;
   overflow: hidden;
+  isolation: isolate;
+  padding: 12px;
+  border: 1px solid var(--primary-light);
+  border-radius: var(--radius-sm);
+  background: var(--white);
+  box-shadow: var(--shadow-sm);
+}
+
+.sidebar-update-watermark {
+  position: absolute;
+  inset: -20% -8% -20% -8%;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 64px;
+  line-height: 0.95;
+  letter-spacing: -0.04em;
+  color: var(--text);
+  opacity: 0.08;
+  text-align: center;
+  pointer-events: none;
+  user-select: none;
+  z-index: 0;
+  transform: rotate(-6deg);
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 10px;
-  border-radius: 8px;
-  font-size: 11px;
-  line-height: 1.3;
-  letter-spacing: 0.01em;
+  justify-content: center;
 }
 
-.sidebar-update-downloading {
-  background: var(--primary-tint);
-  color: var(--primary-dark);
-}
-
-.sidebar-update-downloading .sidebar-update-progress {
-  position: absolute;
-  inset: 0 auto 0 0;
-  background: var(--primary-light);
-  opacity: 0.55;
-  transition: width 0.2s ease-out;
-  z-index: 0;
-}
-
-.sidebar-update-downloading .sidebar-update-text {
+.sidebar-update-content {
   position: relative;
   z-index: 1;
-  font-variant-numeric: tabular-nums;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
-.sidebar-update-ready {
-  appearance: none;
-  border: 0;
-  cursor: pointer;
-  text-align: start;
-  width: 100%;
-  background: var(--accent);
-  color: #fff;
-  justify-content: space-between;
+.sidebar-update-text {
+  font-size: 12px;
+  line-height: 1.3;
+  color: var(--text);
   font-weight: 500;
+}
+
+.sidebar-update-button {
+  appearance: none;
+  border: none;
+  cursor: pointer;
+  width: 100%;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  background: var(--primary);
+  color: var(--white);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  text-align: center;
   transition: background 0.12s;
 }
 
-.sidebar-update-ready:hover {
-  background: var(--accent-hover);
-}
-
-.sidebar-update-ready .sidebar-update-cta {
-  font-size: 11px;
-  font-weight: 600;
-  padding: 2px 8px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.22);
+.sidebar-update-button:hover {
+  background: var(--primary-dark);
 }
 
 .sidebar-status-row {

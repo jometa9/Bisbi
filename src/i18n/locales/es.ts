@@ -24,7 +24,7 @@ export const es: Translations = {
     micError:
       'No se pudo acceder al micrófono. Asegurate de que Bisbi tenga permiso en los ajustes del sistema.',
     limitReached: 'Llegaste al límite del plan gratis de este mes.',
-    updateAvailable: 'Hay una nueva versión de Bisbi disponible ({version}).',
+    updateAvailable: 'Hay una nueva versión de Bisbi disponible.',
     updateAction: 'Descargar',
   },
   auth: {

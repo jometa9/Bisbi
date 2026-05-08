@@ -8,7 +8,6 @@ interface BackendStrings {
     tooltipTranscribing: string;
     openSettings: string;
     history: string;
-    version: string;
     quit: string;
   };
   errors: {
@@ -23,7 +22,6 @@ const en: BackendStrings = {
     tooltipTranscribing: 'Bisbi — transcribing…',
     openSettings: 'Open settings',
     history: 'History',
-    version: 'Version {v}',
     quit: 'Quit',
   },
   errors: {
@@ -38,7 +36,6 @@ const es: BackendStrings = {
     tooltipTranscribing: 'Bisbi — transcribiendo…',
     openSettings: 'Abrir ajustes',
     history: 'Historial',
-    version: 'Versión {v}',
     quit: 'Salir',
   },
   errors: {
@@ -53,7 +50,6 @@ const zh: BackendStrings = {
     tooltipTranscribing: 'Bisbi — 转写中…',
     openSettings: '打开设置',
     history: '历史记录',
-    version: '版本 {v}',
     quit: '退出',
   },
   errors: {
@@ -68,7 +64,6 @@ const hi: BackendStrings = {
     tooltipTranscribing: 'Bisbi — ट्रांसक्राइब हो रहा है…',
     openSettings: 'सेटिंग्स खोलें',
     history: 'इतिहास',
-    version: 'संस्करण {v}',
     quit: 'बाहर निकलें',
   },
   errors: {
@@ -83,7 +78,6 @@ const ar: BackendStrings = {
     tooltipTranscribing: 'Bisbi — يكتب…',
     openSettings: 'فتح الإعدادات',
     history: 'السجل',
-    version: 'الإصدار {v}',
     quit: 'خروج',
   },
   errors: {

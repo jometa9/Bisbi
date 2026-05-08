@@ -8,11 +8,18 @@ import {
   setMonthlyWordLimit,
   setMonthlyWordUsageFromServer,
 } from './db';
-import { getAuthToken } from './auth';
+import { getAuthToken, getSession } from './auth';
 import { apiFetch } from './apiClient';
 
-const BATCH_INTERVAL_MS = 10 * 60_000;
+const BATCH_INTERVAL_FREE_MS = 10 * 60_000;
+const BATCH_INTERVAL_PRO_MS = 24 * 60 * 60_000;
 const MAX_BATCH_SIZE = 20;
+
+function currentBatchIntervalMs(): number {
+  return getSession().userInfo?.plan === 'pro'
+    ? BATCH_INTERVAL_PRO_MS
+    : BATCH_INTERVAL_FREE_MS;
+}
 const FAR_FUTURE_MS = 365 * 24 * 60 * 60_000;
 
 const RETRY_BACKOFF_MS = [
@@ -107,7 +114,7 @@ export function recordUsage(input: { words: number; audioSeconds: number }): voi
   enqueueUsage({
     words,
     audioSeconds: Math.max(0, Math.floor(input.audioSeconds)),
-    nextAttemptAt: Date.now() + BATCH_INTERVAL_MS,
+    nextAttemptAt: Date.now() + currentBatchIntervalMs(),
   });
 
   if (countPendingUsage() >= MAX_BATCH_SIZE) {

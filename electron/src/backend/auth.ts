@@ -94,10 +94,22 @@ function loadFromDisk(): void {
 }
 
 function persist(token: string, userInfo: UserInfo | null): void {
+  const prevPlan = memCache?.userInfo?.plan;
   const tokenEnc = encryptString(token);
   const userInfoEnc = userInfo ? encryptString(JSON.stringify(userInfo)) : null;
   authSet(tokenEnc, userInfoEnc);
   memCache = { token, userInfo };
+  if (prevPlan === 'pro' && userInfo?.plan && userInfo.plan !== 'pro' && onPlanDowngrade) {
+    try { onPlanDowngrade(); } catch { /* swallow */ }
+  }
+}
+
+let onPlanDowngrade: (() => void) | null = null;
+
+export function setAuthEventHandlers(handlers: {
+  onPlanDowngrade?: () => void;
+}): void {
+  onPlanDowngrade = handlers.onPlanDowngrade ?? null;
 }
 
 function getLastValidatedAt(): number {
@@ -125,8 +137,11 @@ export function getAuthToken(): string | null {
 }
 
 async function validateTokenWithApi(token: string): Promise<UserInfo> {
+  console.log('[auth] validateTokenWithApi: calling /api/license');
   const resp = await apiFetch('/api/license', { token });
   if (!resp.ok) {
+    const body = await resp.text().catch(() => '');
+    console.error('[auth] /api/license failed', { status: resp.status, body });
     throw new Error(`Auth failed: ${resp.status}`);
   }
   const data = await resp.json() as {
@@ -155,6 +170,11 @@ async function validateTokenWithApi(token: string): Promise<UserInfo> {
     setMonthlyWordLimit(data.usage.wordsLimit);
   }
   setLastValidatedAt(Date.now());
+  console.log('[auth] /api/license ok', {
+    plan: data.plan,
+    subscriptionStatus: data.subscription?.status ?? null,
+    hasReleaseField: 'release' in (data as Record<string, unknown>),
+  });
   return {
     userId: data.userId,
     email: data.email,
@@ -178,12 +198,17 @@ export async function loginWithToken(token: string): Promise<AuthSession> {
 
 export async function refreshSession(): Promise<AuthSession> {
   loadFromDisk();
-  if (!memCache?.token) return { isAuthenticated: false, userInfo: null };
+  if (!memCache?.token) {
+    console.log('[auth] refreshSession: no token in memCache, returning unauthenticated');
+    return { isAuthenticated: false, userInfo: null };
+  }
   try {
     const userInfo = await validateTokenWithApi(memCache.token);
     persist(memCache.token, userInfo);
+    console.log('[auth] refreshSession: success, plan =', userInfo.plan);
     return { isAuthenticated: true, userInfo };
-  } catch {
+  } catch (err) {
+    console.error('[auth] refreshSession failed, keeping cached userInfo', err);
     return { isAuthenticated: true, userInfo: memCache.userInfo };
   }
 }

@@ -24,7 +24,7 @@ export const zh: Translations = {
     micError:
       '无法访问麦克风。请确保 Bisbi 在系统设置中拥有权限。',
     limitReached: '本月免费套餐已用完。',
-    updateAvailable: 'Bisbi 有新版本可用（{version}）。',
+    updateAvailable: 'Bisbi 有新版本可用。',
     updateAction: '下载',
   },
   auth: {

@@ -253,7 +253,7 @@ export const en: {
     micError:
       'Could not access the microphone. Make sure Bisbi has permission in your system settings.',
     limitReached: 'You’ve hit your free plan limit for this month.',
-    updateAvailable: 'A new version of Bisbi is available ({version}).',
+    updateAvailable: 'A new version of Bisbi is available.',
     updateAction: 'Download',
   },
   auth: {

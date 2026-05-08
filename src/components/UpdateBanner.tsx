@@ -7,10 +7,21 @@ export function UpdateBanner() {
   const [state, setState] = useState<ReleaseState | null>(null);
 
   useEffect(() => {
-    if (!window.bisbi?.release) return;
-    void window.bisbi.release.getState().then(setState);
-    return window.bisbi.release.onStateChange(setState);
+    if (!window.bisbi?.release) {
+      console.log('[UpdateBanner] window.bisbi.release is unavailable');
+      return;
+    }
+    void window.bisbi.release.getState().then((s) => {
+      console.log('[UpdateBanner] initial getState ->', s);
+      setState(s);
+    });
+    return window.bisbi.release.onStateChange((s) => {
+      console.log('[UpdateBanner] onStateChange ->', s);
+      setState(s);
+    });
   }, []);
+
+  console.log('[UpdateBanner] render with state', state);
 
   if (!state?.hasUpdate || !state.downloadUrl || !state.latest?.version) {
     return null;
@@ -23,15 +34,22 @@ export function UpdateBanner() {
   };
 
   return (
-    <button
-      type="button"
-      className="sidebar-update sidebar-update-ready"
-      onClick={handleClick}
-    >
-      <span className="sidebar-update-text">
-        {t('app.updateAvailable', { version: state.latest.version })}
-      </span>
-      <span className="sidebar-update-cta">{t('app.updateAction')}</span>
-    </button>
+    <div className="sidebar-update">
+      <div className="sidebar-update-watermark" aria-hidden="true">
+        v{state.latest.version}
+      </div>
+      <div className="sidebar-update-content">
+        <span className="sidebar-update-text">
+          {t('app.updateAvailable')}
+        </span>
+        <button
+          type="button"
+          className="sidebar-update-button"
+          onClick={handleClick}
+        >
+          {t('app.updateAction')}
+        </button>
+      </div>
+    </div>
   );
 }

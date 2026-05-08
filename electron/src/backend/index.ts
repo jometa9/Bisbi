@@ -26,6 +26,7 @@ import {
   startCheckout,
   openBillingPortal,
   canTranscribe,
+  setAuthEventHandlers,
   startPeriodicAuthRefresh,
   stopPeriodicAuthRefresh,
   type AuthSession,
@@ -69,6 +70,7 @@ import {
 import { getSystemLocale, resolveUiLanguage, tBackend } from './i18n';
 import { rebuildTrayLabels } from './tray';
 import { getReleaseState } from './release';
+import { getAppVersion } from './appVersion';
 import type { RecordingState, AppSettings } from './types';
 
 interface BackendOptions {
@@ -200,6 +202,9 @@ export async function registerBackend(opts: BackendOptions): Promise<void> {
   setUsageEventHandlers({
     onLimitReached: (info) => broadcast('usage:limitReached', info),
   });
+  setAuthEventHandlers({
+    onPlanDowngrade: () => { void flushUsageQueue(true); },
+  });
   startUsageSync();
   startPeriodicAuthRefresh();
 
@@ -321,7 +326,7 @@ export async function registerBackend(opts: BackendOptions): Promise<void> {
   ipcMain.handle('stats:totals', () => getStatsTotals());
 
   ipcMain.handle('resources:check', () => checkResources());
-  ipcMain.handle('app:getVersion', () => app.getVersion());
+  ipcMain.handle('app:getVersion', () => getAppVersion());
   ipcMain.handle('app:getPlatform', () => process.platform);
   ipcMain.handle('app:getSystemLocale', () => getSystemLocale());
   ipcMain.handle('app:openSettings', () => activeMainWindowOpener?.());

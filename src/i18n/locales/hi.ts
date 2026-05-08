@@ -24,7 +24,7 @@ export const hi: Translations = {
     micError:
       'माइक्रोफ़ोन तक पहुँच नहीं हो सकी। सुनिश्चित करें कि Bisbi को सिस्टम सेटिंग्स में अनुमति प्राप्त है।',
     limitReached: 'इस महीने के मुफ़्त प्लान की सीमा पूरी हो गई।',
-    updateAvailable: 'Bisbi का नया संस्करण उपलब्ध है ({version})।',
+    updateAvailable: 'Bisbi का नया संस्करण उपलब्ध है।',
     updateAction: 'डाउनलोड',
   },
   auth: {
