@@ -52,7 +52,6 @@
     "productName": "Bisbi",
     "copyright": "Copyright © 2026 IPTRADE COPIER LLC",
     "asar": true,
-    "asarIntegrity": true,
     "asarUnpack": [
       "resources/whisper/**/*",
       "node_modules/uiohook-napi/**/*"
