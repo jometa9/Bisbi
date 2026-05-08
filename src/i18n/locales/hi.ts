@@ -73,7 +73,7 @@ export const hi: Translations = {
       dictation2k: 'डेस्कटॉप पर 2,000 शब्द/माह',
       unlimited: 'सभी डिवाइस पर असीमित शब्द',
       allDevices: 'Mac और Windows',
-      languages: '100+ भाषाएं',
+      languages: '99 भाषाएं',
       zeroRetention: 'डेटा संधारण नहीं',
       priority: 'प्राथमिकता समर्थन',
     },

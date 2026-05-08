@@ -301,7 +301,7 @@ export const en: {
       dictation2k: '2,000 words / month on desktop',
       unlimited: 'Unlimited words on all devices',
       allDevices: 'Mac & Windows',
-      languages: '100+ languages',
+      languages: '99 languages',
       zeroRetention: 'Zero data retention',
       priority: 'Priority support',
     },

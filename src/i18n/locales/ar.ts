@@ -73,7 +73,7 @@ export const ar: Translations = {
       dictation2k: '2,000 كلمة/شهر على سطح المكتب',
       unlimited: 'كلمات غير محدودة على جميع الأجهزة',
       allDevices: 'Mac وWindows',
-      languages: 'أكثر من 100 لغة',
+      languages: '99 لغة',
       zeroRetention: 'عدم الاحتفاظ بالبيانات',
       priority: 'دعم ذو أولوية',
     },

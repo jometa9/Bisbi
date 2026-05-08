@@ -73,7 +73,7 @@ export const es: Translations = {
       dictation2k: '2.000 palabras / mes en escritorio',
       unlimited: 'Palabras ilimitadas en todos los dispositivos',
       allDevices: 'Mac y Windows',
-      languages: 'Más de 100 idiomas',
+      languages: '99 idiomas',
       zeroRetention: 'Sin retención de datos',
       priority: 'Soporte prioritario',
     },

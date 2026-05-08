@@ -73,7 +73,7 @@ export const zh: Translations = {
       dictation2k: '桌面端每月 2,000 字',
       unlimited: '所有设备无限字数',
       allDevices: 'Mac 和 Windows',
-      languages: '100+ 种语言',
+      languages: '99 种语言',
       zeroRetention: '零数据保留',
       priority: '优先支持',
     },
