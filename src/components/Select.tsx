@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 
 export interface SelectOption<T extends string> {
   value: T;
@@ -26,6 +26,7 @@ export function Select<T extends string>({
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [activeIndex, setActiveIndex] = useState(0);
+  const [menuStyle, setMenuStyle] = useState<React.CSSProperties>({});
   const rootRef = useRef<HTMLDivElement>(null);
   const listRef = useRef<HTMLUListElement>(null);
   const searchRef = useRef<HTMLInputElement>(null);
@@ -96,6 +97,21 @@ export function Select<T extends string>({
     }
   }, [open, searchPlaceholder]);
 
+  // Compute fixed position so the menu never overflows the Electron window.
+  useLayoutEffect(() => {
+    if (!open || !rootRef.current) return;
+    const rect = rootRef.current.getBoundingClientRect();
+    const MARGIN = 12;
+    const availableBelow = window.innerHeight - rect.bottom - MARGIN;
+    const left = Math.max(MARGIN, Math.min(rect.left, window.innerWidth - rect.width - MARGIN));
+    setMenuStyle({
+      top: rect.bottom + 4,
+      left,
+      width: rect.width,
+      maxHeight: Math.min(300, Math.max(80, availableBelow)),
+    });
+  }, [open]);
+
   const onTriggerKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'ArrowDown' || e.key === 'ArrowUp' || e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
@@ -151,7 +167,7 @@ export function Select<T extends string>({
         {variant === 'inline' ? <PencilIcon /> : <ChevronIcon />}
       </button>
       {open && (
-        <div className="select-menu">
+        <div className="select-menu" style={menuStyle}>
           {searchPlaceholder && (
             <div className="select-search">
               <SearchIcon />
