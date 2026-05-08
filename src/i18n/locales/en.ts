@@ -186,7 +186,6 @@ export const en: {
     tooltipTranscribing: string;
     openSettings: string;
     history: string;
-    version: string;
     quit: string;
   };
   errors: { hotkeyRegister: string };
@@ -506,7 +505,6 @@ export const en: {
     tooltipTranscribing: 'Bisbi — transcribing…',
     openSettings: 'Open settings',
     history: 'History',
-    version: 'Version {v}',
     quit: 'Quit',
   },
   errors: {

@@ -274,7 +274,6 @@ export const hi: Translations = {
     tooltipTranscribing: 'Bisbi — ट्रांसक्राइब हो रहा है…',
     openSettings: 'सेटिंग्स खोलें',
     history: 'इतिहास',
-    version: 'संस्करण {v}',
     quit: 'बाहर निकलें',
   },
   errors: {

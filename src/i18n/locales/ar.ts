@@ -274,7 +274,6 @@ export const ar: Translations = {
     tooltipTranscribing: 'Bisbi — يكتب…',
     openSettings: 'فتح الإعدادات',
     history: 'السجل',
-    version: 'الإصدار {v}',
     quit: 'خروج',
   },
   errors: {

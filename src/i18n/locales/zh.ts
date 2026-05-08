@@ -270,7 +270,6 @@ export const zh: Translations = {
     tooltipTranscribing: 'Bisbi — 转写中…',
     openSettings: '打开设置',
     history: '历史记录',
-    version: '版本 {v}',
     quit: '退出',
   },
   errors: {

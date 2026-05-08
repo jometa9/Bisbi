@@ -277,7 +277,6 @@ export const es: Translations = {
     tooltipTranscribing: 'Bisbi — transcribiendo…',
     openSettings: 'Abrir ajustes',
     history: 'Historial',
-    version: 'Versión {v}',
     quit: 'Salir',
   },
   errors: {
