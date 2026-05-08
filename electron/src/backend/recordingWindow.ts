@@ -133,7 +133,7 @@ function ensureWindow(): void {
     show: false,
     ...(process.platform === 'darwin' && { type: 'panel' as const }),
     webPreferences: {
-      preload: path.join(__dirname, '..', 'preload.js'),
+      preload: path.join(app.getAppPath(), 'electron', 'dist', 'preload.js'),
       contextIsolation: true,
       nodeIntegration: false,
       backgroundThrottling: false,
