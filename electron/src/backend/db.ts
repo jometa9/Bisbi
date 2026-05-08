@@ -279,23 +279,25 @@ export function enqueueUsage(input: {
   words: number;
   audioSeconds: number;
   transcribedAt?: number;
+  nextAttemptAt?: number;
 }): UsageQueueRow {
   const words = Math.max(0, Math.floor(input.words));
   const audioSeconds = Math.max(0, Math.floor(input.audioSeconds));
   const transcribedAt = input.transcribedAt ?? Date.now();
+  const nextAttemptAt = Math.max(0, Math.floor(input.nextAttemptAt ?? 0));
   const info = getDb()
     .prepare(
       `INSERT INTO usage_queue(words, audio_seconds, transcribed_at, attempts, next_attempt_at)
-       VALUES(?, ?, ?, 0, 0)`
+       VALUES(?, ?, ?, 0, ?)`
     )
-    .run(words, audioSeconds, transcribedAt);
+    .run(words, audioSeconds, transcribedAt, nextAttemptAt);
   return {
     id: Number(info.lastInsertRowid),
     words,
     audioSeconds,
     transcribedAt,
     attempts: 0,
-    nextAttemptAt: 0,
+    nextAttemptAt,
     lastError: null,
   };
 }

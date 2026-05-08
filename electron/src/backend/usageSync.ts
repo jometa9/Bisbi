@@ -1,7 +1,9 @@
+import { randomUUID } from 'crypto';
 import {
   bumpUsageQueueRow,
   countPendingUsage,
   deleteUsageQueueRow,
+  enqueueUsage,
   peekDueUsage,
   setMonthlyWordLimit,
   setMonthlyWordUsageFromServer,
@@ -9,7 +11,11 @@ import {
 import { getAuthToken } from './auth';
 import { apiFetch } from './apiClient';
 
-const BACKOFF_MS = [
+const BATCH_INTERVAL_MS = 10 * 60_000;
+const MAX_BATCH_SIZE = 20;
+const FAR_FUTURE_MS = 365 * 24 * 60 * 60_000;
+
+const RETRY_BACKOFF_MS = [
   30_000,
   60_000,
   5 * 60_000,
@@ -18,8 +24,8 @@ const BACKOFF_MS = [
 ];
 
 function backoffFor(attempts: number): number {
-  const idx = Math.min(attempts, BACKOFF_MS.length - 1);
-  return BACKOFF_MS[idx];
+  const idx = Math.min(attempts, RETRY_BACKOFF_MS.length - 1);
+  return RETRY_BACKOFF_MS[idx];
 }
 
 interface UsageResponse {
@@ -45,23 +51,33 @@ export function setUsageEventHandlers(handlers: {
   onLimitReached = handlers.onLimitReached ?? null;
 }
 
+interface BatchPayload {
+  words: number;
+  audioSeconds: number;
+  transcribedAt: number;
+  transcriptionsCount: number;
+  batchId: string;
+}
+
 interface PostUsageResult {
   status: number;
   body: UsageResponse | null;
 }
 
-async function postUsage(
-  token: string,
-  payload: { words: number; audioSeconds: number; transcribedAt: number }
-): Promise<PostUsageResult> {
+async function postBatch(token: string, payload: BatchPayload): Promise<PostUsageResult> {
   const resp = await apiFetch('/api/usage', {
     method: 'POST',
     token,
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Bisbi-Batch-Id': payload.batchId,
+    },
     body: JSON.stringify({
       words: payload.words,
       audioSeconds: payload.audioSeconds,
       transcribedAt: new Date(payload.transcribedAt).toISOString(),
+      transcriptionsCount: payload.transcriptionsCount,
+      batchId: payload.batchId,
     }),
   });
   let body: UsageResponse | null = null;
@@ -84,32 +100,55 @@ function applyServerResponse(res: UsageResponse): void {
   }
 }
 
-export async function flushUsageQueue(): Promise<void> {
+export function recordUsage(input: { words: number; audioSeconds: number }): void {
+  const words = Math.max(0, Math.floor(input.words));
+  if (words <= 0) return;
+
+  enqueueUsage({
+    words,
+    audioSeconds: Math.max(0, Math.floor(input.audioSeconds)),
+    nextAttemptAt: Date.now() + BATCH_INTERVAL_MS,
+  });
+
+  if (countPendingUsage() >= MAX_BATCH_SIZE) {
+    void flushUsageQueue(true);
+    return;
+  }
+  scheduleNextFlush();
+}
+
+export async function flushUsageQueue(force = false): Promise<void> {
   if (flushing) return;
   flushing = true;
   try {
     const token = getAuthToken();
     if (!token) return;
-    const rows = peekDueUsage();
-    for (const row of rows) {
-      try {
-        const res = await postUsage(token, {
-          words: row.words,
-          audioSeconds: row.audioSeconds,
-          transcribedAt: row.transcribedAt,
-        });
-        if (res.body) applyServerResponse(res.body);
-        deleteUsageQueueRow(row.id);
-      } catch (err) {
+
+    const cutoff = force ? Date.now() + FAR_FUTURE_MS : Date.now();
+    const rows = peekDueUsage(cutoff);
+    if (rows.length === 0) return;
+
+    const totalWords = rows.reduce((s, r) => s + r.words, 0);
+    const totalAudioSeconds = rows.reduce((s, r) => s + r.audioSeconds, 0);
+    const transcribedAt = rows.reduce((m, r) => Math.max(m, r.transcribedAt), 0);
+    const batchId = randomUUID();
+
+    try {
+      const res = await postBatch(token, {
+        words: totalWords,
+        audioSeconds: totalAudioSeconds,
+        transcribedAt,
+        transcriptionsCount: rows.length,
+        batchId,
+      });
+      if (res.body) applyServerResponse(res.body);
+      for (const row of rows) deleteUsageQueueRow(row.id);
+    } catch (err) {
+      const errMsg = err instanceof Error ? err.message : String(err);
+      for (const row of rows) {
         const attempts = row.attempts + 1;
-        const next = Date.now() + backoffFor(attempts);
-        bumpUsageQueueRow(
-          row.id,
-          attempts,
-          next,
-          err instanceof Error ? err.message : String(err)
-        );
-        break;
+        const nextAttemptAt = Date.now() + backoffFor(attempts);
+        bumpUsageQueueRow(row.id, attempts, nextAttemptAt, errMsg);
       }
     }
   } finally {
@@ -123,23 +162,18 @@ function scheduleNextFlush(): void {
     clearTimeout(flushTimer);
     flushTimer = null;
   }
-  const pending = countPendingUsage();
-  if (pending === 0) {
-    flushTimer = setTimeout(() => {
-      void flushUsageQueue();
-    }, 5 * 60_000);
-    return;
-  }
-  const rows = peekDueUsage(Date.now() + 365 * 24 * 60 * 60_000, 1);
-  if (rows.length === 0) return;
-  const wait = Math.max(1000, rows[0].nextAttemptAt - Date.now());
+  if (countPendingUsage() === 0) return;
+
+  const [next] = peekDueUsage(Date.now() + FAR_FUTURE_MS, 1);
+  if (!next) return;
+  const wait = Math.max(1000, next.nextAttemptAt - Date.now());
   flushTimer = setTimeout(() => {
     void flushUsageQueue();
   }, wait);
 }
 
 export function startUsageSync(): void {
-  void flushUsageQueue();
+  void flushUsageQueue(true);
 }
 
 export function stopUsageSync(): void {

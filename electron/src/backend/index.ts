@@ -10,10 +10,10 @@ import {
   getMonthlyWordUsage,
   addMonthlyWordUsage,
   getMonthlyWordLimit,
-  enqueueUsage,
 } from './db';
 import {
   flushUsageQueue,
+  recordUsage,
   setUsageEventHandlers,
   startUsageSync,
   stopUsageSync,
@@ -152,11 +152,10 @@ async function processQueue(): Promise<void> {
         }
         if (meaningful && wordCount > 0) {
           addMonthlyWordUsage(wordCount);
-          enqueueUsage({
+          recordUsage({
             words: wordCount,
             audioSeconds: Math.round((out.audioDurationMs ?? 0) / 1000),
           });
-          void flushUsageQueue();
         }
       } catch (err) {
         console.error('[backend] transcription job failed:', err);
@@ -360,7 +359,7 @@ export async function registerBackend(opts: BackendOptions): Promise<void> {
     limit: getMonthlyWordLimit(),
   }));
   ipcMain.handle('usage:flush', async () => {
-    await flushUsageQueue();
+    await flushUsageQueue(true);
   });
 
   ipcMain.handle('onboarding:getState', (): OnboardingState => getOnboardingState());
@@ -417,6 +416,7 @@ export async function registerBackend(opts: BackendOptions): Promise<void> {
   app.on('before-quit', () => {
     unregisterAll();
     destroyTray();
+    void flushUsageQueue(true);
     stopUsageSync();
     stopPeriodicAuthRefresh();
   });
