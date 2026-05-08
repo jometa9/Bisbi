@@ -12,7 +12,7 @@ const DEFAULT_SETTINGS: AppSettings = {
   language: 'auto',
   uiLanguage: 'system',
   saveHistory: true,
-  precision: 'accurate',
+  precision: 'fast',
   vocabulary: '',
   microphoneId: null,
   muteSystemAudioWhileRecording: false,

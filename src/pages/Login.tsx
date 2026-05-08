@@ -31,7 +31,7 @@ export function Login({ onStartTour }: Props) {
 
       <div className="onb-progress">
         <span className="onb-progress-text">
-          {t('onboarding.progress', { current: 5, total: 5 })}
+          {t('onboarding.progress', { current: 3, total: 3 })}
         </span>
       </div>
 

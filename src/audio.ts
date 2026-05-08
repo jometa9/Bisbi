@@ -61,6 +61,14 @@ export async function startRecording(
 
   return {
     stop: async () => {
+      if (chunks.length === 0) {
+        await new Promise<void>((resolve) => {
+          const interval = setInterval(() => {
+            if (chunks.length > 0) { clearInterval(interval); resolve(); }
+          }, 20);
+          setTimeout(() => { clearInterval(interval); resolve(); }, 300);
+        });
+      }
       stopped = true;
       const merged = mergeFloat32(chunks);
       cleanup();

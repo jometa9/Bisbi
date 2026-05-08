@@ -16,7 +16,6 @@ interface Props {
   microphoneId: string | null;
   onMicrophoneChange: (id: string | null) => void;
   onContinue: () => void;
-  onBack: () => void;
 }
 
 const DEFAULT_MIC_VALUE = '__system_default__';
@@ -31,17 +30,12 @@ type DictationState =
 
 const NO_VOICE_TIMEOUT_MS = 5000;
 
-// Screen 4 — combined mic test + first real transcription. We tap into the
-// global hotkey events the backend already broadcasts; on stop we ship the
-// PCM through `transcribePreview` so the result lands in our box instead of
-// being pasted into whatever app the user has in the background.
 export function FirstDictation({
   hotkey,
   platform,
   microphoneId,
   onMicrophoneChange,
   onContinue,
-  onBack,
 }: Props) {
   const { t } = useTranslation();
   const keyPlatform: KeyPlatform = platform === 'darwin' ? 'mac' : 'win';
@@ -224,10 +218,7 @@ export function FirstDictation({
         </div>
       </div>
 
-      <div className="onb-nav">
-        <button type="button" className="btn-secondary onb-back" onClick={onBack}>
-          {t('onboarding.back')}
-        </button>
+      <div className="onb-nav onb-nav--single">
         <button
           type="button"
           className={`btn-primary onb-cta${state === 'success' ? ' onb-cta--success' : ''}`}

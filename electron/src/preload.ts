@@ -37,6 +37,7 @@ const bisbi = {
       channels,
     }),
   cancelRecording: () => invoke<void>('recording:cancel'),
+  cancelAll: () => invoke<void>('recording:cancelAll'),
   setRecordingArmed: (armed: boolean) =>
     invoke<void>('recording:setArmed', armed),
   onRecordingStart: (cb: () => void) =>
@@ -50,6 +51,8 @@ const bisbi = {
   onPillState: (cb: (s: import('./backend/types').RecordingState) => void) =>
     listen<import('./backend/types').RecordingState>('recording:pillState', cb),
   sendRecordingLevel: (level: number) => ipcRenderer.send('recording:level', level),
+  notifyExternalKeyup: () => ipcRenderer.send('hotkey:externalKeyup'),
+  notifyExternalKeydown: () => ipcRenderer.send('hotkey:externalKeydown'),
   onRecordingLevel: (cb: (level: number) => void) =>
     listen<number>('recording:level', cb),
 

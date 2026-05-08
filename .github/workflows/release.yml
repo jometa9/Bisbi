@@ -13,45 +13,6 @@ env:
   MODELS_RELEASE: whisper-models
 
 jobs:
-  linux:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.inputs.tag || github.ref }}
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-
-      - name: Install Linux build deps
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y \
-            cmake \
-            libxtst-dev libxkbcommon-dev libxkbcommon-x11-dev \
-            libxinerama-dev libxrandr-dev libx11-dev libxt-dev
-
-      - name: Download whisper models
-        run: gh release download ${{ env.MODELS_RELEASE }} -p 'bsb-*.dat' -D resources/whisper/
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Install npm deps
-        run: npm ci
-
-      - name: Build frontend + electron TS
-        run: npm run build
-
-      - name: Build whisper-cli for linux-x64
-        run: bash scripts/build-whisper.sh
-
-      - name: Package + publish AppImage
-        run: npx electron-builder --linux --publish always
-        env:
-          GH_TOKEN: ${{ secrets.RELEASES_TOKEN }}
-
   windows:
     runs-on: windows-latest
     steps:

@@ -80,6 +80,40 @@ export function App() {
 
   useEffect(() => {
     if (!window.bisbi) return;
+    if (!settings) return;
+    const accel = settings.hotkey;
+    const downHandler = (e: KeyboardEvent) => {
+      if (e.repeat) return;
+      if (matchesAccelerator(e, accel)) {
+        window.bisbi.notifyExternalKeydown();
+      }
+    };
+    const upHandler = (e: KeyboardEvent) => {
+      if (matchesAccelerator(e, accel)) {
+        window.bisbi.notifyExternalKeyup();
+      }
+    };
+    window.addEventListener('keydown', downHandler, true);
+    window.addEventListener('keyup', upHandler, true);
+    return () => {
+      window.removeEventListener('keydown', downHandler, true);
+      window.removeEventListener('keyup', upHandler, true);
+    };
+  }, [settings?.hotkey]);
+
+  useEffect(() => {
+    if (!window.bisbi) return;
+    const handler = (e: KeyboardEvent) => {
+      if (e.code !== 'Escape') return;
+      if (recState === 'idle') return;
+      void window.bisbi.cancelAll();
+    };
+    window.addEventListener('keydown', handler, true);
+    return () => window.removeEventListener('keydown', handler, true);
+  }, [recState]);
+
+  useEffect(() => {
+    if (!window.bisbi) return;
     if (!isAuthenticated) return;
     let handle: RecordingHandle | null = null;
     let chain: Promise<void> = Promise.resolve();
@@ -384,4 +418,23 @@ function renderWithTokens(
       <span key={i}>{part}</span>
     )
   );
+}
+
+const ACCEL_TO_DOM_CODE: Record<string, string> = {
+  CtrlRight: 'ControlRight',
+  CtrlLeft: 'ControlLeft',
+  AltRight: 'AltRight',
+  AltLeft: 'AltLeft',
+  ShiftRight: 'ShiftRight',
+  ShiftLeft: 'ShiftLeft',
+  MetaRight: 'MetaRight',
+  MetaLeft: 'MetaLeft',
+};
+
+function matchesAccelerator(e: KeyboardEvent, accel: string): boolean {
+  const parts = accel.split('+').map((p) => p.trim()).filter(Boolean);
+  const last = parts[parts.length - 1];
+  if (!last) return false;
+  const expected = ACCEL_TO_DOM_CODE[last] ?? last;
+  return e.code === expected;
 }

@@ -16,6 +16,8 @@ export function RecordingApp() {
   const startedAtRef = useRef<number | null>(null);
 
   useEffect(() => {
+    startedAtRef.current = Date.now();
+
     if (!window.bisbi) return;
     const offState = window.bisbi.onPillState((s) => {
       if (s === 'recording') {

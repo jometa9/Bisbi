@@ -86,7 +86,7 @@ export interface AuthSession {
   userInfo: UserInfo | null;
 }
 
-export type OnboardingStep = 1 | 2 | 3 | 4;
+export type OnboardingStep = 1 | 2 | 3;
 
 export interface OnboardingState {
   completed: boolean;
@@ -116,6 +116,7 @@ declare global {
         channels: number
       ) => Promise<void>;
       cancelRecording: () => Promise<void>;
+      cancelAll: () => Promise<void>;
       setRecordingArmed: (armed: boolean) => Promise<void>;
       onRecordingStart: (cb: () => void) => () => void;
       onRecordingStop: (cb: () => void) => () => void;
@@ -123,6 +124,8 @@ declare global {
       onRecordingState: (cb: (s: RecordingState) => void) => () => void;
       onPillState: (cb: (s: RecordingState) => void) => () => void;
       sendRecordingLevel: (level: number) => void;
+      notifyExternalKeyup: () => void;
+      notifyExternalKeydown: () => void;
       onRecordingLevel: (cb: (level: number) => void) => () => void;
       listHistory: (limit?: number) => Promise<TranscriptionRow[]>;
       deleteHistory: (id: string) => Promise<void>;

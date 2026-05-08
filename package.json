@@ -163,18 +163,6 @@
       "allowToChangeInstallationDirectory": true,
       "include": "build/installer.nsh",
       "artifactName": "Bisbi-Setup-${version}.${ext}"
-    },
-    "linux": {
-      "category": "Utility",
-      "icon": "build-resources/icon.png",
-      "target": [
-        {
-          "target": "AppImage",
-          "arch": [
-            "x64"
-          ]
-        }
-      ]
     }
   }
 }

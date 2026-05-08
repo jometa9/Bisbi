@@ -114,50 +114,57 @@ function fade(target: number, onDone?: () => void): void {
   }, 16);
 }
 
-export function showRecordingWindow(state: RecordingState): void {
-  if (!win || win.isDestroyed()) {
-    win = new BrowserWindow({
-      width: WIDTH,
-      height: HEIGHT,
-      frame: false,
-      transparent: true,
-      resizable: false,
-      movable: false,
-      minimizable: false,
-      maximizable: false,
-      fullscreenable: false,
-      skipTaskbar: true,
-      alwaysOnTop: true,
-      hasShadow: false,
-      focusable: false,
-      show: false,
-      ...(process.platform === 'darwin' && { type: 'panel' as const }),
-      webPreferences: {
-        preload: path.join(__dirname, '..', 'preload.js'),
-        contextIsolation: true,
-        nodeIntegration: false,
-        backgroundThrottling: false,
-        devTools: !app.isPackaged,
-      },
-    });
-    hardenWindow(win);
-    win.setAlwaysOnTop(true, 'screen-saver');
-    win.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
-    if (process.platform === 'darwin') {
-      try { win.setHiddenInMissionControl(true); } catch {}
-    }
-    win.loadURL(frontendUrl('/recording')).catch(() => {});
-    win.on('closed', () => {
-      win = null;
-      lastDisplayId = null;
-    });
-    bindScreenListeners();
+function ensureWindow(): void {
+  if (win && !win.isDestroyed()) return;
+  win = new BrowserWindow({
+    width: WIDTH,
+    height: HEIGHT,
+    frame: false,
+    transparent: true,
+    resizable: false,
+    movable: false,
+    minimizable: false,
+    maximizable: false,
+    fullscreenable: false,
+    skipTaskbar: true,
+    alwaysOnTop: true,
+    hasShadow: false,
+    focusable: false,
+    show: false,
+    ...(process.platform === 'darwin' && { type: 'panel' as const }),
+    webPreferences: {
+      preload: path.join(__dirname, '..', 'preload.js'),
+      contextIsolation: true,
+      nodeIntegration: false,
+      backgroundThrottling: false,
+      devTools: !app.isPackaged,
+    },
+  });
+  hardenWindow(win);
+  win.setAlwaysOnTop(true, 'screen-saver');
+  win.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
+  if (process.platform === 'darwin') {
+    try { win.setHiddenInMissionControl(true); } catch {}
   }
-  placeBottomCenter(win);
-  reassertWindowFlags(win);
-  if (!win.isVisible()) {
-    try { win.setOpacity(0); } catch {}
-    win.showInactive();
+  win.loadURL(frontendUrl('/recording')).catch(() => {});
+  win.on('closed', () => {
+    win = null;
+    lastDisplayId = null;
+  });
+  bindScreenListeners();
+}
+
+export function warmUpRecordingWindow(): void {
+  ensureWindow();
+}
+
+export function showRecordingWindow(state: RecordingState): void {
+  ensureWindow();
+  placeBottomCenter(win!);
+  reassertWindowFlags(win!);
+  if (!win!.isVisible()) {
+    try { win!.setOpacity(0); } catch {}
+    win!.showInactive();
   }
   fade(1);
   startFollowingActiveDisplay();

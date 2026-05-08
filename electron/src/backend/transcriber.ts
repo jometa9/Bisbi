@@ -1,11 +1,20 @@
 import { app } from 'electron';
-import { spawn } from 'child_process';
+import { spawn, type ChildProcess } from 'child_process';
 import path from 'path';
 import fs from 'fs';
 import os from 'os';
 import { randomUUID } from 'crypto';
 import { BUILD_CONFIG, WHISPER_MODELS } from '../buildConfig';
 import type { Precision } from './types';
+
+let activeWhisper: ChildProcess | null = null;
+
+export function cancelActiveTranscription(): boolean {
+  const child = activeWhisper;
+  if (!child || child.killed) return false;
+  try { child.kill('SIGKILL'); } catch {}
+  return true;
+}
 
 export interface TranscribeOptions {
   language: string;
@@ -31,7 +40,6 @@ function platformDir(): string {
   const arch = process.arch;
   if (platform === 'darwin') return arch === 'arm64' ? 'darwin-arm64' : 'darwin-x64';
   if (platform === 'win32') return 'win32-x64';
-  if (platform === 'linux') return 'linux-x64';
   throw new Error(`Plataforma no soportada: ${platform}-${arch}`);
 }
 
@@ -153,11 +161,20 @@ export async function transcribePcm(
 function runWhisper(bin: string, args: string[], wavPath: string): Promise<string> {
   return new Promise((resolve, reject) => {
     const child = spawn(bin, args, { stdio: ['ignore', 'pipe', 'pipe'] });
+    activeWhisper = child;
     let stderr = '';
     child.stdout.on('data', () => {});
     child.stderr.on('data', (d) => { stderr += d.toString(); });
-    child.on('error', (err) => reject(err));
-    child.on('close', (code) => {
+    child.on('error', (err) => {
+      if (activeWhisper === child) activeWhisper = null;
+      reject(err);
+    });
+    child.on('close', (code, signal) => {
+      if (activeWhisper === child) activeWhisper = null;
+      if (signal === 'SIGKILL' || signal === 'SIGTERM') {
+        reject(new Error('cancelled'));
+        return;
+      }
       if (code !== 0) {
         reject(new Error(`whisper-cli exited ${code}: ${stderr.slice(-500)}`));
         return;

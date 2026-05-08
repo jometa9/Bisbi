@@ -2005,8 +2005,9 @@ html.recording-window #root {
 .onb-progress {
   -webkit-app-region: no-drag;
   position: absolute;
-  top: 18px;
-  inset-inline-end: 22px;
+  top: 32px;
+  left: 50%;
+  transform: translateX(-50%);
   z-index: 1;
   font-size: 11px;
   font-weight: 500;
@@ -2627,26 +2628,6 @@ html.recording-window #root {
   color: var(--text-soft);
 }
 
-[dir="rtl"] .onb-progress {
-  inset-inline-end: auto;
-  inset-inline-start: 22px;
-}
-
-/* Windows/Linux place the native window controls on the visual right via
-   titleBarOverlay, so the onboarding step counter moves to the visual left
-   to avoid overlapping. macOS keeps it on the right (traffic lights are
-   on the left). */
-body[data-platform="win32"] .onb-progress,
-body[data-platform="linux"] .onb-progress {
-  inset-inline-end: auto;
-  inset-inline-start: 22px;
-}
-
-[dir="rtl"] body[data-platform="win32"] .onb-progress,
-[dir="rtl"] body[data-platform="linux"] .onb-progress {
-  inset-inline-start: auto;
-  inset-inline-end: 22px;
-}
 
 /* RTL adjustments. Most of the layout is flex-based and flips automatically
    when document.documentElement.dir is set to "rtl" by the I18nProvider.

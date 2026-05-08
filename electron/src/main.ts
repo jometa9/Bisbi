@@ -17,6 +17,8 @@ import {
 const appRoot = path.resolve(__dirname, '..', '..');
 const PRODUCT_NAME = BUILD_CONFIG.PRODUCT_NAME;
 
+const SHOW_DEVTOOLS = true;
+
 function getMainLogPath(): string {
   try {
     const dir = path.join(app.getPath('userData'), 'logs');
@@ -246,7 +248,7 @@ function openSettingsWindow(): void {
       contextIsolation: true,
       nodeIntegration: false,
       backgroundThrottling: false,
-      devTools: !app.isPackaged,
+      devTools: !app.isPackaged || SHOW_DEVTOOLS,
     },
   });
 
@@ -257,6 +259,9 @@ function openSettingsWindow(): void {
   settingsWindow.once('ready-to-show', () => {
     settingsWindow?.show();
     settingsWindow?.focus();
+    if (SHOW_DEVTOOLS) {
+      settingsWindow?.webContents.openDevTools({ mode: 'detach' });
+    }
   });
 
   const frontendUrl = getFrontendServerUrl();

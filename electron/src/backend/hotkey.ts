@@ -69,6 +69,17 @@ const BARE_MODIFIER_TOKENS = new Set([
   'MetaLeft',
 ]);
 
+const MODIFIER_SIBLING: Partial<Record<number, number>> = {
+  [UiohookKey.Ctrl]:       UiohookKey.CtrlRight,
+  [UiohookKey.CtrlRight]:  UiohookKey.Ctrl,
+  [UiohookKey.Alt]:        UiohookKey.AltRight,
+  [UiohookKey.AltRight]:   UiohookKey.Alt,
+  [UiohookKey.Shift]:      UiohookKey.ShiftRight,
+  [UiohookKey.ShiftRight]: UiohookKey.Shift,
+  [UiohookKey.Meta]:       UiohookKey.MetaRight,
+  [UiohookKey.MetaRight]:  UiohookKey.Meta,
+};
+
 function parseAccelerator(accel: string): ParsedAccelerator | null {
   const parts = accel.split('+').map((p) => p.trim()).filter(Boolean);
   if (parts.length === 0) return null;
@@ -135,10 +146,7 @@ function eventMatches(parsed: ParsedAccelerator, e: UiohookEvent): boolean {
   );
 }
 
-const TAP_THRESHOLD_MS = 250;
-const DOUBLE_TAP_GRACE_MS = 280;
-
-type Mode = 'idle' | 'ptt' | 'locked';
+type Mode = 'idle' | 'recording';
 
 interface RuntimeState {
   parsed: ParsedAccelerator;
@@ -147,7 +155,6 @@ interface RuntimeState {
   mode: Mode;
   keyHeld: boolean;
   pressStartedAt: number;
-  pendingStopTimer: NodeJS.Timeout | null;
 }
 
 let state: RuntimeState | null = null;
@@ -180,10 +187,6 @@ function onKeydown(e: UiohookEvent): void {
     state.parsed.keycode !== UiohookKey.Escape &&
     state.mode !== 'idle'
   ) {
-    if (state.pendingStopTimer) {
-      clearTimeout(state.pendingStopTimer);
-      state.pendingStopTimer = null;
-    }
     state.mode = 'idle';
     state.cb.onCancelRecording();
     return;
@@ -195,10 +198,16 @@ function onKeydown(e: UiohookEvent): void {
   handlePress();
 }
 
+const SYNTHETIC_KEYUP_GUARD_MS = 60;
+
 function onKeyup(e: UiohookEvent): void {
   if (!state) return;
-  if (e.keycode !== state.parsed.keycode) return;
+  const isTarget =
+    e.keycode === state.parsed.keycode ||
+    (state.parsed.bareModifier && MODIFIER_SIBLING[state.parsed.keycode] === e.keycode);
+  if (!isTarget) return;
   if (!state.keyHeld) return;
+  if (Date.now() - state.pressStartedAt < SYNTHETIC_KEYUP_GUARD_MS) return;
   state.keyHeld = false;
   handleRelease();
 }
@@ -207,9 +216,10 @@ function handlePress(): void {
   if (!state) return;
   const s = state;
 
+  // Hands-free: each press toggles recording on/off.
   if (s.cfg.handsFreeMode) {
     if (s.mode === 'idle') {
-      s.mode = 'locked';
+      s.mode = 'recording';
       s.cb.onStartRecording();
     } else {
       s.mode = 'idle';
@@ -218,22 +228,10 @@ function handlePress(): void {
     return;
   }
 
+  // Push-to-talk: press starts, release stops.
   if (s.mode === 'idle') {
-    s.mode = 'ptt';
+    s.mode = 'recording';
     s.cb.onStartRecording();
-    return;
-  }
-  if (s.mode === 'ptt') {
-    if (s.pendingStopTimer) {
-      clearTimeout(s.pendingStopTimer);
-      s.pendingStopTimer = null;
-    }
-    s.mode = 'locked';
-    return;
-  }
-  if (s.mode === 'locked') {
-    s.mode = 'idle';
-    s.cb.onStopRecording();
   }
 }
 
@@ -241,23 +239,9 @@ function handleRelease(): void {
   if (!state) return;
   const s = state;
   if (s.cfg.handsFreeMode) return;
-  if (s.mode !== 'ptt') return;
-
-  const heldFor = Date.now() - s.pressStartedAt;
-  if (heldFor >= TAP_THRESHOLD_MS) {
-    s.mode = 'idle';
-    s.cb.onStopRecording();
-    return;
-  }
-  if (s.pendingStopTimer) clearTimeout(s.pendingStopTimer);
-  s.pendingStopTimer = setTimeout(() => {
-    if (!state) return;
-    state.pendingStopTimer = null;
-    if (state.mode === 'ptt') {
-      state.mode = 'idle';
-      state.cb.onStopRecording();
-    }
-  }, DOUBLE_TAP_GRACE_MS);
+  if (s.mode !== 'recording') return;
+  s.mode = 'idle';
+  s.cb.onStopRecording();
 }
 
 export function registerHotkey(cfg: HotkeyConfig, cb: HotkeyCallbacks): boolean {
@@ -266,7 +250,6 @@ export function registerHotkey(cfg: HotkeyConfig, cb: HotkeyCallbacks): boolean 
     console.warn('[hotkey] unable to parse accelerator:', cfg.accelerator);
     return false;
   }
-  if (state?.pendingStopTimer) clearTimeout(state.pendingStopTimer);
   state = {
     parsed,
     cfg,
@@ -274,14 +257,12 @@ export function registerHotkey(cfg: HotkeyConfig, cb: HotkeyCallbacks): boolean 
     mode: 'idle',
     keyHeld: false,
     pressStartedAt: 0,
-    pendingStopTimer: null,
   };
   ensureHookStarted();
   return true;
 }
 
 export function unregisterHotkey(): void {
-  if (state?.pendingStopTimer) clearTimeout(state.pendingStopTimer);
   state = null;
 }
 
@@ -297,4 +278,21 @@ export function unregisterAll(): void {
 
 export function getRegistered(): string | null {
   return state?.parsed.raw ?? null;
+}
+
+export function notifyExternalKeyup(): void {
+  if (!state) return;
+  if (!state.keyHeld) return;
+  state.keyHeld = false;
+  handleRelease();
+}
+
+// Same idea for keydown — needed for hands-free toggle when uiohook misses
+// the second press because the app has foreground focus.
+export function notifyExternalKeydown(): void {
+  if (!state) return;
+  if (state.keyHeld) return;
+  state.keyHeld = true;
+  state.pressStartedAt = Date.now();
+  handlePress();
 }

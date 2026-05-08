@@ -25,8 +25,6 @@ function platformDir() {
         return arch === 'arm64' ? 'darwin-arm64' : 'darwin-x64';
     if (platform === 'win32')
         return 'win32-x64';
-    if (platform === 'linux')
-        return 'linux-x64';
     throw new Error(`Plataforma no soportada: ${platform}-${arch}`);
 }
 function whisperBinaryName() {

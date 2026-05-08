@@ -15,7 +15,6 @@ function sleep(ms: number): Promise<void> {
 function simulatePaste(): Promise<void> {
   if (process.platform === 'darwin') return pasteMac();
   if (process.platform === 'win32') return pasteWin();
-  if (process.platform === 'linux') return pasteLinux();
   return Promise.resolve();
 }
 
@@ -29,12 +28,6 @@ function pasteMac(): Promise<void> {
 function pasteWin(): Promise<void> {
   const script = "Add-Type -AssemblyName System.Windows.Forms; [System.Windows.Forms.SendKeys]::SendWait('^v')";
   return run('powershell.exe', ['-NoProfile', '-NonInteractive', '-Command', script]);
-}
-
-function pasteLinux(): Promise<void> {
-  return run('xdotool', ['key', '--clearmodifiers', 'ctrl+v']).catch(() =>
-    run('wtype', ['-M', 'ctrl', 'v'])
-  );
 }
 
 function run(cmd: string, args: string[]): Promise<void> {

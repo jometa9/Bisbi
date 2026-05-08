@@ -5,7 +5,6 @@
 # Hay que correrlo en cada máquina target:
 #   - Mac arm64 (M1/M2/M3): GGML_METAL=ON (default)
 #   - Mac x64 (Intel):       GGML_METAL=OFF (Metal anda mal en x64)
-#   - Linux x64:             GGML_METAL=OFF
 #   - Windows x64:           usar scripts/build-whisper.ps1 desde PowerShell
 #
 # El binario resultante es un solo archivo, sin dylibs externas.
@@ -26,9 +25,6 @@ case "$uname_s" in
       x86_64) PLATFORM_DIR="darwin-x64";   METAL_FLAG="-DGGML_METAL=OFF" ;;
       *) echo "Arquitectura no soportada: $uname_m"; exit 1 ;;
     esac
-    ;;
-  Linux)
-    PLATFORM_DIR="linux-x64"; METAL_FLAG="-DGGML_METAL=OFF"
     ;;
   *)
     echo "Plataforma no soportada: $uname_s"; exit 1

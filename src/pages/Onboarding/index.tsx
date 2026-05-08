@@ -3,7 +3,6 @@ import type { OnboardingStep, AppSettings, PermissionStatus } from '../../types'
 import { useTranslation } from '../../i18n';
 import { Welcome } from './Welcome';
 import { Permissions } from './Permissions';
-import { Hotkey } from './Hotkey';
 import { FirstDictation } from './FirstDictation';
 import owlIdleSvg from '../../../build-resources/owl_head.svg';
 
@@ -14,9 +13,6 @@ interface Props {
   onMicNeeded: (needed: boolean) => void;
 }
 
-// The 4-screen tour. Launched from Login when the user wants to see how the
-// app works. Always starts at step 1 — progress is not persisted. Sign-in
-// happens only on Login; finishing the tour returns the user there.
 export function Onboarding({ settings, onSettingsChange, onExit, onMicNeeded }: Props) {
   const { t } = useTranslation();
   const [step, setStep] = useState<OnboardingStep>(1);
@@ -30,7 +26,7 @@ export function Onboarding({ settings, onSettingsChange, onExit, onMicNeeded }: 
   }, []);
 
   useEffect(() => {
-    onMicNeeded(step === 4);
+    onMicNeeded(step === 3);
     return () => onMicNeeded(false);
   }, [step, onMicNeeded]);
 
@@ -45,16 +41,6 @@ export function Onboarding({ settings, onSettingsChange, onExit, onMicNeeded }: 
     }
   }, [step, perms]);
 
-  const onConfirmHotkey = async (accelerator: string) => {
-    try {
-      const next = await window.bisbi.updateSettings({ hotkey: accelerator });
-      onSettingsChange(next);
-      setStep(4);
-    } catch (err) {
-      console.error('[onboarding] hotkey update failed:', err);
-    }
-  };
-
   const onMicrophoneChange = async (microphoneId: string | null) => {
     try {
       const next = await window.bisbi.updateSettings({ microphoneId });
@@ -64,7 +50,8 @@ export function Onboarding({ settings, onSettingsChange, onExit, onMicNeeded }: 
     }
   };
 
-  const totalSteps = 5;
+  const totalSteps = 3;
+  const displayStep = step === 1 ? 1 : 2;
 
   const content = useMemo(() => {
     switch (step) {
@@ -74,21 +61,12 @@ export function Onboarding({ settings, onSettingsChange, onExit, onMicNeeded }: 
         return <Permissions platform={platform} onContinue={() => setStep(3)} />;
       case 3:
         return (
-          <Hotkey
-            platform={platform}
-            initialHotkey={settings.hotkey}
-            onConfirm={onConfirmHotkey}
-          />
-        );
-      case 4:
-        return (
           <FirstDictation
             hotkey={settings.hotkey}
             platform={platform}
             microphoneId={settings.microphoneId}
             onMicrophoneChange={onMicrophoneChange}
             onContinue={onExit}
-            onBack={() => setStep(3)}
           />
         );
     }
@@ -105,7 +83,7 @@ export function Onboarding({ settings, onSettingsChange, onExit, onMicNeeded }: 
       />
       <div className="onb-progress">
         <span className="onb-progress-text">
-          {t('onboarding.progress', { current: step, total: totalSteps })}
+          {t('onboarding.progress', { current: displayStep, total: totalSteps })}
         </span>
       </div>
       <div className="onb-content" key={step}>

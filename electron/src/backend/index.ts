@@ -32,8 +32,8 @@ import {
   clearPendingDeepLink,
 } from './deepLink';
 import { getSettings, updateSettings, resetSettings } from './settings';
-import { registerHotkey, unregisterAll } from './hotkey';
-import { transcribePcm, checkResources } from './transcriber';
+import { registerHotkey, unregisterAll, notifyExternalKeyup, notifyExternalKeydown } from './hotkey';
+import { transcribePcm, checkResources, cancelActiveTranscription } from './transcriber';
 import { deliverText } from './paster';
 import {
   getOnboardingState,
@@ -52,6 +52,7 @@ import {
   destroyTray,
 } from './tray';
 import {
+  warmUpRecordingWindow,
   showRecordingWindow,
   setState as setRecordingWindowState,
   setLevel as setRecordingWindowLevel,
@@ -201,6 +202,7 @@ export async function registerBackend(opts: BackendOptions): Promise<void> {
   });
 
   applyHotkey(settings);
+  warmUpRecordingWindow();
 
   setUsageEventHandlers({
     onLimitReached: (info) => broadcast('usage:limitReached', info),
@@ -297,6 +299,18 @@ export async function registerBackend(opts: BackendOptions): Promise<void> {
     if (!recordingArmed && isRecording) {
       handleCancelRecording();
     }
+  });
+
+  ipcMain.on('hotkey:externalKeyup', () => {
+    notifyExternalKeyup();
+  });
+
+  ipcMain.on('hotkey:externalKeydown', () => {
+    notifyExternalKeydown();
+  });
+
+  ipcMain.handle('recording:cancelAll', () => {
+    cancelEverything();
   });
 
   ipcMain.handle('history:list', (_e, limit?: number) => listTranscriptions(limit ?? 100));
@@ -466,4 +480,10 @@ function handleCancelRecording(): void {
     muteSnapshot = null;
     void restoreSystemAudio(snap);
   }
+}
+
+function cancelEverything(): void {
+  if (isRecording) handleCancelRecording();
+  transcriptionQueue.length = 0;
+  cancelActiveTranscription();
 }

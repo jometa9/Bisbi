@@ -2,7 +2,7 @@ import { app, systemPreferences, shell, globalShortcut } from 'electron';
 import fs from 'fs';
 import path from 'path';
 
-export type OnboardingStep = 1 | 2 | 3 | 4;
+export type OnboardingStep = 1 | 2 | 3;
 
 export interface OnboardingState {
   completed: boolean;
@@ -28,9 +28,7 @@ export function getOnboardingState(): OnboardingState {
       lastStep:
         parsed.lastStep === 1 ||
         parsed.lastStep === 2 ||
-        parsed.lastStep === 3 ||
-        parsed.lastStep === 4 ||
-        parsed.lastStep === 5
+        parsed.lastStep === 3
           ? parsed.lastStep
           : 1,
     };
