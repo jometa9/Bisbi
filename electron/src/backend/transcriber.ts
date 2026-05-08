@@ -4,8 +4,7 @@ import path from 'path';
 import fs from 'fs';
 import os from 'os';
 import { randomUUID } from 'crypto';
-import { BUILD_CONFIG, WHISPER_MODELS } from '../buildConfig';
-import type { Precision } from './types';
+import { BUILD_CONFIG } from '../buildConfig';
 
 let activeWhisper: ChildProcess | null = null;
 
@@ -18,7 +17,6 @@ export function cancelActiveTranscription(): boolean {
 
 export interface TranscribeOptions {
   language: string;
-  precision: Precision;
   threads?: number;
   vocabulary?: string;
 }
@@ -29,10 +27,6 @@ export interface TranscribeOutput {
   durationMs: number;
   audioDurationMs: number;
   modelFile: string;
-}
-
-export function modelFileForPrecision(precision: Precision): string {
-  return WHISPER_MODELS[precision] ?? WHISPER_MODELS[BUILD_CONFIG.DEFAULT_PRECISION];
 }
 
 function platformDir(): string {
@@ -58,8 +52,8 @@ export function whisperBinaryPath(): string {
   return path.join(resourceRoot(), platformDir(), whisperBinaryName());
 }
 
-export function whisperModelPath(precision: Precision = BUILD_CONFIG.DEFAULT_PRECISION): string {
-  return path.join(resourceRoot(), modelFileForPrecision(precision));
+export function whisperModelPath(): string {
+  return path.join(resourceRoot(), BUILD_CONFIG.WHISPER_MODEL_FILE);
 }
 
 export interface ResourceCheck {
@@ -69,9 +63,9 @@ export interface ResourceCheck {
   missing: string[];
 }
 
-export function checkResources(precision: Precision = BUILD_CONFIG.DEFAULT_PRECISION): ResourceCheck {
+export function checkResources(): ResourceCheck {
   const binaryPath = whisperBinaryPath();
-  const modelPath = whisperModelPath(precision);
+  const modelPath = whisperModelPath();
   const missing: string[] = [];
   if (!fs.existsSync(binaryPath)) missing.push(binaryPath);
   if (!fs.existsSync(modelPath)) missing.push(modelPath);
@@ -111,7 +105,7 @@ export async function transcribePcm(
   channels: number,
   opts: TranscribeOptions
 ): Promise<TranscribeOutput> {
-  const check = checkResources(opts.precision);
+  const check = checkResources();
   if (!check.ok) {
     throw new Error('Resources missing');
   }
@@ -129,14 +123,11 @@ export async function transcribePcm(
       '-otxt',
       '-nt',
       '-t', String(opts.threads ?? Math.max(2, Math.floor(os.cpus().length / 2))),
+      '--temperature', '0.0',
+      '--no-speech-thold', '0.6',
+      '--suppress-nst',
+      '-fa',
     ];
-    args.push('--temperature', '0.0');
-    args.push('--no-speech-thold', '0.6');
-    args.push('--suppress-nst');
-    if (opts.precision === 'accurate') {
-      args.push('-bs', '5');
-      args.push('-fa');
-    }
     const prompt = opts.vocabulary?.trim();
     if (prompt) {
       args.push('--prompt', prompt);
@@ -149,7 +140,7 @@ export async function transcribePcm(
       language: opts.language === 'auto' ? null : opts.language,
       durationMs,
       audioDurationMs,
-      modelFile: modelFileForPrecision(opts.precision),
+      modelFile: BUILD_CONFIG.WHISPER_MODEL_FILE,
     };
   } finally {
     try { fs.unlinkSync(wavPath); } catch {}

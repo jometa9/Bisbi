@@ -168,7 +168,8 @@ export const es: Translations = {
     },
     transcriptionLanguage: {
       title: 'Idioma de transcripción',
-      description: 'Bisbi detecta el idioma automáticamente. Fijalo si querés más velocidad.',
+      description:
+        'Elegí el idioma en el que dictás. La detección automática es más lenta y puede equivocarse en clips cortos.',
       searchPlaceholder: 'Buscar un idioma…',
     },
     uiLanguage: {
@@ -187,19 +188,6 @@ export const es: Translations = {
       disabled: {
         label: 'No guardar',
         hint: 'Cada transcripción se descarta apenas se inserta el texto. No queda registro en ningún lado.',
-      },
-    },
-    precision: {
-      title: 'Precisión de la transcripción',
-      description:
-        'A más precisión, mejor resultado pero más demora y consumo. Cambialo si notás errores.',
-      fast: {
-        label: 'Rápida',
-        hint: 'Transcripción casi instantánea con un modelo más liviano. Ideal si hablás claro y en un solo idioma.',
-      },
-      accurate: {
-        label: 'Precisa (recomendada)',
-        hint: 'La opción más precisa. Más lenta y pesada, pero mejor con mezcla de idiomas, términos técnicos, audios ruidosos o varias personas hablando.',
       },
     },
     muteAudio: {

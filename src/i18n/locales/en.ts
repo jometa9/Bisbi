@@ -120,12 +120,6 @@ export const en: {
       enabled: { label: string; hint: string };
       disabled: { label: string; hint: string };
     };
-    precision: {
-      title: string;
-      description: string;
-      fast: { label: string; hint: string };
-      accurate: { label: string; hint: string };
-    };
     muteAudio: {
       title: string;
       description: string;
@@ -403,7 +397,8 @@ export const en: {
     },
     transcriptionLanguage: {
       title: 'Transcription language',
-      description: 'Bisbi auto-detects the language. Pin it for more speed.',
+      description:
+        'Pick the language you dictate in. Auto-detect is slower and may pick wrong on short clips.',
       searchPlaceholder: 'Search a language…',
     },
     uiLanguage: {
@@ -422,19 +417,6 @@ export const en: {
       disabled: {
         label: 'Do not save',
         hint: 'Each transcription is discarded right after the text is inserted. Nothing is kept.',
-      },
-    },
-    precision: {
-      title: 'Transcription accuracy',
-      description:
-        'Higher accuracy gives better results but takes more time and resources. Change it if you notice errors.',
-      fast: {
-        label: 'Fast',
-        hint: 'Near-instant transcription with a lighter model. Ideal if you speak clearly in a single language.',
-      },
-      accurate: {
-        label: 'Accurate (recommended)',
-        hint: 'The most precise option. Slower and heavier, but best with mixed languages, technical terms, noisy audio, or multiple speakers.',
       },
     },
     muteAudio: {

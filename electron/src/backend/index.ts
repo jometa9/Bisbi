@@ -131,7 +131,6 @@ async function processQueue(): Promise<void> {
         const cfg = getSettings();
         const out = await transcribePcm(job.pcm, job.sampleRate, job.channels, {
           language: cfg.language,
-          precision: cfg.precision,
           vocabulary: cfg.vocabulary,
         });
         const meaningful = out.text.replace(/\s/g, '').length >= 2;
@@ -144,9 +143,9 @@ async function processQueue(): Promise<void> {
             id: randomUUID(),
             createdAt: Date.now(),
             text: out.text,
-            language: null,
+            language: out.language,
             durationMs: out.durationMs,
-            model: cfg.precision,
+            model: out.modelFile,
             audioDurationMs: out.audioDurationMs,
             wordCount,
           });
@@ -327,7 +326,7 @@ export async function registerBackend(opts: BackendOptions): Promise<void> {
 
   ipcMain.handle('stats:totals', () => getStatsTotals());
 
-  ipcMain.handle('resources:check', () => checkResources(getSettings().precision));
+  ipcMain.handle('resources:check', () => checkResources());
   ipcMain.handle('app:getVersion', () => app.getVersion());
   ipcMain.handle('app:getPlatform', () => process.platform);
   ipcMain.handle('app:getSystemLocale', () => getSystemLocale());
@@ -410,7 +409,6 @@ export async function registerBackend(opts: BackendOptions): Promise<void> {
       const cfg = getSettings();
       const out = await transcribePcm(pcm, payload.sampleRate, payload.channels, {
         language: cfg.language,
-        precision: cfg.precision,
         vocabulary: cfg.vocabulary,
       });
       return out.text;

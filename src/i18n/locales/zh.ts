@@ -165,7 +165,7 @@ export const zh: Translations = {
     },
     transcriptionLanguage: {
       title: '转写语言',
-      description: 'Bisbi 会自动检测语言。固定它可以提速。',
+      description: '选择你听写时使用的语言。自动检测较慢，且在短片段上可能选错。',
       searchPlaceholder: '搜索语言…',
     },
     uiLanguage: {
@@ -183,18 +183,6 @@ export const zh: Translations = {
       disabled: {
         label: '不保存',
         hint: '插入文本后立即丢弃每一条转写。不会留下任何记录。',
-      },
-    },
-    precision: {
-      title: '转写精度',
-      description: '精度越高,结果越好,但耗时和消耗也更多。如果发现错误,请调整。',
-      fast: {
-        label: '快速',
-        hint: '使用更轻量的模型,几乎即时完成转写。适合发音清晰且单一语言的场景。',
-      },
-      accurate: {
-        label: '精确(推荐)',
-        hint: '最精确的选项。速度更慢且更重,但对多语言混合、专业术语、嘈杂音频或多人发言效果更好。',
       },
     },
     muteAudio: {

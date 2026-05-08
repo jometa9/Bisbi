@@ -825,7 +825,7 @@ button { font-family: inherit; }
 
 .select {
   position: relative;
-  width: 240px;
+  width: 100%;
   font-size: 13px;
   color: var(--text);
 }
@@ -2457,10 +2457,9 @@ html.recording-window #root {
 .onb-mic-picker {
   width: 100%;
   margin-top: 4px;
-}
-
-.onb-mic-picker .select {
-  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .onb-dictation-box {

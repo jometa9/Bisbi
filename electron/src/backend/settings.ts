@@ -6,17 +6,29 @@ import type { AppSettings } from './types';
 
 const SETTINGS_FILE = 'settings.json';
 
-const DEFAULT_SETTINGS: AppSettings = {
-  hotkey: BUILD_CONFIG.DEFAULT_HOTKEY,
-  handsFreeMode: BUILD_CONFIG.DEFAULT_HANDS_FREE,
-  language: 'auto',
-  uiLanguage: 'system',
-  saveHistory: true,
-  precision: 'fast',
-  vocabulary: '',
-  microphoneId: null,
-  muteSystemAudioWhileRecording: false,
-};
+function deriveDefaultLanguage(): string {
+  try {
+    const locale = app.getLocale() || '';
+    const primary = locale.toLowerCase().replace('_', '-').split('-')[0] ?? '';
+    if (primary.length >= 2 && primary.length <= 3) return primary;
+    return 'auto';
+  } catch {
+    return 'auto';
+  }
+}
+
+function buildDefaults(): AppSettings {
+  return {
+    hotkey: BUILD_CONFIG.DEFAULT_HOTKEY,
+    handsFreeMode: BUILD_CONFIG.DEFAULT_HANDS_FREE,
+    language: deriveDefaultLanguage(),
+    uiLanguage: 'system',
+    saveHistory: true,
+    vocabulary: '',
+    microphoneId: null,
+    muteSystemAudioWhileRecording: false,
+  };
+}
 
 function settingsPath(): string {
   const dir = app.getPath('userData');
@@ -28,26 +40,16 @@ let cached: AppSettings | null = null;
 
 export function getSettings(): AppSettings {
   if (cached) return cached;
+  const defaults = buildDefaults();
   try {
     const raw = fs.readFileSync(settingsPath(), 'utf8');
     const parsed = JSON.parse(raw) as Partial<AppSettings>;
-    cached = { ...DEFAULT_SETTINGS, ...parsed };
+    cached = { ...defaults, ...parsed };
   } catch {
-    cached = { ...DEFAULT_SETTINGS };
+    cached = defaults;
   }
-  let migrated = false;
   if (cached.hotkey === 'Fn') {
     cached = { ...cached, hotkey: BUILD_CONFIG.DEFAULT_HOTKEY };
-    migrated = true;
-  }
-  // Older builds shipped 'balanced' / 'high' / 'max' precisions; collapse any
-  // value other than 'fast' onto 'accurate' so existing users keep getting a
-  // quality-leaning transcription.
-  if (cached.precision !== 'fast' && cached.precision !== 'accurate') {
-    cached = { ...cached, precision: 'accurate' };
-    migrated = true;
-  }
-  if (migrated) {
     fs.writeFileSync(settingsPath(), JSON.stringify(cached, null, 2), 'utf8');
   }
   return cached;
@@ -62,7 +64,7 @@ export function updateSettings(patch: Partial<AppSettings>): AppSettings {
 }
 
 export function resetSettings(): AppSettings {
-  cached = { ...DEFAULT_SETTINGS };
+  cached = buildDefaults();
   fs.writeFileSync(settingsPath(), JSON.stringify(cached, null, 2), 'utf8');
   return cached;
 }

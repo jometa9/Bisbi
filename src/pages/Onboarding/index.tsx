@@ -50,6 +50,15 @@ export function Onboarding({ settings, onSettingsChange, onExit, onMicNeeded }: 
     }
   };
 
+  const onLanguageChange = async (language: string) => {
+    try {
+      const next = await window.bisbi.updateSettings({ language });
+      onSettingsChange(next);
+    } catch (err) {
+      console.error('[onboarding] language update failed:', err);
+    }
+  };
+
   const totalSteps = 3;
   const displayStep = step === 1 ? 1 : 2;
 
@@ -65,7 +74,9 @@ export function Onboarding({ settings, onSettingsChange, onExit, onMicNeeded }: 
             hotkey={settings.hotkey}
             platform={platform}
             microphoneId={settings.microphoneId}
+            language={settings.language}
             onMicrophoneChange={onMicrophoneChange}
+            onLanguageChange={onLanguageChange}
             onContinue={onExit}
           />
         );

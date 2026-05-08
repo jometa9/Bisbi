@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useMemo } from 'react';
-import type { AppSettings, Precision } from '../types';
+import type { AppSettings } from '../types';
 import {
   SUPPORTED_UI_LANGUAGES,
   matchLocale,
@@ -19,8 +19,6 @@ interface Props {
   onReset: () => Promise<void>;
   onClearHistory: () => Promise<void>;
 }
-
-const PRECISION_OPTIONS: Precision[] = ['fast', 'accurate'];
 
 export function Settings({ settings, onChange, onReset, onClearHistory }: Props) {
   const { t, systemLocale } = useTranslation();
@@ -114,24 +112,6 @@ export function Settings({ settings, onChange, onReset, onClearHistory }: Props)
             })),
           ]}
         />
-      </Section>
-
-      <Section
-        title={t('settings.precision.title')}
-        description={t('settings.precision.description')}
-      >
-        <div className="option-cards">
-          {PRECISION_OPTIONS.map((opt) => (
-            <OptionCard
-              key={opt}
-              name="precision"
-              selected={settings.precision === opt}
-              title={t(`settings.precision.${opt}.label` as const)}
-              hint={t(`settings.precision.${opt}.hint` as const)}
-              onSelect={() => onChange({ precision: opt })}
-            />
-          ))}
-        </div>
       </Section>
 
       <Section
