@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 
 export interface SelectOption<T extends string> {
   value: T;
@@ -13,6 +13,7 @@ interface Props<T extends string> {
   ariaLabel?: string;
   searchPlaceholder?: string;
   variant?: 'default' | 'inline';
+  leadingIcon?: ReactNode;
 }
 
 export function Select<T extends string>({
@@ -22,6 +23,7 @@ export function Select<T extends string>({
   ariaLabel,
   searchPlaceholder,
   variant = 'default',
+  leadingIcon,
 }: Props<T>) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
@@ -163,6 +165,11 @@ export function Select<T extends string>({
         onClick={() => setOpen((o) => !o)}
         onKeyDown={onTriggerKeyDown}
       >
+        {leadingIcon && (
+          <span className="select-trigger-leading" aria-hidden="true">
+            {leadingIcon}
+          </span>
+        )}
         <span className="select-trigger-label">{selected?.label}</span>
         {variant === 'inline' ? <PencilIcon /> : <ChevronIcon />}
       </button>

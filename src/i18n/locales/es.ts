@@ -26,8 +26,8 @@ export const es: Translations = {
     limitReached: 'Llegaste al límite del plan gratis de este mes.',
   },
   auth: {
-    welcome: 'A un paso de dictar',
-    tagline: 'La forma más rápida de dictar en cualquier app.',
+    welcome: 'Ya sabés cómo funciona.',
+    tagline: 'Creá tu cuenta gratis o iniciá sesión.',
     signIn: 'Iniciar sesión con Google',
     authenticating: 'Autenticando en el navegador…',
     redirecting: 'Volviendo a la aplicación…',
@@ -295,12 +295,10 @@ export const es: Translations = {
     progress: '{current} de {total}',
     back: 'Atrás',
     welcome: {
-      title: 'Bienvenido a Bisbi.',
+      title: 'Escribís lento. Hablar es 3× más rápido.',
       subtitle:
-        'La forma más rápida de escribir es no escribir. Te lo muestro en menos de 2 minutos.',
+        'Bisbi convierte tu voz en texto en cualquier app — en menos de 2 segundos.',
       cta: 'Empezar',
-      languageQuestion: '¿En qué idioma vas a dictar?',
-      languagePlaceholder: 'Elegí tu idioma',
     },
     permissions: {
       title: 'Bisbi necesita dos permisos.',
@@ -332,10 +330,10 @@ export const es: Translations = {
       conflictInvalid: 'Esa combinación no está soportada. Probá otra.',
     },
     dictation: {
-      title: 'Probemos.',
-      subtitle: 'Mantené apretado {hotkey} y leé la frase de abajo en voz alta para probar tu primer dictado.',
+      title: 'Tu primer dictado.',
+      subtitle: 'Mantené {hotkey} presionado y leé esto:',
       samplePhrase:
-        'Hola Bisbi, esta es mi primera dictada. Hablar es más rápido que escribir.',
+        'Reunión con el equipo el lunes a las 10. Traer el deck de ventas.',
       waiting: 'Esperando tu voz…',
       listening: 'Escuchando…',
       transcribing: 'Transcribiendo…',

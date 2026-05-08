@@ -26,8 +26,8 @@ export const ar: Translations = {
     limitReached: 'لقد بلغت حد الخطة المجانية لهذا الشهر.',
   },
   auth: {
-    welcome: 'على بُعد خطوة من الإملاء',
-    tagline: 'أسرع طريقة للإملاء في أي تطبيق.',
+    welcome: 'الآن أنت تعرف كيف يعمل.',
+    tagline: 'أنشئ حسابك المجاني أو سجّل الدخول.',
     signIn: 'تسجيل الدخول بحساب Google',
     authenticating: 'جارٍ المصادقة في المتصفح…',
     redirecting: 'العودة إلى التطبيق…',
@@ -292,12 +292,10 @@ export const ar: Translations = {
     progress: '{current} من {total}',
     back: 'رجوع',
     welcome: {
-      title: 'مرحبًا بك في Bisbi.',
+      title: 'كتابتك بطيئة. التحدث أسرع 3 مرات.',
       subtitle:
-        'أسرع طريقة للكتابة هي ألّا تكتب. سأريك ذلك في أقل من دقيقتين.',
+        'يحوّل Bisbi صوتك إلى نص في أي تطبيق — في أقل من ثانيتين.',
       cta: 'ابدأ',
-      languageQuestion: 'بأي لغة ستملي؟',
-      languagePlaceholder: 'اختر لغتك',
     },
     permissions: {
       title: 'يحتاج Bisbi إلى صلاحيتين.',
@@ -329,9 +327,9 @@ export const ar: Translations = {
       conflictInvalid: 'هذا التركيب غير مدعوم. جرّب آخر.',
     },
     dictation: {
-      title: 'لنجرّب.',
-      subtitle: 'اضغط مع الاستمرار على {hotkey} واقرأ الجملة أدناه بصوت عالٍ لتجربة أول إملاء لك.',
-      samplePhrase: 'مرحبًا Bisbi، هذه أول إملاءاتي. التحدث أسرع من الكتابة.',
+      title: 'أول إملاء لك.',
+      subtitle: 'اضغط مع الاستمرار على {hotkey} واقرأ هذا بصوت عالٍ:',
+      samplePhrase: 'اجتماع مع الفريق يوم الاثنين الساعة 10. أحضر عرض المبيعات.',
       waiting: 'في انتظار صوتك…',
       listening: 'جارٍ الاستماع…',
       transcribing: 'جارٍ التفريغ…',

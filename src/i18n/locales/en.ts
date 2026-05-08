@@ -202,8 +202,6 @@ export const en: {
       title: string;
       subtitle: string;
       cta: string;
-      languageQuestion: string;
-      languagePlaceholder: string;
     };
     permissions: {
       title: string;
@@ -261,8 +259,8 @@ export const en: {
     limitReached: 'You’ve hit your free plan limit for this month.',
   },
   auth: {
-    welcome: 'One step away from dictating',
-    tagline: 'The fastest way to dictate anywhere.',
+    welcome: 'You know how it works now.',
+    tagline: 'Create your free account or sign in.',
     signIn: 'Sign in with Google',
     authenticating: 'Authenticating in browser…',
     redirecting: 'Redirecting back to the app…',
@@ -530,12 +528,10 @@ export const en: {
     progress: '{current} of {total}',
     back: 'Back',
     welcome: {
-      title: 'Welcome to Bisbi.',
+      title: 'You type slow. Talking is 3× faster.',
       subtitle:
-        'The fastest way to write is not to type. Let me show you in under 2 minutes.',
+        'Bisbi turns your voice into text in any app — in under 2 seconds.',
       cta: 'Start',
-      languageQuestion: 'What language will you dictate in?',
-      languagePlaceholder: 'Pick your language',
     },
     permissions: {
       title: 'Bisbi needs two permissions.',
@@ -567,10 +563,10 @@ export const en: {
       conflictInvalid: "That combination isn't supported. Try another.",
     },
     dictation: {
-      title: "Let's try it.",
-      subtitle: 'Hold down {hotkey} and read the phrase below out loud to try your first dictation.',
+      title: 'Your first dictation.',
+      subtitle: 'Hold {hotkey} down and read this out loud:',
       samplePhrase:
-        'Hi Bisbi, this is my first dictation. Speaking is faster than typing.',
+        'Meeting with the team on Monday at 10. Bring the sales deck.',
       waiting: 'Waiting for your voice…',
       listening: 'Listening…',
       transcribing: 'Transcribing…',

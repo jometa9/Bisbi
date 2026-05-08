@@ -26,8 +26,8 @@ export const zh: Translations = {
     limitReached: '本月免费套餐已用完。',
   },
   auth: {
-    welcome: '离开始口述只差一步',
-    tagline: '在任何应用中最快的口述方式。',
+    welcome: '现在你已经知道它怎么用了。',
+    tagline: '免费注册或登录账户。',
     signIn: '使用 Google 登录',
     authenticating: '正在浏览器中验证…',
     redirecting: '正在返回应用…',
@@ -288,11 +288,9 @@ export const zh: Translations = {
     progress: '{current} / {total}',
     back: '返回',
     welcome: {
-      title: '欢迎使用 Bisbi。',
-      subtitle: '最快的写字方式就是不打字。让我用不到 2 分钟向你演示。',
+      title: '打字很慢。说话快 3 倍。',
+      subtitle: 'Bisbi 把你的声音转成文字，在任何应用中——不到 2 秒。',
       cta: '开始',
-      languageQuestion: '你会用哪种语言口述？',
-      languagePlaceholder: '选择你的语言',
     },
     permissions: {
       title: 'Bisbi 需要两项权限。',
@@ -322,9 +320,9 @@ export const zh: Translations = {
       conflictInvalid: '该组合不受支持，请尝试其它。',
     },
     dictation: {
-      title: '试一下。',
-      subtitle: '按住 {hotkey}，朗读下方句子来尝试你的第一次口述。',
-      samplePhrase: '你好 Bisbi,这是我的第一次听写。说话比打字更快。',
+      title: '你的第一次口述。',
+      subtitle: '按住 {hotkey} 并大声朗读下面这句：',
+      samplePhrase: '周一上午 10 点和团队开会。带上销售演示文稿。',
       waiting: '等待你的声音…',
       listening: '正在聆听…',
       transcribing: '正在转写…',

@@ -583,6 +583,39 @@ button { font-family: inherit; }
     0 1px 0 rgba(26, 26, 24, 0.04);
 }
 
+/* press-hint: a soft, looping color pulse that simulates a press without
+   moving the key. Used to draw the user's attention to the hotkey while
+   they read the prompt during onboarding. */
+@keyframes kbd-press-hint {
+  0%, 100% {
+    background: var(--bg);
+    border-color: var(--border-strong);
+    color: var(--text);
+    box-shadow: 0 1px 0 rgba(26, 26, 24, 0.04);
+  }
+  50% {
+    background: var(--primary-tint-hover);
+    border-color: var(--primary-light);
+    color: var(--primary-dark);
+    box-shadow:
+      0 0 0 4px var(--primary-tint),
+      0 0 0 8px rgba(184, 208, 203, 0.35);
+  }
+}
+
+.kbd-press-hint {
+  animation: kbd-press-hint 1.6s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kbd-press-hint {
+    animation: none;
+    background: var(--primary-tint);
+    border-color: var(--primary-light);
+    color: var(--primary-dark);
+  }
+}
+
 .kbd-plus {
   color: var(--text-soft);
   font-size: 14px;
@@ -869,6 +902,14 @@ button { font-family: inherit; }
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.select-trigger-leading {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--primary);
 }
 
 .select-chevron {

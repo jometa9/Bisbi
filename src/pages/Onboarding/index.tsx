@@ -56,15 +56,6 @@ export function Onboarding({ settings, onSettingsChange, onExit, onMicNeeded }: 
     }
   };
 
-  const onLanguageChange = async (language: string) => {
-    try {
-      const next = await window.bisbi.updateSettings({ language });
-      onSettingsChange(next);
-    } catch (err) {
-      console.error('[onboarding] language update failed:', err);
-    }
-  };
-
   const goFromWelcome = () => {
     setStep(permsAlreadyGranted ? 3 : 2);
   };
@@ -79,13 +70,7 @@ export function Onboarding({ settings, onSettingsChange, onExit, onMicNeeded }: 
   const content = useMemo(() => {
     switch (step) {
       case 1:
-        return (
-          <Welcome
-            language={settings.language}
-            onLanguageChange={onLanguageChange}
-            onContinue={goFromWelcome}
-          />
-        );
+        return <Welcome onContinue={goFromWelcome} />;
       case 2:
         return <Permissions platform={platform} onContinue={() => setStep(3)} />;
       case 3:

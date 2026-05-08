@@ -198,6 +198,7 @@ export function FirstDictation({
           ariaLabel={t('settings.microphone.title')}
           options={micOptions}
           variant="inline"
+          leadingIcon={<MicIcon />}
         />
       </div>
 
@@ -213,7 +214,13 @@ export function FirstDictation({
             <HotkeyKeys
               accel={hotkey}
               platform={keyPlatform}
-              visual={state === 'listening' ? 'pressed' : 'idle'}
+              visual={
+                state === 'listening'
+                  ? 'pressed'
+                  : state === 'waiting'
+                  ? 'press-hint'
+                  : 'idle'
+              }
             />
           </div>
         </div>
@@ -229,5 +236,26 @@ export function FirstDictation({
         </button>
       </div>
     </div>
+  );
+}
+
+function MicIcon() {
+  return (
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.6"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <rect x="9" y="3" width="6" height="12" rx="3" />
+      <path d="M5 11a7 7 0 0 0 14 0" />
+      <path d="M12 18v3" />
+      <path d="M8 21h8" />
+    </svg>
   );
 }
