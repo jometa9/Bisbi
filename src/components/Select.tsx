@@ -12,6 +12,7 @@ interface Props<T extends string> {
   onChange: (next: T) => void;
   ariaLabel?: string;
   searchPlaceholder?: string;
+  variant?: 'default' | 'inline';
 }
 
 export function Select<T extends string>({
@@ -20,6 +21,7 @@ export function Select<T extends string>({
   onChange,
   ariaLabel,
   searchPlaceholder,
+  variant = 'default',
 }: Props<T>) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
@@ -132,7 +134,10 @@ export function Select<T extends string>({
   };
 
   return (
-    <div className={`select${open ? ' open' : ''}`} ref={rootRef}>
+    <div
+      className={`select${open ? ' open' : ''}${variant === 'inline' ? ' select--inline' : ''}`}
+      ref={rootRef}
+    >
       <button
         type="button"
         className="select-trigger"
@@ -143,7 +148,7 @@ export function Select<T extends string>({
         onKeyDown={onTriggerKeyDown}
       >
         <span className="select-trigger-label">{selected?.label}</span>
-        <ChevronIcon />
+        {variant === 'inline' ? <PencilIcon /> : <ChevronIcon />}
       </button>
       {open && (
         <div className="select-menu">
@@ -222,6 +227,27 @@ function ChevronIcon() {
         d="M3 4.5L6 7.5L9 4.5"
         stroke="currentColor"
         strokeWidth="1.4"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function PencilIcon() {
+  return (
+    <svg
+      className="select-pencil"
+      width="12"
+      height="12"
+      viewBox="0 0 12 12"
+      fill="none"
+      aria-hidden="true"
+    >
+      <path
+        d="M8.2 1.8L10.2 3.8L4 10H2V8L8.2 1.8Z"
+        stroke="currentColor"
+        strokeWidth="1.2"
         strokeLinecap="round"
         strokeLinejoin="round"
       />

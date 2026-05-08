@@ -296,6 +296,8 @@ export const hi: Translations = {
       subtitle:
         'सबसे तेज़ लिखने का तरीका है — टाइप ही न करना। 2 मिनट से कम में दिखाता हूँ।',
       cta: 'शुरू करें',
+      languageQuestion: 'आप किस भाषा में बोलेंगे?',
+      languagePlaceholder: 'अपनी भाषा चुनें',
     },
     permissions: {
       title: 'Bisbi को दो अनुमतियाँ चाहिए।',

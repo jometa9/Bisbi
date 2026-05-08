@@ -198,7 +198,13 @@ export const en: {
   onboarding: {
     progress: string;
     back: string;
-    welcome: { title: string; subtitle: string; cta: string };
+    welcome: {
+      title: string;
+      subtitle: string;
+      cta: string;
+      languageQuestion: string;
+      languagePlaceholder: string;
+    };
     permissions: {
       title: string;
       subtitle: string;
@@ -528,6 +534,8 @@ export const en: {
       subtitle:
         'The fastest way to write is not to type. Let me show you in under 2 minutes.',
       cta: 'Start',
+      languageQuestion: 'What language will you dictate in?',
+      languagePlaceholder: 'Pick your language',
     },
     permissions: {
       title: 'Bisbi needs two permissions.',

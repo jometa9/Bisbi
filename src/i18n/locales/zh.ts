@@ -291,6 +291,8 @@ export const zh: Translations = {
       title: '欢迎使用 Bisbi。',
       subtitle: '最快的写字方式就是不打字。让我用不到 2 分钟向你演示。',
       cta: '开始',
+      languageQuestion: '你会用哪种语言口述？',
+      languagePlaceholder: '选择你的语言',
     },
     permissions: {
       title: 'Bisbi 需要两项权限。',

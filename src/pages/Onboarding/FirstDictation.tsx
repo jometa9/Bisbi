@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from '../../i18n';
 import { HotkeyKeys } from '../../components/HotkeyKeys';
 import { Select } from '../../components/Select';
@@ -9,15 +9,12 @@ import {
   type RecordingHandle,
 } from '../../audio';
 import { formatHotkeyAccelerator, useHotkeyLabels, type KeyPlatform } from '../../lib/hotkey';
-import { WHISPER_LANGUAGES, whisperLanguageLabel } from '../../whisperLanguages';
 
 interface Props {
   hotkey: string;
   platform: NodeJS.Platform | null;
   microphoneId: string | null;
-  language: string;
   onMicrophoneChange: (id: string | null) => void;
-  onLanguageChange: (language: string) => void;
   onContinue: () => void;
 }
 
@@ -37,9 +34,7 @@ export function FirstDictation({
   hotkey,
   platform,
   microphoneId,
-  language,
   onMicrophoneChange,
-  onLanguageChange,
   onContinue,
 }: Props) {
   const { t } = useTranslation();
@@ -82,18 +77,6 @@ export function FirstDictation({
       label: d.label || t('settings.microphone.unnamed', { index: i + 1 }),
     })),
   ];
-
-  const languageOptions = useMemo(
-    () => [
-      { value: 'auto', label: t('languages.auto') },
-      ...WHISPER_LANGUAGES.map((lang) => ({
-        value: lang.code,
-        label: whisperLanguageLabel(lang),
-        searchTerms: `${lang.english} ${lang.endonym} ${lang.code}`,
-      })),
-    ],
-    [t]
-  );
 
   useEffect(() => {
     if (!window.bisbi) return;
@@ -208,19 +191,13 @@ export function FirstDictation({
 
       <div className="onb-mic-picker">
         <Select<string>
-          value={language}
-          onChange={onLanguageChange}
-          ariaLabel={t('settings.transcriptionLanguage.title')}
-          searchPlaceholder={t('settings.transcriptionLanguage.searchPlaceholder')}
-          options={languageOptions}
-        />
-        <Select<string>
           value={selectedMic}
           onChange={(next) =>
             onMicrophoneChange(next === DEFAULT_MIC_VALUE ? null : next)
           }
           ariaLabel={t('settings.microphone.title')}
           options={micOptions}
+          variant="inline"
         />
       </div>
 

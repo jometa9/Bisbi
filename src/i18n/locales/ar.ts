@@ -296,6 +296,8 @@ export const ar: Translations = {
       subtitle:
         'أسرع طريقة للكتابة هي ألّا تكتب. سأريك ذلك في أقل من دقيقتين.',
       cta: 'ابدأ',
+      languageQuestion: 'بأي لغة ستملي؟',
+      languagePlaceholder: 'اختر لغتك',
     },
     permissions: {
       title: 'يحتاج Bisbi إلى صلاحيتين.',

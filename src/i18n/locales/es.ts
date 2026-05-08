@@ -299,6 +299,8 @@ export const es: Translations = {
       subtitle:
         'La forma más rápida de escribir es no escribir. Te lo muestro en menos de 2 minutos.',
       cta: 'Empezar',
+      languageQuestion: '¿En qué idioma vas a dictar?',
+      languagePlaceholder: 'Elegí tu idioma',
     },
     permissions: {
       title: 'Bisbi necesita dos permisos.',

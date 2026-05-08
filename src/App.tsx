@@ -271,7 +271,7 @@ export function App() {
           </button>
           <div className="sidebar-status-row">
             <StatusBadge state={recState} />
-            <span className="sidebar-version">v{appVersion}</span>
+            {appVersion && <span className="sidebar-version">v{appVersion}</span>}
           </div>
         </div>
       </aside>

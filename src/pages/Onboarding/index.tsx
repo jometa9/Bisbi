@@ -30,16 +30,22 @@ export function Onboarding({ settings, onSettingsChange, onExit, onMicNeeded }: 
     return () => onMicNeeded(false);
   }, [step, onMicNeeded]);
 
-  // Skip the permissions screen on first entry if the OS already reports both
-  // checks granted — typically a reinstall on the same machine.
-  useEffect(() => {
-    if (step !== 2 || !perms) return;
-    const a11yOk = perms.accessibility !== 'denied';
+  const permsAlreadyGranted = useMemo(() => {
+    if (!perms) return false;
     const micOk = perms.microphone === 'granted';
-    if (micOk && a11yOk && perms.accessibility !== 'unknown') {
+    const a11yOk =
+      platform === 'darwin' ? perms.accessibility === 'granted' : true;
+    return micOk && a11yOk;
+  }, [perms, platform]);
+
+  // If we land on the permissions screen but the OS already reports both
+  // checks granted (typically a reinstall on the same machine), jump straight
+  // to the dictation step.
+  useEffect(() => {
+    if (step === 2 && permsAlreadyGranted) {
       setStep(3);
     }
-  }, [step, perms]);
+  }, [step, permsAlreadyGranted]);
 
   const onMicrophoneChange = async (microphoneId: string | null) => {
     try {
@@ -59,13 +65,27 @@ export function Onboarding({ settings, onSettingsChange, onExit, onMicNeeded }: 
     }
   };
 
-  const totalSteps = 3;
-  const displayStep = step === 1 ? 1 : 2;
+  const goFromWelcome = () => {
+    setStep(permsAlreadyGranted ? 3 : 2);
+  };
+
+  // The progress counter hides the permissions step when it is going to be
+  // skipped — the user should never see "1 of 3" if they will only ever go
+  // through two screens.
+  const totalSteps = permsAlreadyGranted ? 2 : 3;
+  const displayStep =
+    step === 1 ? 1 : step === 2 ? 2 : permsAlreadyGranted ? 2 : 3;
 
   const content = useMemo(() => {
     switch (step) {
       case 1:
-        return <Welcome onContinue={() => setStep(2)} />;
+        return (
+          <Welcome
+            language={settings.language}
+            onLanguageChange={onLanguageChange}
+            onContinue={goFromWelcome}
+          />
+        );
       case 2:
         return <Permissions platform={platform} onContinue={() => setStep(3)} />;
       case 3:
@@ -74,15 +94,13 @@ export function Onboarding({ settings, onSettingsChange, onExit, onMicNeeded }: 
             hotkey={settings.hotkey}
             platform={platform}
             microphoneId={settings.microphoneId}
-            language={settings.language}
             onMicrophoneChange={onMicrophoneChange}
-            onLanguageChange={onLanguageChange}
             onContinue={onExit}
           />
         );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [step, platform, settings, perms]);
+  }, [step, platform, settings, perms, permsAlreadyGranted]);
 
   return (
     <div className="onb-shell">

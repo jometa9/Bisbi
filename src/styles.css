@@ -1632,8 +1632,8 @@ html.recording-window #root {
   transition: background 0.12s, opacity 0.12s;
 }
 
-.btn-primary:hover { background: var(--primary-dark); }
-.btn-primary:disabled { opacity: 0.7; cursor: default; }
+.btn-primary:not(:disabled):hover { background: var(--primary-dark); }
+.btn-primary:disabled { opacity: 0.7; cursor: default; pointer-events: none; }
 
 .login-btn {
   min-width: 240px;
@@ -2173,6 +2173,81 @@ html.recording-window #root {
   height: 96px;
   margin-bottom: 4px;
   filter: drop-shadow(0 4px 16px rgba(123, 168, 156, 0.25));
+}
+
+.onb-welcome-language {
+  width: 100%;
+  max-width: 360px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.onb-welcome-language-label {
+  font-size: 14px;
+  color: var(--text-secondary, #6b7280);
+}
+
+.onb-welcome .onb-cta:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Center the Select text inside the onboarding (welcome language picker
+   and the mic picker on the dictation step). Scoped to these two
+   containers so other Selects in the app stay left-aligned. */
+.onb-welcome-language .select-trigger-label,
+.onb-mic-picker .select-trigger-label {
+  text-align: center;
+}
+
+/* Inline Select variant: used inside the onboarding to make the picker feel
+   like inline editable text rather than a form control. Strips the bg and
+   border, swaps the chevron for a pencil to hint at "edit". */
+.select.select--inline .select-trigger {
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+  padding: 6px 8px;
+}
+
+.select.select--inline .select-trigger:hover {
+  background: var(--bg-soft);
+  border-color: transparent;
+}
+
+.select.select--inline .select-trigger:focus-visible {
+  border-color: transparent;
+  box-shadow: 0 0 0 2px var(--primary-tint-hover);
+}
+
+.select.select--inline.open .select-trigger {
+  background: var(--bg-soft);
+  border-color: transparent;
+  box-shadow: none;
+}
+
+.select-pencil {
+  flex: 0 0 auto;
+  color: var(--text-soft);
+  transition: color 120ms ease;
+}
+
+.select.select--inline .select-trigger:hover .select-pencil,
+.select.select--inline.open .select-pencil {
+  color: var(--primary-dark);
+}
+
+.onb-welcome-language .select-option,
+.onb-mic-picker .select-option {
+  justify-content: center;
+}
+
+.onb-welcome-language .select-option-label,
+.onb-mic-picker .select-option-label {
+  flex: 1;
+  text-align: center;
 }
 
 /* Permissions */
