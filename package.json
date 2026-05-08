@@ -127,7 +127,8 @@
             "arm64"
           ]
         }
-      ]
+      ],
+      "artifactName": "Bisbi-Setup.${ext}"
     },
     "dmg": {
       "icon": "build-resources/icon.icns",
@@ -166,7 +167,7 @@
       "perMachine": false,
       "allowToChangeInstallationDirectory": true,
       "include": "build/installer.nsh",
-      "artifactName": "Bisbi-Setup-${version}.${ext}"
+      "artifactName": "Bisbi-Setup.${ext}"
     }
   }
 }
