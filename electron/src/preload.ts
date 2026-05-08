@@ -75,17 +75,6 @@ const bisbi = {
       'resources:check'
     ),
 
-  // Updater
-  updater: {
-    getState: () =>
-      invoke<import('./backend/updater').UpdateStatus>('updater:getState'),
-    check: () => invoke<void>('updater:check'),
-    install: () => invoke<void>('updater:install'),
-    onStateChange: (
-      cb: (s: import('./backend/updater').UpdateStatus) => void
-    ) => listen<import('./backend/updater').UpdateStatus>('updater:state', cb),
-  },
-
   // Routing helper for tray-driven navigation
   onNavigate: (cb: (payload: { to: string }) => void) =>
     listen<{ to: string }>('navigate', cb),
@@ -139,6 +128,15 @@ const bisbi = {
       invoke<{ ok: boolean; reason?: string }>('onboarding:validateHotkey', accelerator),
     transcribePreview: (pcm: ArrayBuffer, sampleRate: number, channels: number) =>
       invoke<string>('onboarding:transcribePreview', { pcm, sampleRate, channels }),
+  },
+
+  // Release / update banner — admin-managed via landing page; refreshed on every API call.
+  release: {
+    getState: () =>
+      invoke<import('./backend/release').ReleaseState>('release:getState'),
+    onStateChange: (
+      cb: (s: import('./backend/release').ReleaseState) => void
+    ) => listen<import('./backend/release').ReleaseState>('release:state', cb),
   },
 
   // Usage / quota — free plan monthly word cap, tracked locally.

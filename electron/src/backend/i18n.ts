@@ -8,7 +8,6 @@ interface BackendStrings {
     tooltipTranscribing: string;
     openSettings: string;
     history: string;
-    checkUpdates: string;
     version: string;
     quit: string;
   };
@@ -24,7 +23,6 @@ const en: BackendStrings = {
     tooltipTranscribing: 'Bisbi — transcribing…',
     openSettings: 'Open settings',
     history: 'History',
-    checkUpdates: 'Check for updates',
     version: 'Version {v}',
     quit: 'Quit',
   },
@@ -40,7 +38,6 @@ const es: BackendStrings = {
     tooltipTranscribing: 'Bisbi — transcribiendo…',
     openSettings: 'Abrir ajustes',
     history: 'Historial',
-    checkUpdates: 'Buscar actualizaciones',
     version: 'Versión {v}',
     quit: 'Salir',
   },
@@ -56,7 +53,6 @@ const zh: BackendStrings = {
     tooltipTranscribing: 'Bisbi — 转写中…',
     openSettings: '打开设置',
     history: '历史记录',
-    checkUpdates: '检查更新',
     version: '版本 {v}',
     quit: '退出',
   },
@@ -72,7 +68,6 @@ const hi: BackendStrings = {
     tooltipTranscribing: 'Bisbi — ट्रांसक्राइब हो रहा है…',
     openSettings: 'सेटिंग्स खोलें',
     history: 'इतिहास',
-    checkUpdates: 'अपडेट देखें',
     version: 'संस्करण {v}',
     quit: 'बाहर निकलें',
   },
@@ -88,7 +83,6 @@ const ar: BackendStrings = {
     tooltipTranscribing: 'Bisbi — يكتب…',
     openSettings: 'فتح الإعدادات',
     history: 'السجل',
-    checkUpdates: 'البحث عن تحديثات',
     version: 'الإصدار {v}',
     quit: 'خروج',
   },

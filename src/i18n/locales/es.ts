@@ -24,6 +24,8 @@ export const es: Translations = {
     micError:
       'No se pudo acceder al micrófono. Asegurate de que Bisbi tenga permiso en los ajustes del sistema.',
     limitReached: 'Llegaste al límite del plan gratis de este mes.',
+    updateAvailable: 'Hay una nueva versión de Bisbi disponible ({version}).',
+    updateAction: 'Descargar',
   },
   auth: {
     welcome: 'Ya sabés cómo funciona.',
@@ -275,14 +277,8 @@ export const es: Translations = {
     tooltipTranscribing: 'Bisbi — transcribiendo…',
     openSettings: 'Abrir ajustes',
     history: 'Historial',
-    checkUpdates: 'Buscar actualizaciones',
     version: 'Versión {v}',
     quit: 'Salir',
-  },
-  update: {
-    downloading: 'Descargando actualización… {percent}%',
-    ready: 'Actualización lista: v{version}',
-    restart: 'Reiniciar',
   },
   errors: {
     hotkeyRegister: 'No se pudo registrar el atajo "{accel}". Probá otro.',

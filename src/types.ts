@@ -31,13 +31,6 @@ export interface StatsTotals {
   totalWords: number;
 }
 
-export interface UpdateStatus {
-  kind: 'idle' | 'checking' | 'available' | 'downloading' | 'downloaded' | 'not-available' | 'error';
-  version?: string;
-  percent?: number;
-  message?: string;
-}
-
 export interface ResourceCheck {
   ok: boolean;
   binaryPath: string;
@@ -95,6 +88,23 @@ export interface PermissionStatus {
   accessibility: 'granted' | 'denied' | 'unknown' | 'not-applicable';
 }
 
+export interface ReleaseInfo {
+  version: string | null;
+  downloadUrls: {
+    mac: string | null;
+    windows: string | null;
+    linux: string | null;
+  };
+}
+
+export interface ReleaseState {
+  current: string;
+  latest: ReleaseInfo | null;
+  hasUpdate: boolean;
+  downloadUrl: string | null;
+  fetchedAt: number | null;
+}
+
 declare global {
   interface Window {
     bisbi: {
@@ -131,12 +141,6 @@ declare global {
       getStatsTotals: () => Promise<StatsTotals>;
       onStatsTotalsChange: (cb: (s: StatsTotals) => void) => () => void;
       checkResources: () => Promise<ResourceCheck>;
-      updater: {
-        getState: () => Promise<UpdateStatus>;
-        check: () => Promise<void>;
-        install: () => Promise<void>;
-        onStateChange: (cb: (s: UpdateStatus) => void) => () => void;
-      };
       onNavigate: (cb: (payload: { to: string }) => void) => () => void;
       auth: {
         getSession: () => Promise<AuthSession>;
@@ -156,6 +160,10 @@ declare global {
       usage: {
         getMonthly: () => Promise<{ used: number; limit: number }>;
         onLimitReached: (cb: (payload: { used: number; limit: number }) => void) => () => void;
+      };
+      release: {
+        getState: () => Promise<ReleaseState>;
+        onStateChange: (cb: (s: ReleaseState) => void) => () => void;
       };
       onboarding: {
         getState: () => Promise<OnboardingState>;

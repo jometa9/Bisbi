@@ -1,14 +1,13 @@
-import { WEB_BASE } from '../buildConfig';
 import {
   bumpUsageQueueRow,
   countPendingUsage,
-  currentMonthKey,
   deleteUsageQueueRow,
   peekDueUsage,
   setMonthlyWordLimit,
   setMonthlyWordUsageFromServer,
 } from './db';
 import { getAuthToken } from './auth';
+import { apiFetch } from './apiClient';
 
 const BACKOFF_MS = [
   30_000,
@@ -55,12 +54,10 @@ async function postUsage(
   token: string,
   payload: { words: number; audioSeconds: number; transcribedAt: number }
 ): Promise<PostUsageResult> {
-  const resp = await fetch(`${WEB_BASE}/api/usage`, {
+  const resp = await apiFetch('/api/usage', {
     method: 'POST',
-    headers: {
-      Authorization: `Bearer ${token}`,
-      'Content-Type': 'application/json',
-    },
+    token,
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       words: payload.words,
       audioSeconds: payload.audioSeconds,

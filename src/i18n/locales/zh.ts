@@ -24,6 +24,8 @@ export const zh: Translations = {
     micError:
       '无法访问麦克风。请确保 Bisbi 在系统设置中拥有权限。',
     limitReached: '本月免费套餐已用完。',
+    updateAvailable: 'Bisbi 有新版本可用（{version}）。',
+    updateAction: '下载',
   },
   auth: {
     welcome: '现在你已经知道它怎么用了。',
@@ -268,14 +270,8 @@ export const zh: Translations = {
     tooltipTranscribing: 'Bisbi — 转写中…',
     openSettings: '打开设置',
     history: '历史记录',
-    checkUpdates: '检查更新',
     version: '版本 {v}',
     quit: '退出',
-  },
-  update: {
-    downloading: '正在下载更新… {percent}%',
-    ready: '更新已就绪：v{version}',
-    restart: '重启',
   },
   errors: {
     hotkeyRegister: '无法注册快捷键 “{accel}”。请尝试其他组合。',

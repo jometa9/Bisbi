@@ -5,8 +5,8 @@ import { History } from './pages/History';
 import { Account } from './pages/Account';
 import { Login } from './pages/Login';
 import { Onboarding } from './pages/Onboarding';
-import { UpdateLabel } from './components/UpdateLabel';
 import { startRecording, type RecordingHandle } from './audio';
+import { UpdateBanner } from './components/UpdateBanner';
 import type { AppSettings, RecordingState } from './types';
 import { useTranslation } from './i18n';
 import { useAuth } from './context/AuthContext';
@@ -246,7 +246,7 @@ export function App() {
           </button>
         </nav>
         <div className="sidebar-bottom">
-          <UpdateLabel />
+          <UpdateBanner />
           <button
             className={`sidebar-account${tab === 'account' ? ' active' : ''}`}
             onClick={() => setTab('account')}

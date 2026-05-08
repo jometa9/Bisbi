@@ -11,6 +11,8 @@ export const en: {
     resourcesMissing: string;
     micError: string;
     limitReached: string;
+    updateAvailable: string;
+    updateAction: string;
   };
   auth: {
     welcome: string;
@@ -184,14 +186,8 @@ export const en: {
     tooltipTranscribing: string;
     openSettings: string;
     history: string;
-    checkUpdates: string;
     version: string;
     quit: string;
-  };
-  update: {
-    downloading: string;
-    ready: string;
-    restart: string;
   };
   errors: { hotkeyRegister: string };
   common: { yes: string; no: string };
@@ -257,6 +253,8 @@ export const en: {
     micError:
       'Could not access the microphone. Make sure Bisbi has permission in your system settings.',
     limitReached: 'You’ve hit your free plan limit for this month.',
+    updateAvailable: 'A new version of Bisbi is available ({version}).',
+    updateAction: 'Download',
   },
   auth: {
     welcome: 'You know how it works now.',
@@ -508,14 +506,8 @@ export const en: {
     tooltipTranscribing: 'Bisbi — transcribing…',
     openSettings: 'Open settings',
     history: 'History',
-    checkUpdates: 'Check for updates',
     version: 'Version {v}',
     quit: 'Quit',
-  },
-  update: {
-    downloading: 'Downloading update… {percent}%',
-    ready: 'Update ready: v{version}',
-    restart: 'Restart',
   },
   errors: {
     hotkeyRegister: 'Could not register the shortcut "{accel}". Try another one.',

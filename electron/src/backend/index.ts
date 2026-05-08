@@ -25,6 +25,9 @@ import {
   refreshSession,
   startCheckout,
   openBillingPortal,
+  canTranscribe,
+  startPeriodicAuthRefresh,
+  stopPeriodicAuthRefresh,
   type AuthSession,
 } from './auth';
 import {
@@ -63,14 +66,9 @@ import {
   restoreSystemAudio,
   type MuteSnapshot,
 } from './mediaControl';
-import {
-  checkForUpdatesManual,
-  getUpdateStatus,
-  initUpdater,
-  installUpdateAndRestart,
-} from './updater';
 import { getSystemLocale, resolveUiLanguage, tBackend } from './i18n';
 import { rebuildTrayLabels } from './tray';
+import { getReleaseState } from './release';
 import type { RecordingState, AppSettings } from './types';
 
 interface BackendOptions {
@@ -186,8 +184,6 @@ export async function registerBackend(opts: BackendOptions): Promise<void> {
   registered = true;
   activeMainWindowOpener = opts.onOpenSettings;
 
-  initUpdater(broadcast);
-
   const settings = getSettings();
   initTray({
     uiLanguage: resolveUiLanguage(settings.uiLanguage),
@@ -196,7 +192,6 @@ export async function registerBackend(opts: BackendOptions): Promise<void> {
       opts.onOpenSettings();
       broadcast('navigate', { to: '/history' });
     },
-    onCheckForUpdates: () => checkForUpdatesManual(),
     onQuit: opts.onQuit,
   });
 
@@ -207,6 +202,7 @@ export async function registerBackend(opts: BackendOptions): Promise<void> {
     onLimitReached: (info) => broadcast('usage:limitReached', info),
   });
   startUsageSync();
+  startPeriodicAuthRefresh();
 
   ipcMain.handle('settings:get', (): AppSettings => getSettings());
   ipcMain.handle(
@@ -267,16 +263,15 @@ export async function registerBackend(opts: BackendOptions): Promise<void> {
         syncState();
         return;
       }
-      const session = getSession();
-      const isPro = session.userInfo?.plan === 'pro';
-      if (!isPro) {
-        const used = getMonthlyWordUsage();
-        const limit = getMonthlyWordLimit();
-        if (used >= limit) {
-          broadcast('usage:limitReached', { used, limit });
-          syncState();
-          return;
+      const gate = canTranscribe(readLocalUsage);
+      if (!gate.allowed) {
+        if (gate.reason === 'limit-reached' && gate.info) {
+          broadcast('usage:limitReached', gate.info);
+        } else {
+          broadcast('transcription:blocked', { reason: gate.reason });
         }
+        syncState();
+        return;
       }
       transcriptionQueue.push({
         pcm,
@@ -332,9 +327,7 @@ export async function registerBackend(opts: BackendOptions): Promise<void> {
   ipcMain.handle('app:getSystemLocale', () => getSystemLocale());
   ipcMain.handle('app:openSettings', () => activeMainWindowOpener?.());
 
-  ipcMain.handle('updater:getState', () => getUpdateStatus());
-  ipcMain.handle('updater:check', () => checkForUpdatesManual());
-  ipcMain.handle('updater:install', () => installUpdateAndRestart());
+  ipcMain.handle('release:getState', () => getReleaseState());
 
   ipcMain.handle('auth:getSession', (): AuthSession => getSession());
   ipcMain.handle(
@@ -425,18 +418,25 @@ export async function registerBackend(opts: BackendOptions): Promise<void> {
     unregisterAll();
     destroyTray();
     stopUsageSync();
+    stopPeriodicAuthRefresh();
   });
+}
+
+function readLocalUsage(): { used: number; limit: number } {
+  return { used: getMonthlyWordUsage(), limit: getMonthlyWordLimit() };
 }
 
 function handleStartRecording(): void {
   if (isRecording) return;
   if (!recordingArmed) return;
-  const session = getSession();
-  if (session.isAuthenticated && session.userInfo?.plan !== 'pro') {
-    const used = getMonthlyWordUsage();
-    const limit = getMonthlyWordLimit();
-    if (used >= limit) {
-      broadcast('usage:limitReached', { used, limit });
+  if (getSession().isAuthenticated) {
+    const gate = canTranscribe(readLocalUsage);
+    if (!gate.allowed) {
+      if (gate.reason === 'limit-reached' && gate.info) {
+        broadcast('usage:limitReached', gate.info);
+      } else {
+        broadcast('transcription:blocked', { reason: gate.reason });
+      }
       return;
     }
   }

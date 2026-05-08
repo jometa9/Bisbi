@@ -24,6 +24,8 @@ export const hi: Translations = {
     micError:
       'माइक्रोफ़ोन तक पहुँच नहीं हो सकी। सुनिश्चित करें कि Bisbi को सिस्टम सेटिंग्स में अनुमति प्राप्त है।',
     limitReached: 'इस महीने के मुफ़्त प्लान की सीमा पूरी हो गई।',
+    updateAvailable: 'Bisbi का नया संस्करण उपलब्ध है ({version})।',
+    updateAction: 'डाउनलोड',
   },
   auth: {
     welcome: 'अब आप जानते हैं कि यह कैसे काम करता है।',
@@ -272,14 +274,8 @@ export const hi: Translations = {
     tooltipTranscribing: 'Bisbi — ट्रांसक्राइब हो रहा है…',
     openSettings: 'सेटिंग्स खोलें',
     history: 'इतिहास',
-    checkUpdates: 'अपडेट देखें',
     version: 'संस्करण {v}',
     quit: 'बाहर निकलें',
-  },
-  update: {
-    downloading: 'अपडेट डाउनलोड हो रहा है… {percent}%',
-    ready: 'अपडेट तैयार है: v{version}',
-    restart: 'पुनः आरंभ करें',
   },
   errors: {
     hotkeyRegister: 'शॉर्टकट "{accel}" को रजिस्टर नहीं किया जा सका। कोई और आज़माएँ।',

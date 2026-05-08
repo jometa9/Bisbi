@@ -45,7 +45,7 @@ function ensureWhisperBinaryExecutable(appOutDir: string, platformName: string) 
   }
 }
 
-export default async function afterPack(context: AfterPackContext) {
+async function afterPack(context: AfterPackContext) {
   const { electronPlatformName, appOutDir } = context;
   if (electronPlatformName === 'win32') {
     try { applyWindowsIcon(appOutDir); } catch (err) { console.error('afterPack: Windows icon application failed:', err); }
@@ -53,4 +53,4 @@ export default async function afterPack(context: AfterPackContext) {
   ensureWhisperBinaryExecutable(appOutDir, electronPlatformName);
 }
 
-module.exports = afterPack as any;
+export = afterPack;

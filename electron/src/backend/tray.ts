@@ -51,7 +51,6 @@ export interface TrayOptions {
   onOpenSettings: () => void;
   onShowHistory: () => void;
   onQuit: () => void;
-  onCheckForUpdates: () => void;
 }
 
 export function initTray(opts: TrayOptions): void {
@@ -121,11 +120,6 @@ function rebuildMenu(): void {
     {
       label: tBackend(currentLang, 'tray.history'),
       click: () => onShowHistory?.(),
-    },
-    { type: 'separator' },
-    {
-      label: tBackend(currentLang, 'tray.checkUpdates'),
-      click: () => opts.onCheckForUpdates(),
     },
     { type: 'separator' },
     {

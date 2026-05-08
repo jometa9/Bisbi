@@ -24,6 +24,8 @@ export const ar: Translations = {
     micError:
       'تعذّر الوصول إلى الميكروفون. تأكد من أن Bisbi يملك إذن الوصول في إعدادات النظام.',
     limitReached: 'لقد بلغت حد الخطة المجانية لهذا الشهر.',
+    updateAvailable: 'يتوفر إصدار جديد من Bisbi ({version}).',
+    updateAction: 'تنزيل',
   },
   auth: {
     welcome: 'الآن أنت تعرف كيف يعمل.',
@@ -272,14 +274,8 @@ export const ar: Translations = {
     tooltipTranscribing: 'Bisbi — يكتب…',
     openSettings: 'فتح الإعدادات',
     history: 'السجل',
-    checkUpdates: 'البحث عن تحديثات',
     version: 'الإصدار {v}',
     quit: 'خروج',
-  },
-  update: {
-    downloading: 'جارٍ تنزيل التحديث… {percent}%',
-    ready: 'التحديث جاهز: v{version}',
-    restart: 'إعادة التشغيل',
   },
   errors: {
     hotkeyRegister: 'تعذّر تسجيل الاختصار "{accel}". جرّب اختصارًا آخر.',
