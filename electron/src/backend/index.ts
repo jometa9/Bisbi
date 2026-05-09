@@ -132,6 +132,7 @@ async function processQueue(): Promise<void> {
         const out = await transcribePcm(job.pcm, job.sampleRate, job.channels, {
           language: cfg.language,
           vocabulary: cfg.vocabulary,
+          precision: cfg.precision,
         });
         const meaningful = out.text.replace(/\s/g, '').length >= 2;
         const wordCount = meaningful ? countWords(out.text) : 0;
@@ -334,7 +335,7 @@ export async function registerBackend(opts: BackendOptions): Promise<void> {
 
   ipcMain.handle('stats:totals', () => getStatsTotals());
 
-  ipcMain.handle('resources:check', () => checkResources());
+  ipcMain.handle('resources:check', () => checkResources(getSettings().precision));
   ipcMain.handle('app:getVersion', () => getAppVersion());
   ipcMain.handle('app:getPlatform', () => process.platform);
   ipcMain.handle('app:getSystemLocale', () => getSystemLocale());
@@ -416,6 +417,7 @@ export async function registerBackend(opts: BackendOptions): Promise<void> {
       const out = await transcribePcm(pcm, payload.sampleRate, payload.channels, {
         language: cfg.language,
         vocabulary: cfg.vocabulary,
+        precision: cfg.precision,
       });
       return out.text;
     }

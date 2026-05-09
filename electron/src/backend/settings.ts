@@ -28,6 +28,7 @@ function buildDefaults(): AppSettings {
     microphoneId: null,
     muteSystemAudioWhileRecording: false,
     openAtLogin: true,
+    precision: BUILD_CONFIG.DEFAULT_PRECISION,
   };
 }
 

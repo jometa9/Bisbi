@@ -115,6 +115,12 @@ export const en: {
       unnamed: string;
     };
     transcriptionLanguage: { title: string; description: string; searchPlaceholder: string };
+    transcriptionEngine: {
+      title: string;
+      description: string;
+      fast: { label: string; hint: string };
+      accurate: { label: string; hint: string };
+    };
     uiLanguage: { title: string; description: string; system: string };
     saveHistory: {
       title: string;
@@ -407,6 +413,19 @@ export const en: {
       description:
         'Pick the language you dictate in. Auto-detect is slower and may pick wrong on short clips.',
       searchPlaceholder: 'Search a language…',
+    },
+    transcriptionEngine: {
+      title: 'Transcription engine',
+      description:
+        'Pick how Bisbi balances speed and accuracy on this computer.',
+      fast: {
+        label: 'Fast',
+        hint: 'Lighter model that runs quickly on any machine. Lower accuracy on accents, names and noisy audio.',
+      },
+      accurate: {
+        label: 'Accurate',
+        hint: 'Higher quality transcription. Recommended on Mac and on Windows machines with a recent CPU/GPU.',
+      },
     },
     uiLanguage: {
       title: 'App language',

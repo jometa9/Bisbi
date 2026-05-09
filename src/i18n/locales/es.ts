@@ -174,6 +174,19 @@ export const es: Translations = {
         'Elegí el idioma en el que dictás. La detección automática es más lenta y puede equivocarse en clips cortos.',
       searchPlaceholder: 'Buscar un idioma…',
     },
+    transcriptionEngine: {
+      title: 'Motor de transcripción',
+      description:
+        'Elegí cómo Bisbi equilibra velocidad y precisión en esta computadora.',
+      fast: {
+        label: 'Rápido',
+        hint: 'Modelo más liviano que corre rápido en cualquier máquina. Menos precisión con acentos, nombres y audio con ruido.',
+      },
+      accurate: {
+        label: 'Preciso',
+        hint: 'Transcripción de mejor calidad. Recomendado en Mac y en Windows con CPU/GPU recientes.',
+      },
+    },
     uiLanguage: {
       title: 'Idioma de la app',
       description:

@@ -122,6 +122,32 @@ export function Settings({ settings, onChange, onReset, onClearHistory }: Props)
       </Section>
 
       <Section
+        title={t('settings.transcriptionEngine.title')}
+        description={t('settings.transcriptionEngine.description')}
+      >
+        <SegmentedToggle<'fast' | 'accurate'>
+          value={settings.precision}
+          onChange={(precision) => onChange({ precision })}
+          ariaLabel={t('settings.transcriptionEngine.title')}
+          options={[
+            {
+              value: 'fast',
+              label: t('settings.transcriptionEngine.fast.label'),
+            },
+            {
+              value: 'accurate',
+              label: t('settings.transcriptionEngine.accurate.label'),
+            },
+          ]}
+          hint={
+            settings.precision === 'fast'
+              ? t('settings.transcriptionEngine.fast.hint')
+              : t('settings.transcriptionEngine.accurate.hint')
+          }
+        />
+      </Section>
+
+      <Section
         title={t('settings.vocabulary.title')}
         description={t('settings.vocabulary.description')}
       >

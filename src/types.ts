@@ -13,6 +13,7 @@ export interface AppSettings {
   microphoneId: string | null;
   muteSystemAudioWhileRecording: boolean;
   openAtLogin: boolean;
+  precision: 'fast' | 'accurate';
 }
 
 export interface TranscriptionRow {

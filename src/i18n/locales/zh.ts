@@ -170,6 +170,18 @@ export const zh: Translations = {
       description: '选择你听写时使用的语言。自动检测较慢，且在短片段上可能选错。',
       searchPlaceholder: '搜索语言…',
     },
+    transcriptionEngine: {
+      title: '转写引擎',
+      description: '选择 Bisbi 在这台电脑上如何平衡速度与准确性。',
+      fast: {
+        label: '快速',
+        hint: '更轻量的模型，在任何机器上都能快速运行。在口音、人名和嘈杂音频上准确性较低。',
+      },
+      accurate: {
+        label: '高准确度',
+        hint: '更高质量的转写。建议在 Mac 以及配备较新 CPU/GPU 的 Windows 机器上使用。',
+      },
+    },
     uiLanguage: {
       title: '应用语言',
       description: '界面使用的语言。默认情况下跟随操作系统。',
