@@ -8,6 +8,7 @@ import {
   type UiLanguageSetting,
 } from '../i18n';
 import { Select } from '../components/Select';
+import { SegmentedToggle } from '../components/SegmentedToggle';
 import { ConfirmButton } from '../components/ConfirmButton';
 import { listMicrophones, type MicrophoneDevice } from '../audio';
 import { HotkeyKeys } from '../components/HotkeyKeys';
@@ -55,22 +56,28 @@ export function Settings({ settings, onChange, onReset, onClearHistory }: Props)
         title={t('settings.handsFree.title')}
         description={t('settings.handsFree.description')}
       >
-        <div className="option-cards">
-          <OptionCard
-            name="handsFreeMode"
-            selected={!settings.handsFreeMode}
-            title={t('settings.handsFree.pushToTalk.label')}
-            hint={t('settings.handsFree.pushToTalk.hint')}
-            onSelect={() => onChange({ handsFreeMode: false })}
-          />
-          <OptionCard
-            name="handsFreeMode"
-            selected={settings.handsFreeMode}
-            title={t('settings.handsFree.tapToToggle.label')}
-            hint={t('settings.handsFree.tapToToggle.hint')}
-            onSelect={() => onChange({ handsFreeMode: true })}
-          />
-        </div>
+        <SegmentedToggle<'pushToTalk' | 'tapToToggle'>
+          value={settings.handsFreeMode ? 'tapToToggle' : 'pushToTalk'}
+          onChange={(next) =>
+            onChange({ handsFreeMode: next === 'tapToToggle' })
+          }
+          ariaLabel={t('settings.handsFree.title')}
+          options={[
+            {
+              value: 'pushToTalk',
+              label: t('settings.handsFree.pushToTalk.label'),
+            },
+            {
+              value: 'tapToToggle',
+              label: t('settings.handsFree.tapToToggle.label'),
+            },
+          ]}
+          hint={
+            settings.handsFreeMode
+              ? t('settings.handsFree.tapToToggle.hint')
+              : t('settings.handsFree.pushToTalk.hint')
+          }
+        />
       </Section>
 
       <Section
@@ -152,44 +159,54 @@ export function Settings({ settings, onChange, onReset, onClearHistory }: Props)
         title={t('settings.muteAudio.title')}
         description={t('settings.muteAudio.description')}
       >
-        <div className="option-cards">
-          <OptionCard
-            name="muteSystemAudioWhileRecording"
-            selected={settings.muteSystemAudioWhileRecording}
-            title={t('settings.muteAudio.enabled.label')}
-            hint={t('settings.muteAudio.enabled.hint')}
-            onSelect={() => onChange({ muteSystemAudioWhileRecording: true })}
-          />
-          <OptionCard
-            name="muteSystemAudioWhileRecording"
-            selected={!settings.muteSystemAudioWhileRecording}
-            title={t('settings.muteAudio.disabled.label')}
-            hint={t('settings.muteAudio.disabled.hint')}
-            onSelect={() => onChange({ muteSystemAudioWhileRecording: false })}
-          />
-        </div>
+        <SegmentedToggle<'enabled' | 'disabled'>
+          value={settings.muteSystemAudioWhileRecording ? 'enabled' : 'disabled'}
+          onChange={(next) =>
+            onChange({ muteSystemAudioWhileRecording: next === 'enabled' })
+          }
+          ariaLabel={t('settings.muteAudio.title')}
+          options={[
+            {
+              value: 'enabled',
+              label: t('settings.muteAudio.enabled.label'),
+            },
+            {
+              value: 'disabled',
+              label: t('settings.muteAudio.disabled.label'),
+            },
+          ]}
+          hint={
+            settings.muteSystemAudioWhileRecording
+              ? t('settings.muteAudio.enabled.hint')
+              : t('settings.muteAudio.disabled.hint')
+          }
+        />
       </Section>
 
       <Section
         title={t('settings.saveHistory.title')}
         description={t('settings.saveHistory.description')}
       >
-        <div className="option-cards">
-          <OptionCard
-            name="saveHistory"
-            selected={settings.saveHistory}
-            title={t('settings.saveHistory.enabled.label')}
-            hint={t('settings.saveHistory.enabled.hint')}
-            onSelect={() => onChange({ saveHistory: true })}
-          />
-          <OptionCard
-            name="saveHistory"
-            selected={!settings.saveHistory}
-            title={t('settings.saveHistory.disabled.label')}
-            hint={t('settings.saveHistory.disabled.hint')}
-            onSelect={() => onChange({ saveHistory: false })}
-          />
-        </div>
+        <SegmentedToggle<'enabled' | 'disabled'>
+          value={settings.saveHistory ? 'enabled' : 'disabled'}
+          onChange={(next) => onChange({ saveHistory: next === 'enabled' })}
+          ariaLabel={t('settings.saveHistory.title')}
+          options={[
+            {
+              value: 'enabled',
+              label: t('settings.saveHistory.enabled.label'),
+            },
+            {
+              value: 'disabled',
+              label: t('settings.saveHistory.disabled.label'),
+            },
+          ]}
+          hint={
+            settings.saveHistory
+              ? t('settings.saveHistory.enabled.hint')
+              : t('settings.saveHistory.disabled.hint')
+          }
+        />
       </Section>
 
       <Section
@@ -230,37 +247,6 @@ function Section({
       </header>
       <div className="section-body">{children}</div>
     </section>
-  );
-}
-
-function OptionCard({
-  name,
-  selected,
-  title,
-  hint,
-  onSelect,
-}: {
-  name: string;
-  selected: boolean;
-  title: string;
-  hint?: string;
-  onSelect: () => void;
-}) {
-  return (
-    <label className={`option-card${selected ? ' selected' : ''}`}>
-      <input
-        type="radio"
-        name={name}
-        checked={selected}
-        onChange={onSelect}
-        className="option-card-input"
-      />
-      <span className="option-card-radio" aria-hidden="true" />
-      <span className="option-card-body">
-        <span className="option-card-title">{title}</span>
-        {hint && <span className="option-card-hint">{hint}</span>}
-      </span>
-    </label>
   );
 }
 

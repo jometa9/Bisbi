@@ -1041,95 +1041,57 @@ button { font-family: inherit; }
   cursor: pointer;
 }
 
-.option-cards {
+.segmented-toggle-wrap {
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
-.option-card {
-  position: relative;
+.segmented-toggle {
   display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  padding: 12px 14px;
+  gap: 4px;
+  padding: 4px;
   border-radius: var(--radius);
-  border: 1px solid var(--border);
-  /* Default to the cream tone so unselected, non-hovered cards stand out
-     against the white page background. */
   background: var(--bg-soft);
-  cursor: pointer;
-  transition: border-color 120ms ease, background 120ms ease,
-    box-shadow 120ms ease;
+  border: 1px solid var(--border);
+  width: fit-content;
 }
 
-.option-card:hover {
-  border-color: var(--primary-light);
-  background: var(--primary-tint);
-}
-
-.option-card.selected {
-  border-color: var(--primary);
-  background: var(--primary-tint);
-  box-shadow: 0 0 0 1px var(--primary) inset;
-}
-
-.option-card-input {
-  position: absolute;
-  opacity: 0;
-  pointer-events: none;
-}
-
-.option-card-radio {
-  flex: 0 0 auto;
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  border: 1.5px solid var(--border-strong);
-  background: var(--white);
-  margin-top: 2px;
-  transition: border-color 120ms ease, background 120ms ease;
-  position: relative;
-}
-
-.option-card.selected .option-card-radio {
-  border-color: var(--primary-dark);
-  background: var(--primary-dark);
-}
-
-.option-card.selected .option-card-radio::after {
-  content: '';
-  position: absolute;
-  inset: 3px;
-  border-radius: 50%;
-  background: var(--white);
-}
-
-.option-card-body {
+.segmented-toggle-btn {
   display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 0;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 14px;
+  border-radius: calc(var(--radius) - 2px);
+  border: none;
+  background: transparent;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: background 120ms ease, color 120ms ease;
 }
 
-.option-card-title {
-  font-size: 13px;
-  font-weight: 600;
+.segmented-toggle-btn:hover:not(.active) {
   color: var(--text);
 }
 
-.option-card.selected .option-card-title {
-  color: var(--primary-dark);
+.segmented-toggle-btn.active {
+  background: var(--white);
+  color: var(--text);
+  box-shadow: var(--shadow-sm);
 }
 
-.option-card-hint {
+.segmented-toggle-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--primary-tint-hover);
+}
+
+.segmented-toggle-hint {
+  margin: 0;
   font-size: 12.5px;
   color: var(--text-muted);
   line-height: 1.45;
-}
-
-.option-card-input:focus-visible + .option-card-radio {
-  box-shadow: 0 0 0 3px var(--primary-tint-hover);
 }
 
 .handsfree-notice {
