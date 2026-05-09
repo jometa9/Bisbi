@@ -12,6 +12,7 @@ export interface AppSettings {
   vocabulary: string;
   microphoneId: string | null;
   muteSystemAudioWhileRecording: boolean;
+  openAtLogin: boolean;
 }
 
 export interface TranscriptionRow {

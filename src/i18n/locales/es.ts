@@ -192,6 +192,18 @@ export const es: Translations = {
         hint: 'Cada transcripción se descarta apenas se inserta el texto. No queda registro en ningún lado.',
       },
     },
+    openAtLogin: {
+      title: 'Iniciar al encender',
+      description: 'Iniciá Bisbi automáticamente cuando encendés la computadora.',
+      enabled: {
+        label: 'Iniciar al encender',
+        hint: 'Bisbi arranca en segundo plano cuando iniciás sesión.',
+      },
+      disabled: {
+        label: 'No iniciar al encender',
+        hint: 'Tenés que abrir Bisbi manualmente cada vez.',
+      },
+    },
     muteAudio: {
       title: 'Silenciar audio del sistema al grabar',
       description:

@@ -187,6 +187,18 @@ export const zh: Translations = {
         hint: '插入文本后立即丢弃每一条转写。不会留下任何记录。',
       },
     },
+    openAtLogin: {
+      title: '开机自启',
+      description: '开机时自动启动 Bisbi。',
+      enabled: {
+        label: '开机自启',
+        hint: '登录时 Bisbi 将在后台启动。',
+      },
+      disabled: {
+        label: '不自动启动',
+        hint: '每次需要手动打开 Bisbi。',
+      },
+    },
     muteAudio: {
       title: '录音时静音系统音频',
       description: '在录音期间静音电脑输出,以防背景声音泄露到环境中。',

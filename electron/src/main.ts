@@ -6,6 +6,7 @@ import { BUILD_CONFIG } from './buildConfig';
 import { resolveDevFrontendPort } from './devPort';
 import { appendLogLineWithRetention, trimLogFileToRetention } from './logRetention';
 import { registerBackend } from './backend';
+import { getSettings } from './backend/settings';
 import { hardenWindow } from './windowHardening';
 import {
   PROTOCOL,
@@ -180,6 +181,7 @@ if (!gotTheLock) {
         onQuit: () => { isQuitting = true; app.quit(); },
       });
       logMain('[main] backend ready');
+      app.setLoginItemSettings({ openAtLogin: getSettings().openAtLogin });
     } catch (err) {
       logMain(`[main] backend registration failed: ${(err as Error)?.message ?? err}`, true);
     }

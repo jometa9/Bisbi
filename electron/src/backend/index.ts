@@ -240,6 +240,9 @@ export async function registerBackend(opts: BackendOptions): Promise<void> {
       ) {
         rebuildTrayLabels(resolveUiLanguage(next.uiLanguage));
       }
+      if (patch.openAtLogin !== undefined && patch.openAtLogin !== prev.openAtLogin) {
+        app.setLoginItemSettings({ openAtLogin: next.openAtLogin });
+      }
       broadcast('settings:changed', next);
       return next;
     }
@@ -248,6 +251,7 @@ export async function registerBackend(opts: BackendOptions): Promise<void> {
     const next = resetSettings();
     applyHotkey(next);
     rebuildTrayLabels(resolveUiLanguage(next.uiLanguage));
+    app.setLoginItemSettings({ openAtLogin: next.openAtLogin });
     broadcast('settings:changed', next);
     return next;
   });

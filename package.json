@@ -167,6 +167,8 @@
       "perMachine": false,
       "allowToChangeInstallationDirectory": true,
       "include": "build/installer.nsh",
+      "installerSidebar": "build-resources/installerSidebar.bmp",
+      "uninstallerSidebar": "build-resources/uninstallerSidebar.bmp",
       "artifactName": "Bisbi-Setup.${ext}"
     }
   }

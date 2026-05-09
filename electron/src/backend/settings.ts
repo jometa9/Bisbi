@@ -27,6 +27,7 @@ function buildDefaults(): AppSettings {
     vocabulary: '',
     microphoneId: null,
     muteSystemAudioWhileRecording: false,
+    openAtLogin: true,
   };
 }
 

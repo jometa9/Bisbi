@@ -189,6 +189,18 @@ export const ar: Translations = {
         hint: 'تُهمل كل كتابة بمجرد إدراج النص. لا يبقى أي سجل.',
       },
     },
+    openAtLogin: {
+      title: 'التشغيل عند بدء التشغيل',
+      description: 'ابدأ Bisbi تلقائيًا عند تشغيل الكمبيوتر.',
+      enabled: {
+        label: 'التشغيل عند بدء التشغيل',
+        hint: 'سيبدأ Bisbi في الخلفية عند تسجيل الدخول.',
+      },
+      disabled: {
+        label: 'عدم التشغيل عند بدء التشغيل',
+        hint: 'ستحتاج إلى فتح Bisbi يدويًا في كل مرة.',
+      },
+    },
     muteAudio: {
       title: 'كتم صوت النظام أثناء التسجيل',
       description:

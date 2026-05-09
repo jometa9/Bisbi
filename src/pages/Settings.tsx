@@ -127,6 +127,28 @@ export function Settings({ settings, onChange, onReset, onClearHistory }: Props)
       </Section>
 
       <Section
+        title={t('settings.openAtLogin.title')}
+        description={t('settings.openAtLogin.description')}
+      >
+        <div className="option-cards">
+          <OptionCard
+            name="openAtLogin"
+            selected={settings.openAtLogin}
+            title={t('settings.openAtLogin.enabled.label')}
+            hint={t('settings.openAtLogin.enabled.hint')}
+            onSelect={() => onChange({ openAtLogin: true })}
+          />
+          <OptionCard
+            name="openAtLogin"
+            selected={!settings.openAtLogin}
+            title={t('settings.openAtLogin.disabled.label')}
+            hint={t('settings.openAtLogin.disabled.hint')}
+            onSelect={() => onChange({ openAtLogin: false })}
+          />
+        </div>
+      </Section>
+
+      <Section
         title={t('settings.muteAudio.title')}
         description={t('settings.muteAudio.description')}
       >

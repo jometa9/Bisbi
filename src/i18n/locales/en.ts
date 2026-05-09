@@ -122,6 +122,12 @@ export const en: {
       enabled: { label: string; hint: string };
       disabled: { label: string; hint: string };
     };
+    openAtLogin: {
+      title: string;
+      description: string;
+      enabled: { label: string; hint: string };
+      disabled: { label: string; hint: string };
+    };
     muteAudio: {
       title: string;
       description: string;
@@ -418,6 +424,18 @@ export const en: {
       disabled: {
         label: 'Do not save',
         hint: 'Each transcription is discarded right after the text is inserted. Nothing is kept.',
+      },
+    },
+    openAtLogin: {
+      title: 'Launch at startup',
+      description: 'Start Bisbi automatically when you turn on your computer.',
+      enabled: {
+        label: 'Launch at startup',
+        hint: 'Bisbi will start in the background when you log in.',
+      },
+      disabled: {
+        label: 'Do not launch at startup',
+        hint: 'You will need to open Bisbi manually each time.',
       },
     },
     muteAudio: {
