@@ -176,9 +176,11 @@ function ensureHookStarted(): void {
   }
 }
 
+const IS_WIN = process.platform === 'win32';
+
 function onKeydown(e: UiohookEvent): void {
   if (!state) return;
-  console.log('[hotkey] uiohook keydown keycode=', e.keycode, 'ctrl=', e.ctrlKey, 'alt=', e.altKey, 'shift=', e.shiftKey, 'meta=', e.metaKey, '| target keycode=', state.parsed.keycode, 'bareMod=', state.parsed.bareModifier);
+  if (IS_WIN) console.log('[hotkey] uiohook keydown keycode=', e.keycode, 'ctrl=', e.ctrlKey, 'alt=', e.altKey, 'shift=', e.shiftKey, 'meta=', e.metaKey, '| target keycode=', state.parsed.keycode, 'bareMod=', state.parsed.bareModifier);
   if (
     e.keycode === UiohookKey.Escape &&
     !e.ctrlKey &&
@@ -196,7 +198,7 @@ function onKeydown(e: UiohookEvent): void {
   if (state.keyHeld) return;
   state.keyHeld = true;
   state.pressStartedAt = Date.now();
-  console.log('[hotkey] -> handlePress');
+  if (IS_WIN) console.log('[hotkey] -> handlePress');
   handlePress();
 }
 
@@ -204,15 +206,15 @@ const SYNTHETIC_KEYUP_GUARD_MS = 60;
 
 function onKeyup(e: UiohookEvent): void {
   if (!state) return;
-  console.log('[hotkey] uiohook KEYUP keycode=', e.keycode, '| target keycode=', state.parsed.keycode, 'keyHeld=', state.keyHeld, 'sincePress=', Date.now() - state.pressStartedAt, 'ms');
+  if (IS_WIN) console.log('[hotkey] uiohook KEYUP keycode=', e.keycode, '| target keycode=', state.parsed.keycode, 'keyHeld=', state.keyHeld, 'sincePress=', Date.now() - state.pressStartedAt, 'ms');
   const isTarget =
     e.keycode === state.parsed.keycode ||
     (state.parsed.bareModifier && MODIFIER_SIBLING[state.parsed.keycode] === e.keycode);
-  if (!isTarget) { console.log('[hotkey] keyup ignored: not target'); return; }
-  if (!state.keyHeld) { console.log('[hotkey] keyup ignored: not held'); return; }
-  if (Date.now() - state.pressStartedAt < SYNTHETIC_KEYUP_GUARD_MS) { console.log('[hotkey] keyup ignored: synthetic guard'); return; }
+  if (!isTarget) { if (IS_WIN) console.log('[hotkey] keyup ignored: not target'); return; }
+  if (!state.keyHeld) { if (IS_WIN) console.log('[hotkey] keyup ignored: not held'); return; }
+  if (Date.now() - state.pressStartedAt < SYNTHETIC_KEYUP_GUARD_MS) { if (IS_WIN) console.log('[hotkey] keyup ignored: synthetic guard'); return; }
   state.keyHeld = false;
-  console.log('[hotkey] -> handleRelease');
+  if (IS_WIN) console.log('[hotkey] -> handleRelease');
   handleRelease();
 }
 
