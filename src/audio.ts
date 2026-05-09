@@ -29,15 +29,33 @@ export async function startRecording(
   });
 
   const ctx = new AudioContext();
+  console.log('[audio] ctx.state initial =', ctx.state, 'sampleRate=', ctx.sampleRate);
+  if (ctx.state === 'suspended') {
+    try {
+      await ctx.resume();
+      console.log('[audio] ctx.resume OK, state =', ctx.state);
+    } catch (e) {
+      console.error('[audio] ctx.resume failed', e);
+    }
+  }
+  const tracks = stream.getAudioTracks();
+  console.log('[audio] mic tracks:', tracks.map((t) => ({
+    label: t.label, enabled: t.enabled, muted: t.muted, readyState: t.readyState,
+  })));
   const source = ctx.createMediaStreamSource(stream);
   const processor = ctx.createScriptProcessor(4096, 1, 1);
 
   const sourceSampleRate = ctx.sampleRate;
   const chunks: Float32Array[] = [];
   let stopped = false;
+  let processCallCount = 0;
 
   processor.onaudioprocess = (event) => {
     if (stopped) return;
+    processCallCount++;
+    if (processCallCount <= 3 || processCallCount % 50 === 0) {
+      console.log('[audio] onaudioprocess fired #', processCallCount);
+    }
     const input = event.inputBuffer.getChannelData(0);
     chunks.push(new Float32Array(input));
     if (opts.onLevel) {
@@ -50,6 +68,14 @@ export async function startRecording(
 
   source.connect(processor);
   processor.connect(ctx.destination);
+  console.log('[audio] processor wired, state=', ctx.state);
+
+  // Diagnóstico: si en 500ms no se disparó onaudioprocess, algo está bloqueando.
+  setTimeout(() => {
+    if (!stopped && processCallCount === 0) {
+      console.warn('[audio] WARNING: 500ms y onaudioprocess NUNCA se disparó. ctx.state=', ctx.state);
+    }
+  }, 500);
 
   const cleanup = () => {
     stopped = true;

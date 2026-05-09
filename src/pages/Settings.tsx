@@ -137,22 +137,26 @@ export function Settings({ settings, onChange, onReset, onClearHistory }: Props)
         title={t('settings.openAtLogin.title')}
         description={t('settings.openAtLogin.description')}
       >
-        <div className="option-cards">
-          <OptionCard
-            name="openAtLogin"
-            selected={settings.openAtLogin}
-            title={t('settings.openAtLogin.enabled.label')}
-            hint={t('settings.openAtLogin.enabled.hint')}
-            onSelect={() => onChange({ openAtLogin: true })}
-          />
-          <OptionCard
-            name="openAtLogin"
-            selected={!settings.openAtLogin}
-            title={t('settings.openAtLogin.disabled.label')}
-            hint={t('settings.openAtLogin.disabled.hint')}
-            onSelect={() => onChange({ openAtLogin: false })}
-          />
-        </div>
+        <SegmentedToggle<'enabled' | 'disabled'>
+          value={settings.openAtLogin ? 'enabled' : 'disabled'}
+          onChange={(next) => onChange({ openAtLogin: next === 'enabled' })}
+          ariaLabel={t('settings.openAtLogin.title')}
+          options={[
+            {
+              value: 'enabled',
+              label: t('settings.openAtLogin.enabled.label'),
+            },
+            {
+              value: 'disabled',
+              label: t('settings.openAtLogin.disabled.label'),
+            },
+          ]}
+          hint={
+            settings.openAtLogin
+              ? t('settings.openAtLogin.enabled.hint')
+              : t('settings.openAtLogin.disabled.hint')
+          }
+        />
       </Section>
 
       <Section
