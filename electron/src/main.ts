@@ -18,7 +18,7 @@ import {
 const appRoot = path.resolve(__dirname, '..', '..');
 const PRODUCT_NAME = BUILD_CONFIG.PRODUCT_NAME;
 
-const SHOW_DEVTOOLS = true;
+const SHOW_DEVTOOLS = false;
 
 function getMainLogPath(): string {
   try {
