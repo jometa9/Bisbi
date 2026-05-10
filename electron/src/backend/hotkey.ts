@@ -202,8 +202,6 @@ function onKeydown(e: UiohookEvent): void {
   handlePress();
 }
 
-const SYNTHETIC_KEYUP_GUARD_MS = 60;
-
 function onKeyup(e: UiohookEvent): void {
   if (!state) return;
   if (IS_WIN) console.log('[hotkey] uiohook KEYUP keycode=', e.keycode, '| target keycode=', state.parsed.keycode, 'keyHeld=', state.keyHeld, 'sincePress=', Date.now() - state.pressStartedAt, 'ms');
@@ -212,7 +210,6 @@ function onKeyup(e: UiohookEvent): void {
     (state.parsed.bareModifier && MODIFIER_SIBLING[state.parsed.keycode] === e.keycode);
   if (!isTarget) { if (IS_WIN) console.log('[hotkey] keyup ignored: not target'); return; }
   if (!state.keyHeld) { if (IS_WIN) console.log('[hotkey] keyup ignored: not held'); return; }
-  if (Date.now() - state.pressStartedAt < SYNTHETIC_KEYUP_GUARD_MS) { if (IS_WIN) console.log('[hotkey] keyup ignored: synthetic guard'); return; }
   state.keyHeld = false;
   if (IS_WIN) console.log('[hotkey] -> handleRelease');
   handleRelease();
