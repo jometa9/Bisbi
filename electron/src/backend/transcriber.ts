@@ -202,6 +202,9 @@ export async function transcribeCloud(
 
   const wav = buildWavBuffer(pcm, sampleRate, channels);
   const form = new FormData();
+  // The "quality" we send is only a user-intent hint. The landing API owns
+  // the decision of which cloud transcription model actually runs and can
+  // remap or collapse fast/accurate server-side without a client update.
   // Blob is available in Electron's Node runtime (Node 20+).
   // Copy into a fresh ArrayBuffer so the Blob constructor doesn't choke on
   // Buffer's union-typed underlying buffer (Node 20 typings include
