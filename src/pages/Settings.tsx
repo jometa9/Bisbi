@@ -99,6 +99,70 @@ export function Settings({ settings, onChange, onReset, onClearHistory }: Props)
       </Section>
 
       <Section
+        title={t('settings.transcriptionMode.title')}
+        description={t('settings.transcriptionMode.description')}
+      >
+        <SegmentedToggle<'cloud' | 'offline'>
+          value={settings.mode}
+          onChange={(mode) => onChange({ mode })}
+          ariaLabel={t('settings.transcriptionMode.title')}
+          options={[
+            {
+              value: 'cloud',
+              label: t('settings.transcriptionMode.cloud.label'),
+            },
+            {
+              value: 'offline',
+              label: t('settings.transcriptionMode.offline.label'),
+            },
+          ]}
+          hint={
+            settings.mode === 'offline'
+              ? t('settings.transcriptionMode.offline.hint')
+              : t('settings.transcriptionMode.cloud.hint')
+          }
+        />
+      </Section>
+
+      <Section
+        title={t('settings.transcriptionEngine.title')}
+        description={t(
+          settings.mode === 'cloud'
+            ? 'settings.transcriptionEngine.description.cloud'
+            : 'settings.transcriptionEngine.description.offline'
+        )}
+      >
+        <SegmentedToggle<'fast' | 'accurate'>
+          value={settings.precision}
+          onChange={(precision) => onChange({ precision })}
+          ariaLabel={t('settings.transcriptionEngine.title')}
+          options={[
+            {
+              value: 'fast',
+              label: t('settings.transcriptionEngine.fast.label'),
+            },
+            {
+              value: 'accurate',
+              label: t('settings.transcriptionEngine.accurate.label'),
+            },
+          ]}
+          hint={
+            settings.precision === 'fast'
+              ? t(
+                  settings.mode === 'cloud'
+                    ? 'settings.transcriptionEngine.fast.hint.cloud'
+                    : 'settings.transcriptionEngine.fast.hint.offline'
+                )
+              : t(
+                  settings.mode === 'cloud'
+                    ? 'settings.transcriptionEngine.accurate.hint.cloud'
+                    : 'settings.transcriptionEngine.accurate.hint.offline'
+                )
+          }
+        />
+      </Section>
+
+      <Section
         title={t('settings.transcriptionLanguage.title')}
         description={t('settings.transcriptionLanguage.description')}
       >
@@ -118,58 +182,6 @@ export function Settings({ settings, onChange, onReset, onClearHistory }: Props)
               searchTerms: `${lang.english} ${lang.endonym} ${lang.code}`,
             })),
           ]}
-        />
-      </Section>
-
-      <Section
-        title={t('settings.transcriptionMode.title')}
-        description={t('settings.transcriptionMode.description')}
-      >
-        <SegmentedToggle<'offline' | 'cloud'>
-          value={settings.mode}
-          onChange={(mode) => onChange({ mode })}
-          ariaLabel={t('settings.transcriptionMode.title')}
-          options={[
-            {
-              value: 'offline',
-              label: t('settings.transcriptionMode.offline.label'),
-            },
-            {
-              value: 'cloud',
-              label: t('settings.transcriptionMode.cloud.label'),
-            },
-          ]}
-          hint={
-            settings.mode === 'offline'
-              ? t('settings.transcriptionMode.offline.hint')
-              : t('settings.transcriptionMode.cloud.hint')
-          }
-        />
-      </Section>
-
-      <Section
-        title={t('settings.transcriptionEngine.title')}
-        description={t('settings.transcriptionEngine.description')}
-      >
-        <SegmentedToggle<'fast' | 'accurate'>
-          value={settings.precision}
-          onChange={(precision) => onChange({ precision })}
-          ariaLabel={t('settings.transcriptionEngine.title')}
-          options={[
-            {
-              value: 'fast',
-              label: t('settings.transcriptionEngine.fast.label'),
-            },
-            {
-              value: 'accurate',
-              label: t('settings.transcriptionEngine.accurate.label'),
-            },
-          ]}
-          hint={
-            settings.precision === 'fast'
-              ? t('settings.transcriptionEngine.fast.hint')
-              : t('settings.transcriptionEngine.accurate.hint')
-          }
         />
       </Section>
 

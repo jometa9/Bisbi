@@ -123,9 +123,9 @@ export const en: {
     };
     transcriptionEngine: {
       title: string;
-      description: string;
-      fast: { label: string; hint: string };
-      accurate: { label: string; hint: string };
+      description: { offline: string; cloud: string };
+      fast: { label: string; hint: { offline: string; cloud: string } };
+      accurate: { label: string; hint: { offline: string; cloud: string } };
     };
     uiLanguage: { title: string; description: string; system: string };
     saveHistory: {
@@ -435,15 +435,25 @@ export const en: {
     },
     transcriptionEngine: {
       title: 'Transcription engine',
-      description:
-        'Pick how Bisbi balances speed and accuracy on this computer.',
+      description: {
+        offline: 'Pick how Bisbi balances speed and accuracy on this computer.',
+        cloud: 'Pick how we balance speed and accuracy in the cloud.',
+      },
       fast: {
         label: 'Fast',
-        hint: 'Lighter model that runs quickly on any machine. Lower accuracy on accents, names and noisy audio.',
+        hint: {
+          offline:
+            'Lighter model that runs quickly on any machine. Lower accuracy on accents, names and noisy audio.',
+          cloud: 'Optimized for speed. Lower latency on short clips.',
+        },
       },
       accurate: {
         label: 'Accurate',
-        hint: 'Higher quality transcription. Recommended on Mac and on Windows machines with a recent CPU/GPU.',
+        hint: {
+          offline:
+            'Higher quality transcription. Recommended on Mac and on Windows machines with a recent CPU/GPU.',
+          cloud: 'Best quality for accents, proper names and complex audio.',
+        },
       },
     },
     uiLanguage: {

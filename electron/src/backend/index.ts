@@ -138,6 +138,7 @@ async function processQueue(): Promise<void> {
         let countedByServer = false;
         if (cfg.mode === 'cloud') {
           try {
+            console.log(`[backend] dispatching transcription job to cloud (precision=${opts.precision}, language=${opts.language ?? 'auto'})`);
             out = await transcribeCloud(job.pcm, job.sampleRate, job.channels, opts);
             countedByServer = true;
           } catch (err) {

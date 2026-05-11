@@ -189,15 +189,27 @@ export const es: Translations = {
     },
     transcriptionEngine: {
       title: 'Motor de transcripción',
-      description:
-        'Elegí cómo Bisbi equilibra velocidad y precisión en esta computadora.',
+      description: {
+        offline:
+          'Elegí cómo Bisbi equilibra velocidad y precisión en esta computadora.',
+        cloud: 'Elegí cómo balanceamos velocidad y precisión en la nube.',
+      },
       fast: {
         label: 'Rápido',
-        hint: 'Modelo más liviano que corre rápido en cualquier máquina. Menos precisión con acentos, nombres y audio con ruido.',
+        hint: {
+          offline:
+            'Modelo más liviano que corre rápido en cualquier máquina. Menos precisión con acentos, nombres y audio con ruido.',
+          cloud: 'Optimizado para velocidad. Menor latencia en audios cortos.',
+        },
       },
       accurate: {
         label: 'Preciso',
-        hint: 'Transcripción de mejor calidad. Recomendado en Mac y en Windows con CPU/GPU recientes.',
+        hint: {
+          offline:
+            'Transcripción de mejor calidad. Recomendado en Mac y en Windows con CPU/GPU recientes.',
+          cloud:
+            'Mejor calidad para acentos, nombres propios y audios complejos.',
+        },
       },
     },
     uiLanguage: {

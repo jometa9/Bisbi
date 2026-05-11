@@ -294,15 +294,6 @@ export async function openBillingPortal(): Promise<string> {
 }
 
 export async function logout(): Promise<AuthSession> {
-  loadFromDisk();
-  const token = memCache?.token ?? null;
-  if (token) {
-    try {
-      await apiFetch('/api/desktop-logout', { method: 'POST', token });
-    } catch {
-      // Best-effort; clear local state regardless so user can sign out offline.
-    }
-  }
   memCache = null;
   authClear();
   metaSet(LAST_VALIDATED_META_KEY, null);

@@ -184,14 +184,25 @@ export const zh: Translations = {
     },
     transcriptionEngine: {
       title: '转写引擎',
-      description: '选择 Bisbi 在这台电脑上如何平衡速度与准确性。',
+      description: {
+        offline: '选择 Bisbi 在这台电脑上如何平衡速度与准确性。',
+        cloud: '选择我们在云端如何平衡速度与准确性。',
+      },
       fast: {
         label: '快速',
-        hint: '更轻量的模型，在任何机器上都能快速运行。在口音、人名和嘈杂音频上准确性较低。',
+        hint: {
+          offline:
+            '更轻量的模型，在任何机器上都能快速运行。在口音、人名和嘈杂音频上准确性较低。',
+          cloud: '针对速度优化。短音频的延迟更低。',
+        },
       },
       accurate: {
         label: '高准确度',
-        hint: '更高质量的转写。建议在 Mac 以及配备较新 CPU/GPU 的 Windows 机器上使用。',
+        hint: {
+          offline:
+            '更高质量的转写。建议在 Mac 以及配备较新 CPU/GPU 的 Windows 机器上使用。',
+          cloud: '针对口音、专有名词和复杂音频提供最佳质量。',
+        },
       },
     },
     uiLanguage: {

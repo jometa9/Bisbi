@@ -199,6 +199,9 @@ export async function transcribeCloud(
   const bytesPerFrame = 2 * Math.max(1, channels);
   const audioDurationMs = Math.round((pcm.length / (sampleRate * bytesPerFrame)) * 1000);
   const audioSeconds = Math.round(audioDurationMs / 1000);
+  console.log(
+    `[transcriber] cloud transcription started: precision=${opts.precision} language=${opts.language ?? 'auto'} audioSeconds=${audioSeconds} pcmBytes=${pcm.length} sampleRate=${sampleRate} channels=${channels}`
+  );
 
   const wav = buildWavBuffer(pcm, sampleRate, channels);
   const form = new FormData();
@@ -220,12 +223,15 @@ export async function transcribeCloud(
 
   let resp: Response;
   try {
+    console.log('[transcriber] cloud request POST /api/transcribe');
     resp = await apiFetch('/api/transcribe', {
       method: 'POST',
       body: form,
       token,
     });
+    console.log(`[transcriber] cloud response status=${resp.status} in ${Date.now() - startedAt}ms`);
   } catch (err) {
+    console.error('[transcriber] cloud request failed:', err instanceof Error ? err.message : String(err));
     throw new CloudTranscribeError(
       err instanceof Error ? err.message : String(err)
     );
@@ -236,6 +242,7 @@ export async function transcribeCloud(
     try {
       detail = await resp.text();
     } catch {}
+    console.error(`[transcriber] cloud transcription failed status=${resp.status} detail=${detail.slice(0, 200)}`);
     throw new CloudTranscribeError(
       `Cloud transcription failed (${resp.status}): ${detail.slice(0, 200)}`,
       resp.status
@@ -252,8 +259,13 @@ export async function transcribeCloud(
   }
 
   const durationMs = Date.now() - startedAt;
+  const text = (payload.text ?? '').trim();
+  const resolvedLanguage = payload.language ?? opts.language ?? 'auto';
+  console.log(
+    `[transcriber] cloud transcription done: model=${payload.model ?? `cloud-${opts.precision}`} language=${resolvedLanguage} durationMs=${durationMs} textLength=${text.length}`
+  );
   return {
-    text: (payload.text ?? '').trim(),
+    text,
     language: payload.language ?? (opts.language === 'auto' ? null : opts.language),
     durationMs,
     audioDurationMs,
