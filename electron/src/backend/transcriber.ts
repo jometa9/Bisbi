@@ -5,6 +5,8 @@ import fs from 'fs';
 import os from 'os';
 import { randomUUID } from 'crypto';
 import { BUILD_CONFIG, type WhisperPrecision } from '../buildConfig';
+import { apiFetch } from './apiClient';
+import { getAuthToken } from './auth';
 
 function modelFileFor(precision: WhisperPrecision): string {
   return BUILD_CONFIG.WHISPER_MODELS[precision];
@@ -152,6 +154,108 @@ export async function transcribePcm(
     const txt = `${wavPath}.txt`;
     try { fs.unlinkSync(txt); } catch {}
   }
+}
+
+export class CloudTranscribeError extends Error {
+  constructor(message: string, public readonly status?: number) {
+    super(message);
+    this.name = 'CloudTranscribeError';
+  }
+}
+
+function buildWavBuffer(pcm: Buffer, sampleRate: number, channels: number): Buffer {
+  const bitsPerSample = 16;
+  const byteRate = (sampleRate * channels * bitsPerSample) / 8;
+  const blockAlign = (channels * bitsPerSample) / 8;
+  const dataSize = pcm.length;
+  const header = Buffer.alloc(44);
+  header.write('RIFF', 0);
+  header.writeUInt32LE(36 + dataSize, 4);
+  header.write('WAVE', 8);
+  header.write('fmt ', 12);
+  header.writeUInt32LE(16, 16);
+  header.writeUInt16LE(1, 20);
+  header.writeUInt16LE(channels, 22);
+  header.writeUInt32LE(sampleRate, 24);
+  header.writeUInt32LE(byteRate, 28);
+  header.writeUInt16LE(blockAlign, 32);
+  header.writeUInt16LE(bitsPerSample, 34);
+  header.write('data', 36);
+  header.writeUInt32LE(dataSize, 40);
+  return Buffer.concat([header, pcm]);
+}
+
+export async function transcribeCloud(
+  pcm: Buffer,
+  sampleRate: number,
+  channels: number,
+  opts: TranscribeOptions
+): Promise<TranscribeOutput> {
+  const token = getAuthToken();
+  if (!token) {
+    throw new CloudTranscribeError('Not authenticated');
+  }
+  const startedAt = Date.now();
+  const bytesPerFrame = 2 * Math.max(1, channels);
+  const audioDurationMs = Math.round((pcm.length / (sampleRate * bytesPerFrame)) * 1000);
+  const audioSeconds = Math.round(audioDurationMs / 1000);
+
+  const wav = buildWavBuffer(pcm, sampleRate, channels);
+  const form = new FormData();
+  // Blob is available in Electron's Node runtime (Node 20+).
+  // Copy into a fresh ArrayBuffer so the Blob constructor doesn't choke on
+  // Buffer's union-typed underlying buffer (Node 20 typings include
+  // SharedArrayBuffer, which Blob's BlobPart does not accept).
+  const wavBytes = new Uint8Array(wav.byteLength);
+  wavBytes.set(wav);
+  form.append('file', new Blob([wavBytes.buffer], { type: 'audio/wav' }), 'audio.wav');
+  form.append('quality', opts.precision);
+  form.append('audioSeconds', String(audioSeconds));
+  if (opts.language) form.append('language', opts.language);
+  const prompt = opts.vocabulary?.trim();
+  if (prompt) form.append('prompt', prompt);
+
+  let resp: Response;
+  try {
+    resp = await apiFetch('/api/transcribe', {
+      method: 'POST',
+      body: form,
+      token,
+    });
+  } catch (err) {
+    throw new CloudTranscribeError(
+      err instanceof Error ? err.message : String(err)
+    );
+  }
+
+  if (!resp.ok) {
+    let detail = '';
+    try {
+      detail = await resp.text();
+    } catch {}
+    throw new CloudTranscribeError(
+      `Cloud transcription failed (${resp.status}): ${detail.slice(0, 200)}`,
+      resp.status
+    );
+  }
+
+  let payload: { text?: string; language?: string | null; model?: string } = {};
+  try {
+    payload = (await resp.json()) as typeof payload;
+  } catch (err) {
+    throw new CloudTranscribeError(
+      `Malformed cloud response: ${err instanceof Error ? err.message : String(err)}`
+    );
+  }
+
+  const durationMs = Date.now() - startedAt;
+  return {
+    text: (payload.text ?? '').trim(),
+    language: payload.language ?? (opts.language === 'auto' ? null : opts.language),
+    durationMs,
+    audioDurationMs,
+    modelFile: payload.model ?? `cloud-${opts.precision}`,
+  };
 }
 
 function runWhisper(bin: string, args: string[], wavPath: string): Promise<string> {

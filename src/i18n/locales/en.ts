@@ -115,6 +115,12 @@ export const en: {
       unnamed: string;
     };
     transcriptionLanguage: { title: string; description: string; searchPlaceholder: string };
+    transcriptionMode: {
+      title: string;
+      description: string;
+      offline: { label: string; hint: string };
+      cloud: { label: string; hint: string };
+    };
     transcriptionEngine: {
       title: string;
       description: string;
@@ -413,6 +419,19 @@ export const en: {
       description:
         'Pick the language you dictate in. Auto-detect is slower and may pick wrong on short clips.',
       searchPlaceholder: 'Search a language…',
+    },
+    transcriptionMode: {
+      title: 'Transcription mode',
+      description:
+        'Choose where your voice is transcribed. Privacy keeps everything on this computer.',
+      offline: {
+        label: 'Private (offline)',
+        hint: 'Runs entirely on this computer. Your voice never leaves the device.',
+      },
+      cloud: {
+        label: 'Online',
+        hint: 'Better quality transcription using our servers. Requires internet. We do not store your audio or transcripts — we process them and return the result.',
+      },
     },
     transcriptionEngine: {
       title: 'Transcription engine',

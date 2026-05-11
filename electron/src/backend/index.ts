@@ -37,7 +37,7 @@ import {
 } from './deepLink';
 import { getSettings, updateSettings, resetSettings } from './settings';
 import { registerHotkey, unregisterAll, notifyExternalKeyup, notifyExternalKeydown } from './hotkey';
-import { transcribePcm, checkResources, cancelActiveTranscription } from './transcriber';
+import { transcribePcm, transcribeCloud, CloudTranscribeError, checkResources, cancelActiveTranscription } from './transcriber';
 import { deliverText } from './paster';
 import {
   getOnboardingState,
@@ -129,11 +129,32 @@ async function processQueue(): Promise<void> {
       const job = transcriptionQueue.shift()!;
       try {
         const cfg = getSettings();
-        const out = await transcribePcm(job.pcm, job.sampleRate, job.channels, {
+        const opts = {
           language: cfg.language,
           vocabulary: cfg.vocabulary,
           precision: cfg.precision,
-        });
+        };
+        let out;
+        let countedByServer = false;
+        if (cfg.mode === 'cloud') {
+          try {
+            out = await transcribeCloud(job.pcm, job.sampleRate, job.channels, opts);
+            countedByServer = true;
+          } catch (err) {
+            // Network/upstream failure: fall back to offline with the same
+            // quality so the user still gets a transcription. Other errors
+            // (auth, quota) propagate as before.
+            if (err instanceof CloudTranscribeError && (err.status === undefined || err.status === 502 || err.status === 503 || err.status === 504)) {
+              console.warn('[backend] cloud transcription failed, falling back to offline:', err.message);
+              broadcast('transcription:cloudFallback', { reason: err.message });
+              out = await transcribePcm(job.pcm, job.sampleRate, job.channels, opts);
+            } else {
+              throw err;
+            }
+          }
+        } else {
+          out = await transcribePcm(job.pcm, job.sampleRate, job.channels, opts);
+        }
         const meaningful = out.text.replace(/\s/g, '').length >= 2;
         const wordCount = meaningful ? countWords(out.text) : 0;
         if (meaningful) {
@@ -154,11 +175,17 @@ async function processQueue(): Promise<void> {
           broadcast('stats:totals', getStatsTotals());
         }
         if (meaningful && wordCount > 0) {
+          // Local counter stays in sync with the user's monthly bucket so the UI
+          // updates immediately. When the cloud path ran, the server already
+          // incremented its own counter inside /api/transcribe — skip the
+          // queued sync to /api/usage to avoid double-counting.
           addMonthlyWordUsage(wordCount);
-          recordUsage({
-            words: wordCount,
-            audioSeconds: Math.round((out.audioDurationMs ?? 0) / 1000),
-          });
+          if (!countedByServer) {
+            recordUsage({
+              words: wordCount,
+              audioSeconds: Math.round((out.audioDurationMs ?? 0) / 1000),
+            });
+          }
         }
       } catch (err) {
         console.error('[backend] transcription job failed:', err);

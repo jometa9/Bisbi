@@ -170,6 +170,18 @@ export const zh: Translations = {
       description: '选择你听写时使用的语言。自动检测较慢，且在短片段上可能选错。',
       searchPlaceholder: '搜索语言…',
     },
+    transcriptionMode: {
+      title: '转写方式',
+      description: '选择在哪里转写你的语音。隐私模式让一切都留在本机。',
+      offline: {
+        label: '私密（离线）',
+        hint: '完全在本机运行，你的声音不会离开设备。',
+      },
+      cloud: {
+        label: '在线',
+        hint: '使用我们的服务器获得更高质量的转写。需要联网。我们不保存你的音频或转写文本——只处理并把结果返回给你。',
+      },
+    },
     transcriptionEngine: {
       title: '转写引擎',
       description: '选择 Bisbi 在这台电脑上如何平衡速度与准确性。',

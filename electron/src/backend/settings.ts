@@ -29,6 +29,7 @@ function buildDefaults(): AppSettings {
     muteSystemAudioWhileRecording: false,
     openAtLogin: true,
     precision: BUILD_CONFIG.DEFAULT_PRECISION,
+    mode: 'offline',
   };
 }
 

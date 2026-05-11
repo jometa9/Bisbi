@@ -14,6 +14,7 @@ export interface AppSettings {
   muteSystemAudioWhileRecording: boolean;
   openAtLogin: boolean;
   precision: 'fast' | 'accurate';
+  mode: 'offline' | 'cloud';
 }
 
 export interface TranscriptionRow {

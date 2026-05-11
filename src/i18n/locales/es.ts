@@ -174,6 +174,19 @@ export const es: Translations = {
         'Elegí el idioma en el que dictás. La detección automática es más lenta y puede equivocarse en clips cortos.',
       searchPlaceholder: 'Buscar un idioma…',
     },
+    transcriptionMode: {
+      title: 'Modo de transcripción',
+      description:
+        'Elegí dónde se transcribe tu voz. El modo privado mantiene todo en esta computadora.',
+      offline: {
+        label: 'Privado (sin conexión)',
+        hint: 'Corre completamente en esta computadora. Tu voz no sale del dispositivo.',
+      },
+      cloud: {
+        label: 'En línea',
+        hint: 'Mejor calidad de transcripción usando nuestros servidores. Requiere internet. No guardamos tu audio ni la transcripción — los procesamos y te devolvemos el resultado.',
+      },
+    },
     transcriptionEngine: {
       title: 'Motor de transcripción',
       description:
