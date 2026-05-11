@@ -133,128 +133,79 @@ export const zh: Translations = {
     copy: '复制',
     copied: '已复制',
     delete: '删除',
-    savingDisabledTitle: '历史记录保存已关闭',
-    savingDisabledHint: '你的转写没有被保存,因此无法在此显示。在“设置”中重新开启历史记录后即可再次看到它们。',
-    savingDisabledCta: '打开设置',
   },
   settings: {
     hotkey: {
       title: '键盘快捷键',
-      description: '在任何应用中按下它即可开始和停止录音。',
+      description: '用于录音的全局快捷键。',
       change: '更改',
       cancel: '取消',
       waiting: '请按下你想使用的按键…',
     },
     handsFree: {
       title: '录音模式',
-      description: '选择快捷键如何开始和结束录音。',
+      description: '快捷键的行为方式。',
       pushToTalk: {
         label: '按住说话',
-        hint: '说话时按住快捷键,松开即停止。',
+        hint: '说话时按住快捷键，松开即停止。',
       },
       tapToToggle: {
         label: '免手模式',
-        hint: '点击快捷键一次开始录音,再次点击结束录音。适合较长的口述,你不想一直按着按键。',
+        hint: '点击一次开始，再次点击结束。',
       },
       doubleTapNotice:
-        '想随时切换到免手模式?快速双击 {hotkey},录音会保持开启,你就可以松开按键。',
+        '快速双击 {hotkey}，录音会保持开启，你就可以松开按键。',
     },
     microphone: {
       title: '麦克风',
-      description: '选择用于录音的输入设备。如果所选设备未连接，则回退到系统默认设备。',
+      description: '音频输入。不可用时回退到系统默认。',
       systemDefault: '系统默认',
       unnamed: '麦克风 {index}',
     },
-    transcriptionLanguage: {
-      title: '转写语言',
-      description: '选择你听写时使用的语言。自动检测较慢，且在短片段上可能选错。',
-      searchPlaceholder: '搜索语言…',
-    },
     transcriptionMode: {
       title: '转写方式',
-      description: '选择在哪里转写你的语音。隐私模式让一切都留在本机。',
+      description: '在哪里转写。',
       offline: {
-        label: '私密（离线）',
-        hint: '完全在本机运行，你的声音不会离开设备。',
+        label: '离线',
+        hint: '完全在本机运行——你的声音不会离开设备。质量低于在线。',
       },
       cloud: {
         label: '在线',
-        hint: '使用我们的服务器获得更高质量的转写。需要联网。我们不保存你的音频或转写文本——只处理并把结果返回给你。',
-      },
-    },
-    transcriptionEngine: {
-      title: '转写引擎',
-      description: {
-        offline: '选择 Bisbi 在这台电脑上如何平衡速度与准确性。',
-        cloud: '选择我们在云端如何平衡速度与准确性。',
-      },
-      fast: {
-        label: '快速',
-        hint: {
-          offline:
-            '更轻量的模型，在任何机器上都能快速运行。在口音、人名和嘈杂音频上准确性较低。',
-          cloud: '针对速度优化。短音频的延迟更低。',
-        },
-      },
-      accurate: {
-        label: '高准确度',
-        hint: {
-          offline:
-            '更高质量的转写。建议在 Mac 以及配备较新 CPU/GPU 的 Windows 机器上使用。',
-          cloud: '针对口音、专有名词和复杂音频提供最佳质量。',
-        },
+        hint: '使用我们的服务器获得最佳质量。需要联网。不保存音频或转写文本。',
       },
     },
     uiLanguage: {
       title: '应用语言',
-      description: '界面使用的语言。默认情况下跟随操作系统。',
+      description: '界面语言。',
       system: '系统({detected})',
-    },
-    saveHistory: {
-      title: '历史记录',
-      description: '决定是否保留你的转写,以便稍后查看。',
-      enabled: {
-        label: '保存转写',
-        hint: '只在你的电脑本地保存。可在历史记录标签中查看。',
-      },
-      disabled: {
-        label: '不保存',
-        hint: '插入文本后立即丢弃每一条转写。不会留下任何记录。',
-      },
     },
     openAtLogin: {
       title: '开机自启',
-      description: '开机时自动启动 Bisbi。',
+      description: '系统启动时打开 Bisbi。',
       enabled: {
-        label: '开机自启',
+        label: '开',
         hint: '登录时 Bisbi 将在后台启动。',
       },
       disabled: {
-        label: '不自动启动',
-        hint: '每次需要手动打开 Bisbi。',
+        label: '关',
+        hint: '需要手动打开 Bisbi。',
       },
     },
     muteAudio: {
       title: '录音时静音系统音频',
-      description: '在录音期间静音电脑输出,以防背景声音泄露到环境中。',
+      description: '录音时静音系统输出。',
       enabled: {
-        label: '录音时静音',
-        hint: '听写时系统输出会被静音,停止后会恢复之前的音量。',
+        label: '开',
+        hint: '听写时系统输出会被静音，停止后恢复。',
       },
       disabled: {
-        label: '保持音频',
-        hint: '音量保持不变。如果你需要在说话时听到声音,可以使用此选项。',
+        label: '关',
+        hint: '音量保持不变。',
       },
-    },
-    vocabulary: {
-      title: '自定义词汇',
-      description: '希望 Bisbi 更准确识别的人名、品牌或专业术语。会作为每次转录的上下文。',
-      placeholder: '例如:小明、ChatGPT、上海、Excel、冲刺、发票',
-      hint: '保持简短。用你最常使用的语言书写这些词汇。',
     },
     dangerZone: {
       title: '重置与数据',
-      description: '这些操作不可撤销,执行后无法恢复。',
+      description: '永久性操作。',
     },
     reset: '重置设置',
     clearHistory: '清除历史记录',
@@ -264,18 +215,6 @@ export const zh: Translations = {
     recording: '录音中',
     transcribing: '转写中…',
     idle: '就绪',
-  },
-  languages: {
-    auto: '自动检测',
-    en: '英语',
-    es: '西班牙语',
-    pt: '葡萄牙语',
-    fr: '法语',
-    it: '意大利语',
-    de: '德语',
-    zh: '中文',
-    hi: '印地语',
-    ar: '阿拉伯语',
   },
   uiLanguageOption: {
     en: 'English',

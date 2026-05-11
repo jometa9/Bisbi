@@ -6,29 +6,14 @@ import type { AppSettings } from './types';
 
 const SETTINGS_FILE = 'settings.json';
 
-function deriveDefaultLanguage(): string {
-  try {
-    const locale = app.getLocale() || '';
-    const primary = locale.toLowerCase().replace('_', '-').split('-')[0] ?? '';
-    if (primary.length >= 2 && primary.length <= 3) return primary;
-    return 'auto';
-  } catch {
-    return 'auto';
-  }
-}
-
 function buildDefaults(): AppSettings {
   return {
     hotkey: BUILD_CONFIG.DEFAULT_HOTKEY,
     handsFreeMode: BUILD_CONFIG.DEFAULT_HANDS_FREE,
-    language: deriveDefaultLanguage(),
     uiLanguage: 'system',
-    saveHistory: true,
-    vocabulary: '',
     microphoneId: null,
     muteSystemAudioWhileRecording: false,
     openAtLogin: true,
-    precision: BUILD_CONFIG.DEFAULT_PRECISION,
     mode: 'cloud',
   };
 }
@@ -44,15 +29,27 @@ let cached: AppSettings | null = null;
 export function getSettings(): AppSettings {
   if (cached) return cached;
   const defaults = buildDefaults();
+  let migrated = false;
   try {
     const raw = fs.readFileSync(settingsPath(), 'utf8');
-    const parsed = JSON.parse(raw) as Partial<AppSettings>;
+    const parsed = JSON.parse(raw) as Partial<AppSettings> & Record<string, unknown>;
+    // Drop legacy fields removed in older versions so they don't linger in the
+    // saved settings file.
+    for (const stale of ['precision', 'language', 'saveHistory'] as const) {
+      if (stale in parsed) {
+        delete parsed[stale];
+        migrated = true;
+      }
+    }
     cached = { ...defaults, ...parsed };
   } catch {
     cached = defaults;
   }
   if (cached.hotkey === 'Fn') {
     cached = { ...cached, hotkey: BUILD_CONFIG.DEFAULT_HOTKEY };
+    migrated = true;
+  }
+  if (migrated) {
     fs.writeFileSync(settingsPath(), JSON.stringify(cached, null, 2), 'utf8');
   }
   return cached;

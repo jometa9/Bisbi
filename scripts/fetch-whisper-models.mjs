@@ -19,11 +19,6 @@ const MODELS = [
     url: 'https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-base-q5_1.bin',
     expectedSize: 60_409_487, // ~57 MB
   },
-  {
-    file: 'bsb-002.dat',
-    url: 'https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-large-v3-turbo-q5_0.bin',
-    expectedSize: 574_041_195, // ~547 MB
-  },
 ];
 
 function formatBytes(n) {

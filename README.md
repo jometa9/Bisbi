@@ -2,11 +2,12 @@
 
 ## Whisper binaries and models
 
-Bisbi ships a bundled `whisper-cli` executable plus two model files. Both come
-from the [`whisper.cpp`](https://github.com/ggerganov/whisper.cpp) project by
-Georgi Gerganov (`ggerganov` / `ggml-org`). We do not modify the source — we
-build the upstream binary, rename the model files, and drop them into
-`resources/whisper/`.
+Bisbi ships a bundled `whisper-cli` executable plus a single offline model
+file. Both come from the [`whisper.cpp`](https://github.com/ggerganov/whisper.cpp)
+project by Georgi Gerganov (`ggerganov` / `ggml-org`). We do not modify the
+source — we build the upstream binary, rename the model file, and drop them
+into `resources/whisper/`. The online (cloud) mode does not require any local
+model.
 
 ### `whisper-cli` executable
 
@@ -29,9 +30,9 @@ resources/whisper/linux-x64/whisper-cli
 resources/whisper/win32-x64/whisper-cli.exe
 ```
 
-### GGML model files
+### GGML model file
 
-The two `.dat` files in `resources/whisper/` are renamed `ggml-*.bin` weights
+The `.dat` file in `resources/whisper/` is a renamed `ggml-*.bin` weight
 distributed by the same upstream maintainer on Hugging Face:
 
 - Model index: <https://huggingface.co/ggerganov/whisper.cpp>
@@ -39,14 +40,13 @@ distributed by the same upstream maintainer on Hugging Face:
 
 | App setting    | File in repo     | Upstream model                | Download URL |
 | -------------- | ---------------- | ----------------------------- | ------------ |
-| **Fast**       | `bsb-001.dat`    | `ggml-base-q5_1.bin`          | <https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-base-q5_1.bin> |
-| **Accurate**   | `bsb-002.dat`    | `ggml-large-v3-turbo-q5_0.bin`| <https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-large-v3-turbo-q5_0.bin> |
+| **Offline**    | `bsb-001.dat`    | `ggml-base-q5_1.bin`          | <https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-base-q5_1.bin> |
 
-Per-platform default precision (see `electron/src/buildConfig.ts`):
-
-- Windows → `fast` (CPU-bound; the accurate model is too heavy for real-time
-  use without GPU acceleration).
-- macOS / Linux → `accurate` (Metal / native acceleration handles it fine).
+The offline model is intentionally kept small (under 100 MB) so it can ship
+inside the installer on every platform. It is the fallback when the user is
+offline or chooses the private mode; users who want the best quality should
+use the online (cloud) mode, which is handled server-side and needs no local
+model.
 
 ### Updating
 
@@ -54,9 +54,9 @@ Per-platform default precision (see `electron/src/buildConfig.ts`):
    <https://github.com/ggerganov/whisper.cpp/releases>.
 2. Rebuild the binary on each target platform with
    `WHISPER_REF=<tag> scripts/build-whisper.sh` (or the `.ps1` equivalent).
-3. If the model format changes, re-download the matching `ggml-*.bin` files
-   from <https://huggingface.co/ggerganov/whisper.cpp> and rename them to
-   `bsb-001.dat` (fast) and `bsb-002.dat` (accurate).
+3. If the model format changes, re-download the matching `ggml-*.bin` file
+   from <https://huggingface.co/ggerganov/whisper.cpp> and rename it to
+   `bsb-001.dat`.
 4. Bump the version recorded in this README so we can tell at a glance which
    upstream release is shipping.
 

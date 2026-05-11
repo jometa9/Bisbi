@@ -4,12 +4,7 @@ import { useTranslation } from '../i18n';
 import { TranscriptionList } from '../components/TranscriptionList';
 import { ConfirmButton } from '../components/ConfirmButton';
 
-interface Props {
-  saveHistoryEnabled: boolean;
-  onOpenSettings: () => void;
-}
-
-export function History({ saveHistoryEnabled, onOpenSettings }: Props) {
+export function History() {
   const { t } = useTranslation();
   const [rows, setRows] = useState<TranscriptionRow[]>([]);
 
@@ -25,7 +20,7 @@ export function History({ saveHistoryEnabled, onOpenSettings }: Props) {
     <div className="history">
       <div className="history-header">
         <h2>{t('history.title')}</h2>
-        {saveHistoryEnabled && rows.length > 0 && (
+        {rows.length > 0 && (
           <ConfirmButton
             label={t('history.clearAll')}
             question={t('history.confirmClear')}
@@ -34,17 +29,7 @@ export function History({ saveHistoryEnabled, onOpenSettings }: Props) {
         )}
       </div>
 
-      {saveHistoryEnabled ? (
-        <TranscriptionList rows={rows} emptyLabel={t('history.empty')} />
-      ) : (
-        <div className="history-disabled" role="status">
-          <p className="history-disabled-title">{t('history.savingDisabledTitle')}</p>
-          <p className="history-disabled-hint">{t('history.savingDisabledHint')}</p>
-          <button type="button" className="btn-secondary" onClick={onOpenSettings}>
-            {t('history.savingDisabledCta')}
-          </button>
-        </div>
-      )}
+      <TranscriptionList rows={rows} emptyLabel={t('history.empty')} />
     </div>
   );
 }

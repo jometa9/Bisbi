@@ -4,13 +4,9 @@ import path from 'path';
 import fs from 'fs';
 import os from 'os';
 import { randomUUID } from 'crypto';
-import { BUILD_CONFIG, type WhisperPrecision } from '../buildConfig';
+import { BUILD_CONFIG } from '../buildConfig';
 import { apiFetch } from './apiClient';
 import { getAuthToken } from './auth';
-
-function modelFileFor(precision: WhisperPrecision): string {
-  return BUILD_CONFIG.WHISPER_MODELS[precision];
-}
 
 let activeWhisper: ChildProcess | null = null;
 
@@ -19,13 +15,6 @@ export function cancelActiveTranscription(): boolean {
   if (!child || child.killed) return false;
   try { child.kill('SIGKILL'); } catch {}
   return true;
-}
-
-export interface TranscribeOptions {
-  language: string;
-  threads?: number;
-  vocabulary?: string;
-  precision: WhisperPrecision;
 }
 
 export interface TranscribeOutput {
@@ -59,8 +48,8 @@ export function whisperBinaryPath(): string {
   return path.join(resourceRoot(), platformDir(), whisperBinaryName());
 }
 
-export function whisperModelPath(precision: WhisperPrecision = BUILD_CONFIG.DEFAULT_PRECISION): string {
-  return path.join(resourceRoot(), modelFileFor(precision));
+export function whisperModelPath(): string {
+  return path.join(resourceRoot(), BUILD_CONFIG.OFFLINE_MODEL_FILE);
 }
 
 export interface ResourceCheck {
@@ -70,9 +59,9 @@ export interface ResourceCheck {
   missing: string[];
 }
 
-export function checkResources(precision: WhisperPrecision = BUILD_CONFIG.DEFAULT_PRECISION): ResourceCheck {
+export function checkResources(): ResourceCheck {
   const binaryPath = whisperBinaryPath();
-  const modelPath = whisperModelPath(precision);
+  const modelPath = whisperModelPath();
   const missing: string[] = [];
   if (!fs.existsSync(binaryPath)) missing.push(binaryPath);
   if (!fs.existsSync(modelPath)) missing.push(modelPath);
@@ -109,10 +98,9 @@ function writeWavFile(pcm: Buffer, sampleRate: number, channels: number): string
 export async function transcribePcm(
   pcm: Buffer,
   sampleRate: number,
-  channels: number,
-  opts: TranscribeOptions
+  channels: number
 ): Promise<TranscribeOutput> {
-  const check = checkResources(opts.precision);
+  const check = checkResources();
   if (!check.ok) {
     throw new Error('Resources missing');
   }
@@ -126,28 +114,24 @@ export async function transcribePcm(
     const args = [
       '-m', check.modelPath,
       '-f', wavPath,
-      '-l', opts.language || 'auto',
+      '-l', 'auto',
       '-otxt',
       '-nt',
-      '-t', String(opts.threads ?? Math.max(2, Math.floor(os.cpus().length / 2))),
+      '-t', String(Math.max(2, Math.floor(os.cpus().length / 2))),
       '--temperature', '0.0',
       '--no-speech-thold', '0.6',
       '--suppress-nst',
       '-fa',
     ];
-    const prompt = opts.vocabulary?.trim();
-    if (prompt) {
-      args.push('--prompt', prompt);
-    }
 
     const text = await runWhisper(check.binaryPath, args, wavPath);
     const durationMs = Date.now() - startedAt;
     return {
       text: text.trim(),
-      language: opts.language === 'auto' ? null : opts.language,
+      language: null,
       durationMs,
       audioDurationMs,
-      modelFile: modelFileFor(opts.precision),
+      modelFile: BUILD_CONFIG.OFFLINE_MODEL_FILE,
     };
   } finally {
     try { fs.unlinkSync(wavPath); } catch {}
@@ -188,8 +172,7 @@ function buildWavBuffer(pcm: Buffer, sampleRate: number, channels: number): Buff
 export async function transcribeCloud(
   pcm: Buffer,
   sampleRate: number,
-  channels: number,
-  opts: TranscribeOptions
+  channels: number
 ): Promise<TranscribeOutput> {
   const token = getAuthToken();
   if (!token) {
@@ -200,26 +183,18 @@ export async function transcribeCloud(
   const audioDurationMs = Math.round((pcm.length / (sampleRate * bytesPerFrame)) * 1000);
   const audioSeconds = Math.round(audioDurationMs / 1000);
   console.log(
-    `[transcriber] cloud transcription started: precision=${opts.precision} language=${opts.language ?? 'auto'} audioSeconds=${audioSeconds} pcmBytes=${pcm.length} sampleRate=${sampleRate} channels=${channels}`
+    `[transcriber] cloud transcription started: language=auto audioSeconds=${audioSeconds} pcmBytes=${pcm.length} sampleRate=${sampleRate} channels=${channels}`
   );
 
   const wav = buildWavBuffer(pcm, sampleRate, channels);
   const form = new FormData();
-  // The "quality" we send is only a user-intent hint. The landing API owns
-  // the decision of which cloud transcription model actually runs and can
-  // remap or collapse fast/accurate server-side without a client update.
-  // Blob is available in Electron's Node runtime (Node 20+).
   // Copy into a fresh ArrayBuffer so the Blob constructor doesn't choke on
   // Buffer's union-typed underlying buffer (Node 20 typings include
   // SharedArrayBuffer, which Blob's BlobPart does not accept).
   const wavBytes = new Uint8Array(wav.byteLength);
   wavBytes.set(wav);
   form.append('file', new Blob([wavBytes.buffer], { type: 'audio/wav' }), 'audio.wav');
-  form.append('quality', opts.precision);
   form.append('audioSeconds', String(audioSeconds));
-  if (opts.language) form.append('language', opts.language);
-  const prompt = opts.vocabulary?.trim();
-  if (prompt) form.append('prompt', prompt);
 
   let resp: Response;
   try {
@@ -260,16 +235,16 @@ export async function transcribeCloud(
 
   const durationMs = Date.now() - startedAt;
   const text = (payload.text ?? '').trim();
-  const resolvedLanguage = payload.language ?? opts.language ?? 'auto';
+  const resolvedLanguage = payload.language ?? 'auto';
   console.log(
-    `[transcriber] cloud transcription done: model=${payload.model ?? `cloud-${opts.precision}`} language=${resolvedLanguage} durationMs=${durationMs} textLength=${text.length}`
+    `[transcriber] cloud transcription done: model=${payload.model ?? 'cloud'} language=${resolvedLanguage} durationMs=${durationMs} textLength=${text.length}`
   );
   return {
     text,
-    language: payload.language ?? (opts.language === 'auto' ? null : opts.language),
+    language: payload.language ?? null,
     durationMs,
     audioDurationMs,
-    modelFile: payload.model ?? `cloud-${opts.precision}`,
+    modelFile: payload.model ?? 'cloud',
   };
 }
 

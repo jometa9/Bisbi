@@ -14,6 +14,10 @@ let followTimer: NodeJS.Timeout | null = null;
 let lastDisplayId: number | null = null;
 let fadeTimer: NodeJS.Timeout | null = null;
 const FADE_MS = 180;
+// Tracks the intended visibility of the pill. The window is warmed up at
+// app start (created hidden) and OS events like display changes or
+// sleep/wake can otherwise sneak it onto the screen via showInactive().
+let shouldBeVisible = false;
 
 function frontendUrl(route: string): string {
   if (app.isPackaged) {
@@ -46,7 +50,10 @@ function placeBottomCenter(w: BrowserWindow): void {
     width: WIDTH,
     height: HEIGHT,
   });
-  if (changed) reassertWindowFlags(w);
+  // Only re-show on a display change while the pill is supposed to be on
+  // screen. Otherwise OS-driven display events (sleep/wake, monitor
+  // hot-plug) would reveal the warmed-up window with stale state.
+  if (changed && shouldBeVisible) reassertWindowFlags(w);
 }
 
 function reassertWindowFlags(w: BrowserWindow): void {
@@ -83,6 +90,10 @@ function bindScreenListeners(): void {
   const reposition = (): void => {
     if (!win || win.isDestroyed()) return;
     lastDisplayId = null;
+    // Skip the OS-driven reposition while the pill is hidden — placing
+    // bounds and reasserting flags would otherwise sneak the warmed-up
+    // window onto the screen with whatever state the renderer last had.
+    if (!shouldBeVisible) return;
     placeBottomCenter(win);
   };
   screen.on('display-metrics-changed', reposition);
@@ -143,6 +154,10 @@ function ensureWindow(): void {
     },
   });
   hardenWindow(win);
+  // Start fully transparent so that if anything (OS events, focus
+  // changes, etc.) ever forces the window visible before we explicitly
+  // call showRecordingWindow, nothing is shown on screen.
+  try { win.setOpacity(0); } catch {}
   win.setAlwaysOnTop(true, 'screen-saver');
   win.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
   if (process.platform === 'darwin') {
@@ -152,6 +167,7 @@ function ensureWindow(): void {
   win.on('closed', () => {
     win = null;
     lastDisplayId = null;
+    shouldBeVisible = false;
   });
   bindScreenListeners();
 }
@@ -162,6 +178,10 @@ export function warmUpRecordingWindow(): void {
 
 export function showRecordingWindow(state: RecordingState): void {
   ensureWindow();
+  // Push the state to the renderer before making the window visible so
+  // it never paints with the stale default state from a previous show.
+  setState(state);
+  shouldBeVisible = true;
   placeBottomCenter(win!);
   reassertWindowFlags(win!);
   if (!win!.isVisible()) {
@@ -170,7 +190,6 @@ export function showRecordingWindow(state: RecordingState): void {
   }
   fade(1);
   startFollowingActiveDisplay();
-  setState(state);
 }
 
 export function setState(state: RecordingState): void {
@@ -185,6 +204,7 @@ export function setLevel(level: number): void {
 }
 
 export function hideRecordingWindow(): void {
+  shouldBeVisible = false;
   stopFollowingActiveDisplay();
   if (!win || win.isDestroyed()) return;
   fade(0);

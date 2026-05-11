@@ -129,39 +129,34 @@ async function processQueue(): Promise<void> {
       const job = transcriptionQueue.shift()!;
       try {
         const cfg = getSettings();
-        const opts = {
-          language: cfg.language,
-          vocabulary: cfg.vocabulary,
-          precision: cfg.precision,
-        };
         let out;
         let countedByServer = false;
         if (cfg.mode === 'cloud') {
           try {
-            console.log(`[backend] dispatching transcription job to cloud (precision=${opts.precision}, language=${opts.language ?? 'auto'})`);
-            out = await transcribeCloud(job.pcm, job.sampleRate, job.channels, opts);
+            console.log('[backend] dispatching transcription job to cloud (language=auto)');
+            out = await transcribeCloud(job.pcm, job.sampleRate, job.channels);
             countedByServer = true;
           } catch (err) {
-            // Network/upstream failure: fall back to offline with the same
-            // quality so the user still gets a transcription. Other errors
-            // (auth, quota) propagate as before.
+            // Network/upstream failure: fall back to the offline model so the
+            // user still gets a transcription. Other errors (auth, quota)
+            // propagate as before.
             if (err instanceof CloudTranscribeError && (err.status === undefined || err.status === 502 || err.status === 503 || err.status === 504)) {
               console.warn('[backend] cloud transcription failed, falling back to offline:', err.message);
               broadcast('transcription:cloudFallback', { reason: err.message });
-              out = await transcribePcm(job.pcm, job.sampleRate, job.channels, opts);
+              out = await transcribePcm(job.pcm, job.sampleRate, job.channels);
             } else {
               throw err;
             }
           }
         } else {
-          out = await transcribePcm(job.pcm, job.sampleRate, job.channels, opts);
+          out = await transcribePcm(job.pcm, job.sampleRate, job.channels);
         }
         const meaningful = out.text.replace(/\s/g, '').length >= 2;
         const wordCount = meaningful ? countWords(out.text) : 0;
         if (meaningful) {
           await deliverText(out.text);
         }
-        if (cfg.saveHistory && meaningful) {
+        if (meaningful) {
           insertTranscription({
             id: randomUUID(),
             createdAt: Date.now(),
@@ -363,7 +358,7 @@ export async function registerBackend(opts: BackendOptions): Promise<void> {
 
   ipcMain.handle('stats:totals', () => getStatsTotals());
 
-  ipcMain.handle('resources:check', () => checkResources(getSettings().precision));
+  ipcMain.handle('resources:check', () => checkResources());
   ipcMain.handle('app:getVersion', () => getAppVersion());
   ipcMain.handle('app:getPlatform', () => process.platform);
   ipcMain.handle('app:getSystemLocale', () => getSystemLocale());
@@ -441,12 +436,7 @@ export async function registerBackend(opts: BackendOptions): Promise<void> {
       payload: { pcm: ArrayBuffer; sampleRate: number; channels: number }
     ): Promise<string> => {
       const pcm = Buffer.from(payload.pcm);
-      const cfg = getSettings();
-      const out = await transcribePcm(pcm, payload.sampleRate, payload.channels, {
-        language: cfg.language,
-        vocabulary: cfg.vocabulary,
-        precision: cfg.precision,
-      });
+      const out = await transcribePcm(pcm, payload.sampleRate, payload.channels);
       return out.text;
     }
   );

@@ -8,7 +8,9 @@ const PEAK_ATTACK = 0.6;
 const PEAK_DECAY = 0.992;
 
 export function RecordingApp() {
-  const [state, setState] = useState<RecordingState>('recording');
+  // Default to 'idle' so the warmed-up pill window never renders a
+  // recording UI before the backend has explicitly told it to.
+  const [state, setState] = useState<RecordingState>('idle');
   const [bars, setBars] = useState<number[]>(() => new Array(BARS).fill(0));
   const [seconds, setSeconds] = useState(0);
   const lastLevelRef = useRef(0);
@@ -16,8 +18,6 @@ export function RecordingApp() {
   const startedAtRef = useRef<number | null>(null);
 
   useEffect(() => {
-    startedAtRef.current = Date.now();
-
     if (!window.bisbi) return;
     const offState = window.bisbi.onPillState((s) => {
       if (s === 'recording') {

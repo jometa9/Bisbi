@@ -12,7 +12,6 @@ import { SegmentedToggle } from '../components/SegmentedToggle';
 import { ConfirmButton } from '../components/ConfirmButton';
 import { listMicrophones, type MicrophoneDevice } from '../audio';
 import { HotkeyKeys } from '../components/HotkeyKeys';
-import { WHISPER_LANGUAGES, whisperLanguageLabel } from '../whisperLanguages';
 
 interface Props {
   settings: AppSettings;
@@ -125,79 +124,6 @@ export function Settings({ settings, onChange, onReset, onClearHistory }: Props)
       </Section>
 
       <Section
-        title={t('settings.transcriptionEngine.title')}
-        description={t(
-          settings.mode === 'cloud'
-            ? 'settings.transcriptionEngine.description.cloud'
-            : 'settings.transcriptionEngine.description.offline'
-        )}
-      >
-        <SegmentedToggle<'fast' | 'accurate'>
-          value={settings.precision}
-          onChange={(precision) => onChange({ precision })}
-          ariaLabel={t('settings.transcriptionEngine.title')}
-          options={[
-            {
-              value: 'fast',
-              label: t('settings.transcriptionEngine.fast.label'),
-            },
-            {
-              value: 'accurate',
-              label: t('settings.transcriptionEngine.accurate.label'),
-            },
-          ]}
-          hint={
-            settings.precision === 'fast'
-              ? t(
-                  settings.mode === 'cloud'
-                    ? 'settings.transcriptionEngine.fast.hint.cloud'
-                    : 'settings.transcriptionEngine.fast.hint.offline'
-                )
-              : t(
-                  settings.mode === 'cloud'
-                    ? 'settings.transcriptionEngine.accurate.hint.cloud'
-                    : 'settings.transcriptionEngine.accurate.hint.offline'
-                )
-          }
-        />
-      </Section>
-
-      <Section
-        title={t('settings.transcriptionLanguage.title')}
-        description={t('settings.transcriptionLanguage.description')}
-      >
-        <Select<string>
-          value={settings.language}
-          onChange={(language) => onChange({ language })}
-          ariaLabel={t('settings.transcriptionLanguage.title')}
-          searchPlaceholder={t('settings.transcriptionLanguage.searchPlaceholder')}
-          options={[
-            { value: 'auto', label: t('languages.auto') },
-            ...WHISPER_LANGUAGES.map((lang) => ({
-              value: lang.code,
-              label: whisperLanguageLabel(lang),
-              // The label format is "English — Endonym"; pasting both into
-              // searchTerms is redundant but harmless and keeps any future
-              // label-format change from breaking search.
-              searchTerms: `${lang.english} ${lang.endonym} ${lang.code}`,
-            })),
-          ]}
-        />
-      </Section>
-
-      <Section
-        title={t('settings.vocabulary.title')}
-        description={t('settings.vocabulary.description')}
-      >
-        <VocabularyInput
-          value={settings.vocabulary}
-          onChange={(vocabulary) => onChange({ vocabulary })}
-          placeholder={t('settings.vocabulary.placeholder')}
-          hint={t('settings.vocabulary.hint')}
-        />
-      </Section>
-
-      <Section
         title={t('settings.openAtLogin.title')}
         description={t('settings.openAtLogin.description')}
       >
@@ -252,32 +178,6 @@ export function Settings({ settings, onChange, onReset, onClearHistory }: Props)
       </Section>
 
       <Section
-        title={t('settings.saveHistory.title')}
-        description={t('settings.saveHistory.description')}
-      >
-        <SegmentedToggle<'enabled' | 'disabled'>
-          value={settings.saveHistory ? 'enabled' : 'disabled'}
-          onChange={(next) => onChange({ saveHistory: next === 'enabled' })}
-          ariaLabel={t('settings.saveHistory.title')}
-          options={[
-            {
-              value: 'enabled',
-              label: t('settings.saveHistory.enabled.label'),
-            },
-            {
-              value: 'disabled',
-              label: t('settings.saveHistory.disabled.label'),
-            },
-          ]}
-          hint={
-            settings.saveHistory
-              ? t('settings.saveHistory.enabled.hint')
-              : t('settings.saveHistory.disabled.hint')
-          }
-        />
-      </Section>
-
-      <Section
         title={t('settings.dangerZone.title')}
         description={t('settings.dangerZone.description')}
       >
@@ -304,14 +204,14 @@ function Section({
   children,
 }: {
   title: string;
-  description: string;
+  description?: string;
   children: React.ReactNode;
 }) {
   return (
     <section className="section">
       <header>
         <h3>{title}</h3>
-        <p>{description}</p>
+        {description ? <p>{description}</p> : null}
       </header>
       <div className="section-body">{children}</div>
     </section>
@@ -393,34 +293,30 @@ function HotkeyInput({
 
   return (
     <div className="hotkey-input" ref={ref}>
-      <div className={`hotkey-display${capturing ? ' capturing' : ''}`}>
-        {capturing ? (
-          <>
-            <span className="hotkey-display-pulse" aria-hidden="true" />
-            {showCapturePreview ? (
-              <span className="hotkey-display-keys">
-                <HotkeyKeys accel={draft} platform={platform} size="sm" />
-              </span>
-            ) : (
+      <div className={`hotkey-row${capturing ? ' capturing' : ''}`}>
+        <div className="hotkey-display">
+          {capturing && !showCapturePreview ? (
+            <>
+              <span className="hotkey-display-pulse" aria-hidden="true" />
               <span className="hotkey-display-text">
                 {t('settings.hotkey.waiting')}
               </span>
-            )}
-          </>
-        ) : (
-          <span className="hotkey-display-keys">
-            <HotkeyKeys accel={draft} platform={platform} size="sm" />
-          </span>
-        )}
+            </>
+          ) : (
+            <span className="hotkey-display-keys">
+              <HotkeyKeys accel={draft} platform={platform} size="sm" />
+            </span>
+          )}
+        </div>
+        <button
+          className="btn-secondary hotkey-change-btn"
+          onClick={() => {
+            setCapturing((c) => !c);
+          }}
+        >
+          {capturing ? t('settings.hotkey.cancel') : t('settings.hotkey.change')}
+        </button>
       </div>
-      <button
-        className="btn-secondary"
-        onClick={() => {
-          setCapturing((c) => !c);
-        }}
-      >
-        {capturing ? t('settings.hotkey.cancel') : t('settings.hotkey.change')}
-      </button>
       <div className="hotkey-presets">
         {isMac && (
           <button
@@ -504,58 +400,6 @@ function MicrophonePicker({
       ariaLabel={t('settings.microphone.title')}
       options={options}
     />
-  );
-}
-
-// Whisper's `--prompt` is capped around 224 tokens — well under that the
-// quality starts to degrade if the prompt drowns out the actual audio.
-// 240 chars keeps users within a safe envelope without having to count tokens.
-const VOCABULARY_MAX_LENGTH = 240;
-
-function VocabularyInput({
-  value,
-  onChange,
-  placeholder,
-  hint,
-}: {
-  value: string;
-  onChange: (next: string) => void;
-  placeholder: string;
-  hint: string;
-}) {
-  const [draft, setDraft] = useState(value);
-  // Re-sync if the underlying setting changes from elsewhere (reset, another
-  // window). We compare to avoid clobbering an in-progress edit when this
-  // component itself emitted the change.
-  useEffect(() => {
-    setDraft((prev) => (prev === value ? prev : value));
-  }, [value]);
-
-  // Debounce disk writes so we don't fsync on every keystroke. 400ms feels
-  // immediate while still collapsing a typing burst into a single save.
-  useEffect(() => {
-    if (draft === value) return;
-    const handle = setTimeout(() => onChange(draft), 400);
-    return () => clearTimeout(handle);
-  }, [draft, value, onChange]);
-
-  return (
-    <div className="vocabulary-input">
-      <textarea
-        value={draft}
-        onChange={(e) => setDraft(e.target.value.slice(0, VOCABULARY_MAX_LENGTH))}
-        placeholder={placeholder}
-        rows={3}
-        maxLength={VOCABULARY_MAX_LENGTH}
-        spellCheck={false}
-      />
-      <div className="vocabulary-input-meta">
-        <span className="vocabulary-input-hint">{hint}</span>
-        <span className="vocabulary-input-counter">
-          {draft.length}/{VOCABULARY_MAX_LENGTH}
-        </span>
-      </div>
-    </div>
   );
 }
 

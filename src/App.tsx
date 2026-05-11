@@ -325,12 +325,7 @@ export function App() {
               }}
             />
           )}
-          {tab === 'history' && (
-            <History
-              saveHistoryEnabled={settings.saveHistory}
-              onOpenSettings={() => setTab('settings')}
-            />
-          )}
+          {tab === 'history' && <History />}
           {tab === 'account' && <Account />}
         </div>
       </main>

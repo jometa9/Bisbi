@@ -112,6 +112,17 @@ function normalizeKey(e: KeyboardEvent): string | null {
     ArrowDown: 'Down',
     ArrowLeft: 'Left',
     ArrowRight: 'Right',
+    Period: '.',
+    Comma: ',',
+    Slash: '/',
+    Semicolon: ';',
+    Quote: "'",
+    BracketLeft: '[',
+    BracketRight: ']',
+    Backslash: '\\',
+    Minus: '-',
+    Equal: '=',
+    Backquote: '`',
   };
   return direct[code] ?? null;
 }

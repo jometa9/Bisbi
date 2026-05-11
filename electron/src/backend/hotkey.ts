@@ -56,6 +56,17 @@ const KEY_TOKEN_MAP: Record<string, number> = {
   ShiftLeft: UiohookKey.Shift,
   MetaRight: UiohookKey.MetaRight,
   MetaLeft: UiohookKey.Meta,
+  '.': UiohookKey.Period,
+  ',': UiohookKey.Comma,
+  '/': UiohookKey.Slash,
+  ';': UiohookKey.Semicolon,
+  "'": UiohookKey.Quote,
+  '[': UiohookKey.BracketLeft,
+  ']': UiohookKey.BracketRight,
+  '\\': UiohookKey.Backslash,
+  '-': UiohookKey.Minus,
+  '=': UiohookKey.Equal,
+  '`': UiohookKey.Backquote,
 };
 
 const BARE_MODIFIER_TOKENS = new Set([

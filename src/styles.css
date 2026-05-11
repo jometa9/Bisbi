@@ -431,12 +431,6 @@ button { font-family: inherit; }
   padding-top: 24px;
 }
 
-.home--centered {
-  min-height: calc(75vh);
-  justify-content: center;
-  padding-top: 0;
-}
-
 .home-hero {
   display: flex;
   flex-direction: column;
@@ -831,17 +825,24 @@ button { font-family: inherit; }
 .settings {
   display: flex;
   flex-direction: column;
-  gap: 40px;
+  gap: 28px;
 }
 
 .section {
+  display: grid;
+  grid-template-columns: minmax(180px, 1fr) minmax(0, 1.6fr);
+  gap: 24px;
+  align-items: start;
+}
+
+.section > header {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 4px;
 }
 
 .section header h3 {
-  margin: 0 0 4px;
+  margin: 0;
   font-family: var(--font-display);
   font-size: 14px;
   font-weight: 600;
@@ -860,6 +861,14 @@ button { font-family: inherit; }
   display: flex;
   flex-direction: column;
   gap: 10px;
+  min-width: 0;
+}
+
+@media (max-width: 640px) {
+  .section {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
 }
 
 /* Custom Select (replaces native <select>) */
@@ -1054,12 +1063,14 @@ button { font-family: inherit; }
   border-radius: var(--radius);
   background: var(--bg-soft);
   border: 1px solid var(--border);
-  width: fit-content;
+  width: 100%;
 }
 
 .segmented-toggle-btn {
+  flex: 1 1 0;
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
   padding: 5px 14px;
   border-radius: calc(var(--radius) - 2px);
@@ -1164,38 +1175,41 @@ button { font-family: inherit; }
 
 .hotkey-input {
   display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.hotkey-row {
+  display: flex;
   align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
+  gap: 12px;
+  width: 100%;
 }
 
 .hotkey-display {
+  flex: 1;
   display: inline-flex;
   align-items: center;
   gap: 8px;
   min-height: 34px;
-  min-width: 160px;
-  padding: 6px 14px;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--border-strong);
-  background: var(--bg-soft);
-  font-family: ui-monospace, "SF Mono", Menlo, monospace;
-  font-size: 12.5px;
   color: var(--text);
-  letter-spacing: 0.01em;
-  transition: border-color 120ms ease, background 120ms ease,
-    box-shadow 120ms ease, color 120ms ease;
 }
 
-.hotkey-display.capturing {
-  border-color: var(--primary);
-  background: var(--primary-tint);
+.hotkey-row.capturing .hotkey-display {
   color: var(--primary-dark);
-  box-shadow: 0 0 0 3px var(--primary-tint-hover);
+}
+
+.hotkey-row.capturing .kbd {
+  background: var(--primary-tint);
+  border-color: var(--primary-light);
+  color: var(--primary-dark);
 }
 
 .hotkey-display-text {
   font-weight: 500;
+  font-size: 13px;
+  color: var(--primary-dark);
 }
 
 .hotkey-display-keys {
@@ -1204,10 +1218,37 @@ button { font-family: inherit; }
   gap: 6px;
 }
 
-.hotkey-display.capturing .hotkey-display-text {
-  font-family: var(--font-body);
-  font-size: 13px;
-  letter-spacing: 0;
+.hotkey-change-btn {
+  flex: 0 0 auto;
+  margin-left: auto;
+}
+
+.hotkey-presets {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+  font-size: 12.5px;
+  color: var(--text-muted);
+}
+
+.hotkey-presets::before {
+  content: attr(data-label);
+}
+
+.hotkey-presets .btn-link {
+  font-size: 12.5px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--bg-soft);
+  border: 1px solid var(--border);
+  transition: background 0.12s, border-color 0.12s, color 0.12s;
+}
+
+.hotkey-presets .btn-link:hover {
+  background: var(--primary-tint);
+  border-color: var(--primary-light);
+  color: var(--primary-dark);
 }
 
 .hotkey-display-pulse {

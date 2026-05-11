@@ -95,9 +95,6 @@ export const en: {
     copy: string;
     copied: string;
     delete: string;
-    savingDisabledTitle: string;
-    savingDisabledHint: string;
-    savingDisabledCta: string;
   };
   settings: {
     hotkey: { title: string; description: string; change: string; cancel: string; waiting: string };
@@ -114,26 +111,13 @@ export const en: {
       systemDefault: string;
       unnamed: string;
     };
-    transcriptionLanguage: { title: string; description: string; searchPlaceholder: string };
     transcriptionMode: {
       title: string;
       description: string;
       offline: { label: string; hint: string };
       cloud: { label: string; hint: string };
     };
-    transcriptionEngine: {
-      title: string;
-      description: { offline: string; cloud: string };
-      fast: { label: string; hint: { offline: string; cloud: string } };
-      accurate: { label: string; hint: { offline: string; cloud: string } };
-    };
     uiLanguage: { title: string; description: string; system: string };
-    saveHistory: {
-      title: string;
-      description: string;
-      enabled: { label: string; hint: string };
-      disabled: { label: string; hint: string };
-    };
     openAtLogin: {
       title: string;
       description: string;
@@ -146,30 +130,12 @@ export const en: {
       enabled: { label: string; hint: string };
       disabled: { label: string; hint: string };
     };
-    vocabulary: {
-      title: string;
-      description: string;
-      placeholder: string;
-      hint: string;
-    };
     dangerZone: { title: string; description: string };
     reset: string;
     clearHistory: string;
     confirmReset: string;
   };
   recording: { recording: string; transcribing: string; idle: string };
-  languages: {
-    auto: string;
-    en: string;
-    es: string;
-    pt: string;
-    fr: string;
-    it: string;
-    de: string;
-    zh: string;
-    hi: string;
-    ar: string;
-  };
   uiLanguageOption: { en: string; es: string; zh: string; hi: string; ar: string };
   keys: {
     command: string;
@@ -379,25 +345,20 @@ export const en: {
     copy: 'Copy',
     copied: 'Copied',
     delete: 'Delete',
-    savingDisabledTitle: 'History saving is turned off',
-    savingDisabledHint:
-      'Your transcriptions are not being saved, so they cannot show up here. Turn the history back on in Settings to see them again.',
-    savingDisabledCta: 'Open settings',
   },
   settings: {
     hotkey: {
       title: 'Keyboard shortcut',
-      description: 'Press it from any app to start and stop recording.',
+      description: 'Global shortcut to record.',
       change: 'Change',
       cancel: 'Cancel',
       waiting: 'Press the keys you want to use…',
     },
     handsFree: {
       title: 'Recording mode',
-      description:
-        'Choose how the shortcut starts and stops a recording.',
+      description: 'How the shortcut behaves.',
       pushToTalk: {
-        label: 'Hold to talk',
+        label: 'Push to talk',
         hint: 'Hold the shortcut down while you speak; release it to stop.',
       },
       tapToToggle: {
@@ -409,106 +370,54 @@ export const en: {
     },
     microphone: {
       title: 'Microphone',
-      description:
-        'Pick which input we use to record. Falls back to the system default if your chosen device is not connected.',
+      description: 'Audio input. Falls back to the system default.',
       systemDefault: 'System default',
       unnamed: 'Microphone {index}',
     },
-    transcriptionLanguage: {
-      title: 'Transcription language',
-      description:
-        'Pick the language you dictate in. Auto-detect is slower and may pick wrong on short clips.',
-      searchPlaceholder: 'Search a language…',
-    },
     transcriptionMode: {
       title: 'Transcription mode',
-      description:
-        'Choose where your voice is transcribed. Privacy keeps everything on this computer.',
+      description: 'Where transcription runs.',
       offline: {
-        label: 'Private (offline)',
-        hint: 'Runs entirely on this computer. Your voice never leaves the device.',
+        label: 'Offline',
+        hint: 'Runs entirely on this computer with a lightweight model — your voice never leaves the device. Quality is noticeably lower than online, especially with accents, names and noisy audio. Use online for better results.',
       },
       cloud: {
         label: 'Online',
-        hint: 'Better quality transcription using our servers. Requires internet. We do not store your audio or transcripts — we process them and return the result.',
-      },
-    },
-    transcriptionEngine: {
-      title: 'Transcription engine',
-      description: {
-        offline: 'Pick how Bisbi balances speed and accuracy on this computer.',
-        cloud: 'Pick how we balance speed and accuracy in the cloud.',
-      },
-      fast: {
-        label: 'Fast',
-        hint: {
-          offline:
-            'Lighter model that runs quickly on any machine. Lower accuracy on accents, names and noisy audio.',
-          cloud: 'Optimized for speed. Lower latency on short clips.',
-        },
-      },
-      accurate: {
-        label: 'Accurate',
-        hint: {
-          offline:
-            'Higher quality transcription. Recommended on Mac and on Windows machines with a recent CPU/GPU.',
-          cloud: 'Best quality for accents, proper names and complex audio.',
-        },
+        hint: 'Best quality transcription using our servers. Requires internet. We do not store your audio or transcripts — we process them and return the result.',
       },
     },
     uiLanguage: {
       title: 'App language',
-      description:
-        'Language used for the interface. By default it follows your operating system.',
+      description: 'Interface language.',
       system: 'System ({detected})',
-    },
-    saveHistory: {
-      title: 'History',
-      description: 'Decide whether your transcriptions are kept so you can review them later.',
-      enabled: {
-        label: 'Save transcriptions',
-        hint: 'Stored locally on your computer only. Find them later in the History tab.',
-      },
-      disabled: {
-        label: 'Do not save',
-        hint: 'Each transcription is discarded right after the text is inserted. Nothing is kept.',
-      },
     },
     openAtLogin: {
       title: 'Launch at startup',
-      description: 'Start Bisbi automatically when you turn on your computer.',
+      description: 'Open Bisbi at system startup.',
       enabled: {
-        label: 'Launch at startup',
-        hint: 'Bisbi will start in the background when you log in.',
+        label: 'On',
+        hint: 'Bisbi starts in the background when you log in.',
       },
       disabled: {
-        label: 'Do not launch at startup',
-        hint: 'You will need to open Bisbi manually each time.',
+        label: 'Off',
+        hint: 'You will need to open Bisbi manually.',
       },
     },
     muteAudio: {
       title: 'Mute system audio while recording',
-      description:
-        'Mute your computer output for the duration of the recording so background sounds do not bleed into the room.',
+      description: 'Mute system output while recording.',
       enabled: {
-        label: 'Mute on record',
-        hint: 'The system output is muted while you dictate and the previous level is restored on stop.',
+        label: 'On',
+        hint: 'Output is muted while dictating; restored on stop.',
       },
       disabled: {
-        label: 'Keep audio on',
-        hint: 'Your output stays at the same level. Use this if you rely on hearing the audio while you talk.',
+        label: 'Off',
+        hint: 'Output stays at the same level.',
       },
-    },
-    vocabulary: {
-      title: 'Custom vocabulary',
-      description:
-        'Names, brand terms or jargon Bisbi should recognise better. Used as context for every transcription.',
-      placeholder: 'e.g. John, ChatGPT, New York, Excel, sprint, invoice',
-      hint: 'Keep it short. Write the terms in the language you mostly dictate in.',
     },
     dangerZone: {
       title: 'Reset & data',
-      description: 'These actions are permanent and cannot be undone.',
+      description: 'Permanent actions.',
     },
     reset: 'Reset settings',
     clearHistory: 'Clear history',
@@ -518,18 +427,6 @@ export const en: {
     recording: 'Recording',
     transcribing: 'Transcribing…',
     idle: 'Ready',
-  },
-  languages: {
-    auto: 'Auto-detect',
-    en: 'English',
-    es: 'Spanish',
-    pt: 'Portuguese',
-    fr: 'French',
-    it: 'Italian',
-    de: 'German',
-    zh: 'Chinese',
-    hi: 'Hindi',
-    ar: 'Arabic',
   },
   uiLanguageOption: {
     en: 'English',
