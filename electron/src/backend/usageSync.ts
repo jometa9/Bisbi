@@ -99,12 +99,28 @@ async function postBatch(token: string, payload: BatchPayload): Promise<PostUsag
   return { status: resp.status, body };
 }
 
-function applyServerResponse(res: UsageResponse): void {
-  setMonthlyWordUsageFromServer(res.wordsUsed, res.monthKey);
-  setMonthlyWordLimit(res.wordsLimit);
-  if (res.exceeded && res.wordsLimit != null && onLimitReached) {
-    onLimitReached({ used: res.wordsUsed, limit: res.wordsLimit });
+export interface ServerUsageSnapshot {
+  monthKey: string;
+  wordsUsed: number;
+  wordsLimit: number | null;
+  exceeded: boolean;
+}
+
+export function applyServerUsage(snap: ServerUsageSnapshot): void {
+  setMonthlyWordUsageFromServer(snap.wordsUsed, snap.monthKey);
+  setMonthlyWordLimit(snap.wordsLimit);
+  if (snap.exceeded && snap.wordsLimit != null && onLimitReached) {
+    onLimitReached({ used: snap.wordsUsed, limit: snap.wordsLimit });
   }
+}
+
+function applyServerResponse(res: UsageResponse): void {
+  applyServerUsage({
+    monthKey: res.monthKey,
+    wordsUsed: res.wordsUsed,
+    wordsLimit: res.wordsLimit,
+    exceeded: res.exceeded,
+  });
 }
 
 export function recordUsage(input: { words: number; audioSeconds: number }): void {

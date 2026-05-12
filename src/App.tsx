@@ -24,13 +24,24 @@ export function App() {
   const [recState, setRecState] = useState<RecordingState>('idle');
   const [appVersion, setAppVersion] = useState('');
   const [resourcesOk, setResourcesOk] = useState<boolean | null>(null);
-  const [showLimitBanner, setShowLimitBanner] = useState(false);
+  // DEBUG: forzá a `true` para previsualizar el estado de límite alcanzado
+  // (hotkey verde + watermark "limit reached") sin gastar palabras.
+  // Revertir a `false` antes de mergear.
+  const FORCE_LIMIT_REACHED = true;
+  const [showLimitBanner, setShowLimitBanner] = useState(FORCE_LIMIT_REACHED);
+  const limitReached =
+    (showLimitBanner || FORCE_LIMIT_REACHED) && userInfo?.plan !== 'pro';
   const [tourActive, setTourActive] = useState(true);
   const [tourMicNeeded, setTourMicNeeded] = useState(false);
+  const [avatarFailed, setAvatarFailed] = useState(false);
 
   useEffect(() => {
     settingsRef.current = settings;
   }, [settings]);
+
+  useEffect(() => {
+    setAvatarFailed(false);
+  }, [userInfo?.avatarUrl]);
 
   useEffect(() => {
     if (!window.bisbi) return;
@@ -211,13 +222,15 @@ export function App() {
   ).trim().charAt(0).toUpperCase();
 
   return (
-    <div className="app">
+    <div
+      className="app"
+      style={{
+        '--owl-idle': `url(${owlIdleSvg})`,
+        '--owl-rec': `url(${owlRecSvg})`,
+      } as CSSProperties}
+    >
       <aside
         className={`sidebar${recState === 'recording' ? ' is-recording' : ''}`}
-        style={{
-          '--owl-idle': `url(${owlIdleSvg})`,
-          '--owl-rec': `url(${owlRecSvg})`,
-        } as CSSProperties}
       >
         <div className="sidebar-top">
           <div className="sidebar-brand">{t('app.brand')}</div>
@@ -252,8 +265,12 @@ export function App() {
             onClick={() => setTab('account')}
           >
             <span className="sidebar-account-avatar" aria-hidden="true">
-              {userInfo?.avatarUrl ? (
-                <img src={userInfo.avatarUrl} alt="" />
+              {userInfo?.avatarUrl && !avatarFailed ? (
+                <img
+                  src={userInfo.avatarUrl}
+                  alt=""
+                  onError={() => setAvatarFailed(true)}
+                />
               ) : (
                 accountInitial
               )}
@@ -277,21 +294,6 @@ export function App() {
       </aside>
 
       <main className="content">
-        {showLimitBanner && userInfo?.plan !== 'pro' && (
-          <div className="banner banner-upgrade">
-            <span>{t('app.limitReached')}</span>
-            <button
-              type="button"
-              className="banner-upgrade-cta"
-              onClick={() => {
-                setShowLimitBanner(false);
-                setTab('account');
-              }}
-            >
-              {t('account.upgradeToPro')}
-            </button>
-          </div>
-        )}
         {resourcesOk === false && (
           <div className="banner banner-error">
             {t('app.resourcesMissing')}
@@ -302,6 +304,11 @@ export function App() {
             <Home
               settings={settings}
               recState={recState}
+              limitReached={limitReached}
+              onUpgrade={() => {
+                setShowLimitBanner(false);
+                setTab('account');
+              }}
               onNavigateToHistory={() => setTab('history')}
             />
           )}
@@ -326,7 +333,7 @@ export function App() {
             />
           )}
           {tab === 'history' && <History />}
-          {tab === 'account' && <Account />}
+          {tab === 'account' && <Account limitReached={limitReached} />}
         </div>
       </main>
     </div>

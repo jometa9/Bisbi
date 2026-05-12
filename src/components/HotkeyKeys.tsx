@@ -1,6 +1,6 @@
 import { formatHotkeyPart, useHotkeyLabels, type KeyPlatform } from '../lib/hotkey';
 
-export type HotkeyVisualState = 'idle' | 'pressed' | 'lit' | 'press-hint';
+export type HotkeyVisualState = 'idle' | 'pressed' | 'lit' | 'press-hint' | 'disabled';
 
 interface Props {
   accel: string;

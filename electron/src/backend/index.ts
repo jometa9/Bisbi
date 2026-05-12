@@ -12,6 +12,7 @@ import {
   getMonthlyWordLimit,
 } from './db';
 import {
+  applyServerUsage,
   flushUsageQueue,
   recordUsage,
   setUsageEventHandlers,
@@ -137,6 +138,23 @@ async function processQueue(): Promise<void> {
             out = await transcribeCloud(job.pcm, job.sampleRate, job.channels);
             countedByServer = true;
           } catch (err) {
+            // Quota hit: server returned 429 with the current usage snapshot.
+            // Sync the local mirror so the UI shows the limit immediately, and
+            // skip this job — do NOT fall back to offline, the user is out of
+            // free quota and would otherwise bypass the gate.
+            if (err instanceof CloudTranscribeError && err.status === 429) {
+              if (err.usage) {
+                applyServerUsage({
+                  monthKey: err.usage.monthKey,
+                  wordsUsed: err.usage.wordsUsed,
+                  wordsLimit: err.usage.wordsLimit,
+                  exceeded: err.usage.exceeded,
+                });
+              } else {
+                broadcast('usage:limitReached', {});
+              }
+              continue;
+            }
             // Network/upstream failure: fall back to the offline model so the
             // user still gets a transcription. Other errors (auth, quota)
             // propagate as before.

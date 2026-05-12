@@ -11,6 +11,7 @@ export const en: {
     resourcesMissing: string;
     micError: string;
     limitReached: string;
+    limitResetsNextMonth: string;
     updateAvailable: string;
     updateAction: string;
   };
@@ -235,7 +236,8 @@ export const en: {
     resourcesMissing: 'Something went wrong. Please contact support.',
     micError:
       'Could not access the microphone. Make sure Bisbi has permission in your system settings.',
-    limitReached: 'You’ve hit your free plan limit for this month.',
+    limitReached: 'Limit reached',
+    limitResetsNextMonth: 'Your free plan limit resets next month.',
     updateAvailable: 'A new version of Bisbi is available.',
     updateAction: 'Download',
   },
@@ -326,9 +328,9 @@ export const en: {
     transcriptionsOne: 'transcription',
     transcriptionsOther: 'transcriptions',
     dictated: 'dictated',
-    wordsOne: 'word transcribed',
-    wordsOther: 'words transcribed',
-    wpmLabel: 'words per minute',
+    wordsOne: 'word',
+    wordsOther: 'words',
+    wpmLabel: 'wpm',
     recentSection: 'Recent transcriptions',
     empty: 'No transcriptions yet. Try your hotkey.',
     seeMore: 'See all in History',

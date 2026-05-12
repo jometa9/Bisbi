@@ -140,8 +140,21 @@ export async function transcribePcm(
   }
 }
 
+export interface CloudUsageInfo {
+  monthKey: string;
+  wordsUsed: number;
+  wordsLimit: number | null;
+  exceeded: boolean;
+  tier: string;
+  remaining: number | null;
+}
+
 export class CloudTranscribeError extends Error {
-  constructor(message: string, public readonly status?: number) {
+  constructor(
+    message: string,
+    public readonly status?: number,
+    public readonly usage?: CloudUsageInfo
+  ) {
     super(message);
     this.name = 'CloudTranscribeError';
   }
@@ -214,13 +227,40 @@ export async function transcribeCloud(
 
   if (!resp.ok) {
     let detail = '';
+    let usage: CloudUsageInfo | undefined;
     try {
       detail = await resp.text();
+      try {
+        const parsed = JSON.parse(detail) as {
+          monthKey?: unknown;
+          wordsUsed?: unknown;
+          wordsLimit?: unknown;
+          exceeded?: unknown;
+          tier?: unknown;
+          remaining?: unknown;
+        };
+        if (
+          typeof parsed.monthKey === 'string' &&
+          typeof parsed.wordsUsed === 'number'
+        ) {
+          usage = {
+            monthKey: parsed.monthKey,
+            wordsUsed: parsed.wordsUsed,
+            wordsLimit:
+              typeof parsed.wordsLimit === 'number' ? parsed.wordsLimit : null,
+            exceeded: parsed.exceeded === true,
+            tier: typeof parsed.tier === 'string' ? parsed.tier : 'free',
+            remaining:
+              typeof parsed.remaining === 'number' ? parsed.remaining : null,
+          };
+        }
+      } catch {}
     } catch {}
     console.error(`[transcriber] cloud transcription failed status=${resp.status} detail=${detail.slice(0, 200)}`);
     throw new CloudTranscribeError(
       `Cloud transcription failed (${resp.status}): ${detail.slice(0, 200)}`,
-      resp.status
+      resp.status,
+      usage
     );
   }
 

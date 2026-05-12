@@ -630,6 +630,60 @@ button { font-family: inherit; }
   margin-top: 4px;
 }
 
+.home-hotkey-limit-text {
+  font-size: 13px;
+  color: var(--primary-dark);
+  text-align: center;
+  margin-top: 6px;
+  max-width: 320px;
+}
+
+.kbd-disabled {
+  background: rgba(255, 255, 255, 0.55);
+  border-color: rgba(26, 26, 24, 0.18);
+  color: rgba(26, 26, 24, 0.45);
+  box-shadow: none;
+  cursor: not-allowed;
+  filter: saturate(0.6);
+}
+
+.home-hotkey.is-limit-reached {
+  background: var(--primary-tint);
+  border-color: var(--primary);
+}
+
+.home-hotkey.is-limit-reached .home-hotkey-watermark {
+  color: var(--primary-dark);
+  opacity: 0.18;
+  letter-spacing: -0.02em;
+}
+
+.home-hotkey.is-limit-reached .home-hotkey-label {
+  color: var(--primary-dark);
+  opacity: 0.85;
+}
+
+.home-hotkey-upgrade {
+  margin-top: 10px;
+  padding: 8px 18px;
+  border-radius: 999px;
+  border: 1px solid var(--primary-dark);
+  background: var(--primary-dark);
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 80ms ease, background 120ms ease, box-shadow 120ms ease;
+}
+
+.home-hotkey-upgrade:hover {
+  background: var(--primary);
+}
+
+.home-hotkey-upgrade:active {
+  transform: translateY(1px);
+}
+
 .home-section {
   display: flex;
   flex-direction: column;
@@ -829,10 +883,9 @@ button { font-family: inherit; }
 }
 
 .section {
-  display: grid;
-  grid-template-columns: minmax(180px, 1fr) minmax(0, 1.6fr);
-  gap: 24px;
-  align-items: start;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 .section > header {
@@ -862,13 +915,6 @@ button { font-family: inherit; }
   flex-direction: column;
   gap: 10px;
   min-width: 0;
-}
-
-@media (max-width: 640px) {
-  .section {
-    grid-template-columns: 1fr;
-    gap: 10px;
-  }
 }
 
 /* Custom Select (replaces native <select>) */
@@ -1537,7 +1583,7 @@ html.recording-window #root {
   align-items: center;
   justify-content: center;
   font-family: var(--font-display);
-  font-weight: 600;
+  font-weight: 700;
   font-size: 13px;
   letter-spacing: 0;
   overflow: hidden;
@@ -1792,7 +1838,7 @@ html.recording-window #root {
   align-items: center;
   justify-content: center;
   font-family: var(--font-display);
-  font-weight: 600;
+  font-weight: 700;
   font-size: 22px;
   overflow: hidden;
 }
@@ -1898,6 +1944,13 @@ html.recording-window #root {
 
 /* Billing toggle */
 
+.billing-toggle-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
 .billing-toggle {
   display: flex;
   gap: 4px;
@@ -1906,6 +1959,24 @@ html.recording-window #root {
   background: var(--bg-soft);
   border: 1px solid var(--border);
   width: fit-content;
+}
+
+.limit-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.limit-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 9px 14px;
+  border-radius: var(--radius);
+  background: var(--primary-tint);
+  color: var(--primary-dark);
+  border: 1px solid var(--primary);
+  font-size: 13px;
+  font-weight: 500;
 }
 
 .billing-toggle-btn {

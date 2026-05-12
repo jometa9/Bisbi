@@ -1,15 +1,23 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from '../i18n';
 import { useAuth } from '../context/AuthContext';
 import { ConfirmButton } from '../components/ConfirmButton';
 import type { Pricing } from '../types';
 
-export function Account() {
+type AccountProps = {
+  limitReached?: boolean;
+};
+
+export function Account({ limitReached = false }: AccountProps) {
   const { t } = useTranslation();
   const { userInfo, logout, isRefreshing, refreshSession } = useAuth();
   const [billingPeriod, setBillingPeriod] = useState<'monthly' | 'annual'>('monthly');
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   const [isOpeningPortal, setIsOpeningPortal] = useState(false);
+  const [avatarFailed, setAvatarFailed] = useState(false);
+  useEffect(() => {
+    setAvatarFailed(false);
+  }, [userInfo?.avatarUrl]);
 
   if (!userInfo) return null;
 
@@ -75,8 +83,12 @@ export function Account() {
     <div className="settings">
       <header className="account-header">
         <div className="account-avatar" aria-hidden="true">
-          {userInfo.avatarUrl ? (
-            <img src={userInfo.avatarUrl} alt="" />
+          {userInfo.avatarUrl && !avatarFailed ? (
+            <img
+              src={userInfo.avatarUrl}
+              alt=""
+              onError={() => setAvatarFailed(true)}
+            />
           ) : (
             <span>{initial}</span>
           )}
@@ -92,24 +104,43 @@ export function Account() {
 
       {!isPro && (
         <Section title={t('account.subscriptionSection.title')} description={t('account.subscriptionSection.description')}>
-          <div className="billing-toggle">
-            <button
-              type="button"
-              className={`billing-toggle-btn${billingPeriod === 'monthly' ? ' active' : ''}`}
-              onClick={() => setBillingPeriod('monthly')}
-            >
-              {t('account.monthly')}
-            </button>
-            <button
-              type="button"
-              className={`billing-toggle-btn${billingPeriod === 'annual' ? ' active' : ''}`}
-              onClick={() => setBillingPeriod('annual')}
-            >
-              {t('account.annual')}
-              {billingPeriod === 'annual' && (
-                <span className="billing-savings-badge">{annualSavings}</span>
-              )}
-            </button>
+          <div className="billing-toggle-row">
+            <div className="billing-toggle">
+              <button
+                type="button"
+                className={`billing-toggle-btn${billingPeriod === 'monthly' ? ' active' : ''}`}
+                onClick={() => setBillingPeriod('monthly')}
+              >
+                {t('account.monthly')}
+              </button>
+              <button
+                type="button"
+                className={`billing-toggle-btn${billingPeriod === 'annual' ? ' active' : ''}`}
+                onClick={() => setBillingPeriod('annual')}
+              >
+                {t('account.annual')}
+                {billingPeriod === 'annual' && (
+                  <span className="billing-savings-badge">{annualSavings}</span>
+                )}
+              </button>
+            </div>
+            {limitReached && (
+              <div className="limit-group">
+                <span className="limit-pill" role="status">
+                  {t('app.limitReached')}
+                </span>
+                <button
+                  type="button"
+                  className="tx-icon-btn"
+                  onClick={() => void refreshSession()}
+                  disabled={isRefreshing}
+                  title={t('account.refresh')}
+                  aria-label={t('account.refresh')}
+                >
+                  <RefreshIcon spinning={isRefreshing} />
+                </button>
+              </div>
+            )}
           </div>
 
           <div className="plan-cards">
@@ -197,13 +228,6 @@ export function Account() {
           </div>
         </Section>
       )}
-
-      <Section title={t('account.profileSection.title')} description={t('account.profileSection.description')}>
-        <div className="account-card">
-          <Field label={t('account.name')} value={userInfo.name || '—'} />
-          <Field label={t('account.email')} value={userInfo.email} />
-        </div>
-      </Section>
 
       <Section title={t('account.sessionSection.title')} description={t('account.sessionSection.description')}>
         <div className="actions">
