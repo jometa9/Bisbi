@@ -24,13 +24,8 @@ export function App() {
   const [recState, setRecState] = useState<RecordingState>('idle');
   const [appVersion, setAppVersion] = useState('');
   const [resourcesOk, setResourcesOk] = useState<boolean | null>(null);
-  // DEBUG: forzá a `true` para previsualizar el estado de límite alcanzado
-  // (hotkey verde + watermark "limit reached") sin gastar palabras.
-  // Revertir a `false` antes de mergear.
-  const FORCE_LIMIT_REACHED = false;
-  const [showLimitBanner, setShowLimitBanner] = useState(FORCE_LIMIT_REACHED);
-  const limitReached =
-    (showLimitBanner || FORCE_LIMIT_REACHED) && userInfo?.plan !== 'pro';
+  const [showLimitBanner, setShowLimitBanner] = useState(false);
+  const limitReached = showLimitBanner && userInfo?.plan !== 'pro';
   const [tourActive, setTourActive] = useState(true);
   const [tourMicNeeded, setTourMicNeeded] = useState(false);
   const [avatarFailed, setAvatarFailed] = useState(false);

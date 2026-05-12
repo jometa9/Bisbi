@@ -217,24 +217,10 @@ export type CanTranscribeResult =
   | { allowed: true }
   | { allowed: false; reason: 'unauthenticated' | 'limit-reached' | 'session-expired'; info?: { used?: number; limit?: number } };
 
-// DEBUG: forzá a `true` para simular cuota agotada (banner + bloqueo de
-// grabación) sin tener que gastar palabras reales. Ignora el plan pro/admin.
-// Revertir a `false` antes de mergear.
-const FORCE_LIMIT_REACHED = false;
-
 export function canTranscribe(getLocalUsage: () => { used: number; limit: number }): CanTranscribeResult {
   loadFromDisk();
   if (!memCache?.token) {
     return { allowed: false, reason: 'unauthenticated' };
-  }
-
-  if (FORCE_LIMIT_REACHED) {
-    const { used, limit } = getLocalUsage();
-    return {
-      allowed: false,
-      reason: 'limit-reached',
-      info: { used: Math.max(used, limit || 1000), limit: limit || 1000 },
-    };
   }
 
   const sinceValidation = Date.now() - getLastValidatedAt();
