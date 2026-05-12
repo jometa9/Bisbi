@@ -21,7 +21,8 @@
     "build:electron": "node scripts/build-electron.mjs",
     "build:electron-dev": "tsc -p electron/tsconfig.json",
     "package": "npm run build && electron-builder",
-    "package:mac": "npm run build && electron-builder --mac && node scripts/notarize-dmg.mjs",
+    "preflight:mac-signing": "node scripts/preflight-mac-signing.mjs",
+    "package:mac": "npm run preflight:mac-signing && npm run build && electron-builder --mac && node scripts/notarize-dmg.mjs",
     "package:win": "npm run build && electron-builder --win",
     "package:linux": "npm run build && electron-builder --linux",
     "typecheck": "tsc --noEmit && tsc -p electron/tsconfig.json --noEmit"
