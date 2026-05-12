@@ -21,7 +21,7 @@
     "build:electron": "node scripts/build-electron.mjs",
     "build:electron-dev": "tsc -p electron/tsconfig.json",
     "package": "npm run build && electron-builder",
-    "package:mac": "npm run build && electron-builder --mac",
+    "package:mac": "npm run build && electron-builder --mac && node scripts/notarize-dmg.mjs",
     "package:win": "npm run build && electron-builder --win",
     "package:linux": "npm run build && electron-builder --linux",
     "typecheck": "tsc --noEmit && tsc -p electron/tsconfig.json --noEmit"
@@ -52,7 +52,7 @@
   "build": {
     "appId": "app.bisbi.desktop",
     "productName": "Bisbi",
-    "copyright": "Copyright © 2026 IPTRADE COPIER LLC",
+    "copyright": "Copyright © 2026 Joaquin Metayer",
     "asar": true,
     "asarUnpack": [
       "resources/whisper/**/*",
@@ -110,6 +110,7 @@
       "icon": "build-resources/icon.icns",
       "hardenedRuntime": true,
       "gatekeeperAssess": false,
+      "notarize": true,
       "entitlements": "electron/entitlements.mac.plist",
       "entitlementsInherit": "electron/entitlements.mac.plist",
       "extendInfo": {
