@@ -220,7 +220,7 @@ export type CanTranscribeResult =
 // DEBUG: forzá a `true` para simular cuota agotada (banner + bloqueo de
 // grabación) sin tener que gastar palabras reales. Ignora el plan pro/admin.
 // Revertir a `false` antes de mergear.
-const FORCE_LIMIT_REACHED = true;
+const FORCE_LIMIT_REACHED = false;
 
 export function canTranscribe(getLocalUsage: () => { used: number; limit: number }): CanTranscribeResult {
   loadFromDisk();
