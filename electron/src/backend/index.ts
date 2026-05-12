@@ -454,6 +454,30 @@ export async function registerBackend(opts: BackendOptions): Promise<void> {
       payload: { pcm: ArrayBuffer; sampleRate: number; channels: number }
     ): Promise<string> => {
       const pcm = Buffer.from(payload.pcm);
+      const cfg = getSettings();
+      if (cfg.mode === 'cloud') {
+        try {
+          console.log('[onboarding] dispatching preview to cloud (language=auto)');
+          const out = await transcribeCloud(pcm, payload.sampleRate, payload.channels);
+          return out.text;
+        } catch (err) {
+          if (
+            err instanceof CloudTranscribeError &&
+            (err.status === undefined ||
+              err.status === 502 ||
+              err.status === 503 ||
+              err.status === 504)
+          ) {
+            console.warn(
+              '[onboarding] cloud preview failed, falling back to offline:',
+              err.message
+            );
+            const out = await transcribePcm(pcm, payload.sampleRate, payload.channels);
+            return out.text;
+          }
+          throw err;
+        }
+      }
       const out = await transcribePcm(pcm, payload.sampleRate, payload.channels);
       return out.text;
     }

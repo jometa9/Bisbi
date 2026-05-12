@@ -1,5 +1,5 @@
-//export const WEB_BASE = 'https://bisbi.io';
-export const WEB_BASE = 'http://localhost:3001';
+export const WEB_BASE = 'https://bisbi.io';
+//export const WEB_BASE = 'http://localhost:3001';
 
 export const OFFLINE_MODEL_FILE = 'bsb-001.dat';
 
