@@ -66,6 +66,8 @@ import {
 import {
   muteSystemAudio,
   restoreSystemAudio,
+  prewarmMediaControl,
+  shutdownMediaControl,
   type MuteSnapshot,
 } from './mediaControl';
 import { getSystemLocale, resolveUiLanguage, tBackend } from './i18n';
@@ -240,6 +242,7 @@ export async function registerBackend(opts: BackendOptions): Promise<void> {
 
   applyHotkey(settings);
   warmUpRecordingWindow();
+  prewarmMediaControl();
 
   setUsageEventHandlers({
     onLimitReached: (info) => broadcast('usage:limitReached', info),
@@ -495,6 +498,7 @@ export async function registerBackend(opts: BackendOptions): Promise<void> {
     void flushUsageQueue(true);
     stopUsageSync();
     stopPeriodicAuthRefresh();
+    shutdownMediaControl();
   });
 }
 

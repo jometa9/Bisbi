@@ -186,17 +186,20 @@ if (!gotTheLock) {
       logMain(`[main] backend registration failed: ${(err as Error)?.message ?? err}`, true);
     }
 
-    // In dev we always open the settings window so the developer sees
-    // something. In packaged builds we only open it on first run; after that
-    // the tray icon is the entry point.
+    // The renderer process owns the microphone (getUserMedia) and arms the
+    // recording pipeline, so the hotkey only works once a BrowserWindow is
+    // alive. To make the shortcut available immediately after login without
+    // forcing the user to click the tray, always create the settings window
+    // at startup — but keep it hidden when the OS launched us at login (or
+    // we're a packaged non-first-run start), so it stays out of the way.
     const isFirstRun = !fs.existsSync(getWindowStatePath());
-    const shouldOpenWindow = isFirstRun || !app.isPackaged;
-    if (shouldOpenWindow) {
-      logMain('[main] opening settings window');
-      openSettingsWindow();
-    } else {
-      logMain('[main] running in tray; click the tray icon to open settings');
-    }
+    const wasOpenedAtLogin = (() => {
+      try { return app.getLoginItemSettings().wasOpenedAtLogin === true; }
+      catch { return false; }
+    })();
+    const keepHidden = app.isPackaged && !isFirstRun;
+    logMain(`[main] opening settings window (hidden=${keepHidden}, firstRun=${isFirstRun}, atLogin=${wasOpenedAtLogin})`);
+    openSettingsWindow({ keepHidden });
 
     // Keep the dock icon visible whenever the app is running, even when no
     // window is open. It only disappears when the user fully quits Bisbi.
@@ -208,8 +211,10 @@ if (!gotTheLock) {
   });
 }
 
-function openSettingsWindow(): void {
+function openSettingsWindow(opts: { keepHidden?: boolean } = {}): void {
+  const keepHidden = opts.keepHidden === true;
   if (settingsWindow && !settingsWindow.isDestroyed()) {
+    if (keepHidden) return;
     if (settingsWindow.isMinimized()) settingsWindow.restore();
     settingsWindow.show();
     settingsWindow.focus();
@@ -256,9 +261,10 @@ function openSettingsWindow(): void {
 
   hardenWindow(settingsWindow);
 
-  if (process.platform === 'darwin' && app.dock) app.dock.show();
+  if (!keepHidden && process.platform === 'darwin' && app.dock) app.dock.show();
 
   settingsWindow.once('ready-to-show', () => {
+    if (keepHidden) return;
     settingsWindow?.show();
     settingsWindow?.focus();
     if (SHOW_DEVTOOLS) {
