@@ -182,6 +182,7 @@ function ensureHookStarted(): void {
   try {
     uIOhook.start();
     hookStarted = true;
+    console.log('[hotkey] uIOhook started');
   } catch (err) {
     console.error('[hotkey] uIOhook.start failed:', err);
   }

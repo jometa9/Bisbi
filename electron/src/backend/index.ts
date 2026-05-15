@@ -1,4 +1,4 @@
-import { BrowserWindow, ipcMain, app, shell } from 'electron';
+import { BrowserWindow, ipcMain, app, shell, systemPreferences } from 'electron';
 import { randomUUID } from 'crypto';
 import {
   insertTranscription,
@@ -224,6 +224,27 @@ function applyHotkey(settings: AppSettings): boolean {
   );
 }
 
+// uiohook-napi creates a CGEventTap with kCGEventTapOptionDefault on macOS,
+// which silently produces a dead tap when Accessibility isn't granted to the
+// running binary — global hotkeys stop firing while the window-focused fallback
+// (DOM keydown forwarded by App.tsx) keeps working, making it look like a
+// partial bug. Re-check on every launch and surface the system prompt so the
+// user can re-grant after a TCC reset, OS upgrade, or signature change.
+function ensureAccessibilityForHotkey(): void {
+  if (process.platform !== 'darwin') return;
+  const trusted = systemPreferences.isTrustedAccessibilityClient(false);
+  if (trusted) {
+    console.log('[backend] accessibility: granted — global hotkey active');
+    return;
+  }
+  console.warn(
+    '[backend] accessibility: NOT granted — global hotkey will only work while ' +
+    'the Bisbi window is focused. Triggering system prompt.'
+  );
+  systemPreferences.isTrustedAccessibilityClient(true);
+  broadcast('permission:accessibilityMissing', { platform: 'darwin' });
+}
+
 export async function registerBackend(opts: BackendOptions): Promise<void> {
   if (registered) return;
   registered = true;
@@ -241,6 +262,7 @@ export async function registerBackend(opts: BackendOptions): Promise<void> {
   });
 
   applyHotkey(settings);
+  ensureAccessibilityForHotkey();
   warmUpRecordingWindow();
   prewarmMediaControl();
 
