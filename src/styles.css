@@ -2847,3 +2847,58 @@ html.recording-window #root {
   text-align: left;
 }
 
+.openai-key {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.openai-key-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+
+.openai-key-input {
+  flex: 1;
+  min-width: 0;
+  padding: 8px 12px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--bg-soft);
+  color: var(--text);
+  font: inherit;
+  font-size: 13px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  transition: border-color 0.12s, background 0.12s, box-shadow 0.12s;
+}
+
+.openai-key-input:hover {
+  background: var(--white);
+  border-color: var(--text-soft);
+}
+
+.openai-key-input:focus-visible,
+.openai-key-input:focus {
+  outline: none;
+  background: var(--white);
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-tint-hover);
+}
+
+.openai-key-row .btn-secondary {
+  flex: 0 0 auto;
+}
+
+.openai-key-hint {
+  margin: 0;
+  font-size: 12.5px;
+  color: var(--text-muted);
+}
+
+.openai-key-hint .btn-link {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
