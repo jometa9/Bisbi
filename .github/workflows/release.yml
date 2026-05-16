@@ -78,6 +78,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Build whisper-cli (darwin-arm64)
+        run: bash scripts/build-whisper.sh
+
       - name: Decode Apple ASC API key (.p8)
         env:
           APPLE_API_KEY_BASE64: ${{ secrets.APPLE_API_KEY_BASE64 }}
@@ -124,6 +127,10 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Build whisper-cli (win32-x64)
+        shell: pwsh
+        run: pwsh -File scripts/build-whisper.ps1
+
       - name: Build and publish (Windows x64)
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -163,10 +170,15 @@ jobs:
             libxrandr-dev \
             libxkbcommon-dev \
             libxkbcommon-x11-dev \
-            libx11-xcb-dev
+            libx11-xcb-dev \
+            cmake \
+            build-essential
 
       - name: Install dependencies
         run: npm ci
+
+      - name: Build whisper-cli (linux-x64)
+        run: bash scripts/build-whisper.sh
 
       - name: Build and publish (Linux x64)
         env:

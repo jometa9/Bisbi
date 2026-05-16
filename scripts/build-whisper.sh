@@ -26,6 +26,12 @@ case "$uname_s" in
       *) echo "Arquitectura no soportada: $uname_m"; exit 1 ;;
     esac
     ;;
+  Linux)
+    case "$uname_m" in
+      x86_64) PLATFORM_DIR="linux-x64";  METAL_FLAG="-DGGML_METAL=OFF" ;;
+      *) echo "Arquitectura no soportada: $uname_m"; exit 1 ;;
+    esac
+    ;;
   *)
     echo "Plataforma no soportada: $uname_s"; exit 1
     ;;
