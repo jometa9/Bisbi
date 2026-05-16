@@ -19,7 +19,7 @@ function buildDefaults(): AppSettings {
     microphoneId: null,
     muteSystemAudioWhileRecording: false,
     openAtLogin: true,
-    mode: 'cloud',
+    mode: 'offline',
     openaiApiKey: null,
     openaiModel: 'gpt-4o-mini-transcribe',
   };

@@ -44,8 +44,7 @@ export function App() {
     });
     const offBlocked = window.bisbi.onTranscriptionBlocked(({ reason }) => {
       setBlockedReason(reason);
-      // Auto-route the user to Settings so they can paste / fix their key.
-      if (reason === 'no-api-key' || reason === 'invalid-key') {
+      if (reason === 'invalid-key') {
         setTab('settings');
       }
     });
@@ -242,7 +241,7 @@ export function App() {
             {t('app.resourcesMissing')}
           </div>
         )}
-        {blockedReason === 'no-api-key' && settings.mode === 'cloud' && (
+        {settings.mode === 'cloud' && !settings.openaiApiKey && (
           <div className="banner banner-error">
             {t('app.missingApiKey')}
           </div>

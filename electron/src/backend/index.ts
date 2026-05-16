@@ -104,24 +104,17 @@ async function processQueue(): Promise<void> {
       try {
         const cfg = getSettings();
         let out;
-        if (cfg.mode === 'cloud') {
+        if (cfg.mode === 'cloud' && cfg.openaiApiKey) {
           try {
             out = await transcribeCloud(job.pcm, job.sampleRate, job.channels, {
               apiKey: cfg.openaiApiKey,
               model: cfg.openaiModel,
             });
           } catch (err) {
-            if (err instanceof CloudTranscribeError && err.reason === 'no-api-key') {
-              broadcast('transcription:blocked', { reason: 'no-api-key' });
-              continue;
-            }
             if (err instanceof CloudTranscribeError && err.reason === 'invalid-key') {
               broadcast('transcription:blocked', { reason: 'invalid-key' });
-              continue;
-            }
-            // Network/upstream failure: fall back to the offline model so the
-            // user still gets a transcription.
-            if (
+              out = await transcribePcm(job.pcm, job.sampleRate, job.channels);
+            } else if (
               err instanceof CloudTranscribeError &&
               (err.reason === 'network' || err.reason === 'upstream')
             ) {
@@ -277,12 +270,6 @@ export async function registerBackend(opts: BackendOptions): Promise<void> {
       const bytesPerSample = 2 * Math.max(1, payload.channels);
       const minBytes = Math.floor(payload.sampleRate * 0.1) * bytesPerSample;
       if (pcm.length < minBytes) {
-        syncState();
-        return;
-      }
-      const cfg = getSettings();
-      if (cfg.mode === 'cloud' && !cfg.openaiApiKey) {
-        broadcast('transcription:blocked', { reason: 'no-api-key' });
         syncState();
         return;
       }
