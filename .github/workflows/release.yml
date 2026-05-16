@@ -154,7 +154,16 @@ jobs:
       - name: Install X11 build dependencies (for uiohook-napi)
         run: |
           sudo apt-get update
-          sudo apt-get install -y libx11-dev libxtst-dev libxt-dev libxinerama-dev libxkbfile-dev
+          sudo apt-get install -y \
+            libx11-dev \
+            libxtst-dev \
+            libxt-dev \
+            libxinerama-dev \
+            libxkbfile-dev \
+            libxrandr-dev \
+            libxkbcommon-dev \
+            libxkbcommon-x11-dev \
+            libx11-xcb-dev
 
       - name: Install dependencies
         run: npm ci
