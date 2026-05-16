@@ -1,5 +1,9 @@
 import { useState, useRef, useEffect, useMemo } from 'react';
-import type { AppSettings } from '../types';
+import {
+  OPENAI_TRANSCRIPTION_MODELS,
+  type AppSettings,
+  type OpenAITranscriptionModel,
+} from '../types';
 import {
   SUPPORTED_UI_LANGUAGES,
   matchLocale,
@@ -122,6 +126,35 @@ export function Settings({ settings, onChange, onReset, onClearHistory }: Props)
           }
         />
       </Section>
+
+      {settings.mode === 'cloud' && (
+        <Section
+          title={t('settings.openaiKey.title')}
+          description={t('settings.openaiKey.description')}
+        >
+          <OpenAIKeyInput
+            value={settings.openaiApiKey}
+            onChange={(openaiApiKey) => onChange({ openaiApiKey })}
+          />
+        </Section>
+      )}
+
+      {settings.mode === 'cloud' && (
+        <Section
+          title={t('settings.openaiModel.title')}
+          description={t('settings.openaiModel.description')}
+        >
+          <Select<OpenAITranscriptionModel>
+            value={settings.openaiModel}
+            onChange={(openaiModel) => onChange({ openaiModel })}
+            ariaLabel={t('settings.openaiModel.title')}
+            options={OPENAI_TRANSCRIPTION_MODELS.map((m) => ({
+              value: m,
+              label: m,
+            }))}
+          />
+        </Section>
+      )}
 
       <Section
         title={t('settings.openAtLogin.title')}
@@ -443,6 +476,90 @@ function bareModifierFromCode(code: string): string | null {
     default:
       return null;
   }
+}
+
+function OpenAIKeyInput({
+  value,
+  onChange,
+}: {
+  value: string | null;
+  onChange: (next: string | null) => void;
+}) {
+  const { t } = useTranslation();
+  const [draft, setDraft] = useState(value ?? '');
+  const [visible, setVisible] = useState(false);
+  const [saved, setSaved] = useState(false);
+
+  useEffect(() => {
+    setDraft(value ?? '');
+  }, [value]);
+
+  const dirty = (draft.trim() || null) !== (value ?? null);
+
+  const save = () => {
+    const next = draft.trim();
+    onChange(next.length > 0 ? next : null);
+    setSaved(true);
+    setTimeout(() => setSaved(false), 1500);
+  };
+
+  return (
+    <div className="openai-key">
+      <div className="openai-key-row">
+        <input
+          type={visible ? 'text' : 'password'}
+          className="openai-key-input"
+          value={draft}
+          placeholder="sk-…"
+          spellCheck={false}
+          autoComplete="off"
+          onChange={(e) => setDraft(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') save();
+          }}
+        />
+        <button
+          type="button"
+          className="btn-secondary"
+          onClick={() => setVisible((v) => !v)}
+        >
+          {visible ? t('settings.openaiKey.hide') : t('settings.openaiKey.show')}
+        </button>
+        <button
+          type="button"
+          className="btn-secondary"
+          disabled={!dirty}
+          onClick={save}
+        >
+          {saved ? t('settings.openaiKey.saved') : t('settings.openaiKey.save')}
+        </button>
+        {value && (
+          <button
+            type="button"
+            className="btn-secondary"
+            onClick={() => {
+              setDraft('');
+              onChange(null);
+            }}
+          >
+            {t('settings.openaiKey.clear')}
+          </button>
+        )}
+      </div>
+      <p className="openai-key-hint">
+        {t('settings.openaiKey.hint')}{' '}
+        <button
+          type="button"
+          className="btn-link"
+          onClick={() =>
+            void window.bisbi.openExternal('https://platform.openai.com/api-keys')
+          }
+        >
+          platform.openai.com/api-keys
+        </button>
+      </p>
+    </div>
+  );
 }
 
 function normalizeKey(key: string, code: string): string | null {

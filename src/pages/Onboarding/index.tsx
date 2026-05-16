@@ -10,10 +10,9 @@ interface Props {
   settings: AppSettings;
   onSettingsChange: (next: AppSettings) => void;
   onExit: () => void;
-  onMicNeeded: (needed: boolean) => void;
 }
 
-export function Onboarding({ settings, onSettingsChange, onExit, onMicNeeded }: Props) {
+export function Onboarding({ settings, onSettingsChange, onExit }: Props) {
   const { t } = useTranslation();
   const [step, setStep] = useState<OnboardingStep>(1);
   const [platform, setPlatform] = useState<NodeJS.Platform | null>(null);
@@ -24,11 +23,6 @@ export function Onboarding({ settings, onSettingsChange, onExit, onMicNeeded }: 
     void window.bisbi.getPlatform().then(setPlatform);
     void window.bisbi.onboarding.getPermissions().then(setPerms);
   }, []);
-
-  useEffect(() => {
-    onMicNeeded(step === 3);
-    return () => onMicNeeded(false);
-  }, [step, onMicNeeded]);
 
   const permsAlreadyGranted = useMemo(() => {
     if (!perms) return false;
@@ -109,7 +103,7 @@ export function Onboarding({ settings, onSettingsChange, onExit, onMicNeeded }: 
           className="onb-exit"
           onClick={onExit}
         >
-          {t('auth.backToLogin')}
+          {t('onboarding.skip')}
         </button>
       </div>
     </div>

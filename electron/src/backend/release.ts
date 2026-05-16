@@ -10,6 +10,7 @@ export type ReleaseDownloadUrls = {
 export type ReleaseInfo = {
   version: string | null;
   downloadUrls: ReleaseDownloadUrls;
+  htmlUrl: string | null;
 };
 
 export type ReleaseState = {
@@ -20,8 +21,14 @@ export type ReleaseState = {
   fetchedAt: number | null;
 };
 
+const GITHUB_OWNER = 'jometa9';
+const GITHUB_REPO = 'Bisbi';
+const LATEST_RELEASE_URL = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/releases/latest`;
+const POLL_INTERVAL_MS = 6 * 60 * 60 * 1000; // 6 h
+
 let latest: ReleaseInfo | null = null;
 let fetchedAt: number | null = null;
+let pollTimer: ReturnType<typeof setInterval> | null = null;
 
 function currentVersion(): string {
   return getAppVersion();
@@ -73,44 +80,86 @@ function broadcastState() {
   }
 }
 
-function isReleaseInfo(value: unknown): value is ReleaseInfo {
-  if (!value || typeof value !== 'object') return false;
-  const v = value as Record<string, unknown>;
-  if (!('version' in v) || !('downloadUrls' in v)) return false;
-  const urls = v.downloadUrls as Record<string, unknown> | null | undefined;
-  if (!urls || typeof urls !== 'object') return false;
-  return 'mac' in urls && 'windows' in urls && 'linux' in urls;
+interface GitHubAsset {
+  name: string;
+  browser_download_url: string;
 }
 
-export function captureFromJson(payload: unknown): void {
-  if (!payload || typeof payload !== 'object') return;
-  const release = (payload as Record<string, unknown>).release;
-  if (!isReleaseInfo(release)) {
-    console.log('[release] captureFromJson: no valid release field in payload', {
-      hasReleaseKey: !!release,
-      releaseShape: release && typeof release === 'object' ? Object.keys(release) : typeof release,
-    });
-    return;
-  }
-  console.log('[release] captureFromJson: capturing release', release);
+interface GitHubRelease {
+  tag_name?: string;
+  name?: string;
+  html_url?: string;
+  draft?: boolean;
+  prerelease?: boolean;
+  assets?: GitHubAsset[];
+}
 
-  const prev = latest;
-  latest = {
-    version: release.version,
+function pickAssetUrl(assets: GitHubAsset[], matchers: RegExp[]): string | null {
+  for (const re of matchers) {
+    const hit = assets.find((a) => re.test(a.name));
+    if (hit) return hit.browser_download_url;
+  }
+  return null;
+}
+
+function parseGitHubRelease(payload: GitHubRelease): ReleaseInfo | null {
+  if (!payload || payload.draft || payload.prerelease) return null;
+  const tag = (payload.tag_name ?? payload.name ?? '').toString();
+  if (!tag) return null;
+  const assets = Array.isArray(payload.assets) ? payload.assets : [];
+  return {
+    version: tag.replace(/^v/i, ''),
+    htmlUrl: payload.html_url ?? null,
     downloadUrls: {
-      mac: release.downloadUrls.mac ?? null,
-      windows: release.downloadUrls.windows ?? null,
-      linux: release.downloadUrls.linux ?? null,
+      // electron-builder default DMG artifact is e.g. Bisbi-Setup.dmg.
+      mac: pickAssetUrl(assets, [/\.dmg$/i, /mac.*\.zip$/i]),
+      windows: pickAssetUrl(assets, [/\.exe$/i, /win.*\.zip$/i]),
+      linux: pickAssetUrl(assets, [/\.AppImage$/i, /\.tar\.gz$/i, /\.deb$/i]),
     },
   };
-  fetchedAt = Date.now();
+}
 
-  const changed =
-    !prev ||
-    prev.version !== latest.version ||
-    prev.downloadUrls.mac !== latest.downloadUrls.mac ||
-    prev.downloadUrls.windows !== latest.downloadUrls.windows ||
-    prev.downloadUrls.linux !== latest.downloadUrls.linux;
+export async function fetchLatestRelease(): Promise<void> {
+  try {
+    const resp = await fetch(LATEST_RELEASE_URL, {
+      headers: {
+        Accept: 'application/vnd.github+json',
+        'User-Agent': `Bisbi/${currentVersion()}`,
+      },
+    });
+    if (!resp.ok) {
+      console.warn(`[release] github fetch failed: ${resp.status}`);
+      return;
+    }
+    const payload = (await resp.json()) as GitHubRelease;
+    const info = parseGitHubRelease(payload);
+    if (!info) return;
+    const prev = latest;
+    latest = info;
+    fetchedAt = Date.now();
+    const changed =
+      !prev ||
+      prev.version !== info.version ||
+      prev.downloadUrls.mac !== info.downloadUrls.mac ||
+      prev.downloadUrls.windows !== info.downloadUrls.windows ||
+      prev.downloadUrls.linux !== info.downloadUrls.linux;
+    if (changed) broadcastState();
+  } catch (err) {
+    console.warn('[release] github fetch error:', err instanceof Error ? err.message : String(err));
+  }
+}
 
-  if (changed) broadcastState();
+export function startReleasePolling(): void {
+  if (pollTimer) return;
+  void fetchLatestRelease();
+  pollTimer = setInterval(() => {
+    void fetchLatestRelease();
+  }, POLL_INTERVAL_MS);
+}
+
+export function stopReleasePolling(): void {
+  if (pollTimer) {
+    clearInterval(pollTimer);
+    pollTimer = null;
+  }
 }

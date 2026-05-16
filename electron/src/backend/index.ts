@@ -7,35 +7,7 @@ import {
   clearTranscriptions,
   getStatsTotals,
   countWords,
-  getMonthlyWordUsage,
-  addMonthlyWordUsage,
-  getMonthlyWordLimit,
 } from './db';
-import {
-  applyServerUsage,
-  flushUsageQueue,
-  recordUsage,
-  setUsageEventHandlers,
-  startUsageSync,
-  stopUsageSync,
-} from './usageSync';
-import {
-  getSession,
-  loginWithToken,
-  logout as authLogout,
-  refreshSession,
-  startCheckout,
-  openBillingPortal,
-  canTranscribe,
-  setAuthEventHandlers,
-  startPeriodicAuthRefresh,
-  stopPeriodicAuthRefresh,
-  type AuthSession,
-} from './auth';
-import {
-  getPendingDeepLink,
-  clearPendingDeepLink,
-} from './deepLink';
 import { getSettings, updateSettings, resetSettings } from './settings';
 import { registerHotkey, unregisterAll, notifyExternalKeyup, notifyExternalKeydown } from './hotkey';
 import { transcribePcm, transcribeCloud, CloudTranscribeError, checkResources, cancelActiveTranscription } from './transcriber';
@@ -59,7 +31,6 @@ import {
 import {
   warmUpRecordingWindow,
   showRecordingWindow,
-  setState as setRecordingWindowState,
   setLevel as setRecordingWindowLevel,
   hideRecordingWindow,
 } from './recordingWindow';
@@ -72,7 +43,7 @@ import {
 } from './mediaControl';
 import { getSystemLocale, resolveUiLanguage, tBackend } from './i18n';
 import { rebuildTrayLabels } from './tray';
-import { getReleaseState } from './release';
+import { getReleaseState, startReleasePolling, stopReleasePolling, fetchLatestRelease } from './release';
 import { getAppVersion } from './appVersion';
 import type { RecordingState, AppSettings } from './types';
 
@@ -133,34 +104,27 @@ async function processQueue(): Promise<void> {
       try {
         const cfg = getSettings();
         let out;
-        let countedByServer = false;
         if (cfg.mode === 'cloud') {
           try {
-            console.log('[backend] dispatching transcription job to cloud (language=auto)');
-            out = await transcribeCloud(job.pcm, job.sampleRate, job.channels);
-            countedByServer = true;
+            out = await transcribeCloud(job.pcm, job.sampleRate, job.channels, {
+              apiKey: cfg.openaiApiKey,
+              model: cfg.openaiModel,
+            });
           } catch (err) {
-            // Quota hit: server returned 429 with the current usage snapshot.
-            // Sync the local mirror so the UI shows the limit immediately, and
-            // skip this job — do NOT fall back to offline, the user is out of
-            // free quota and would otherwise bypass the gate.
-            if (err instanceof CloudTranscribeError && err.status === 429) {
-              if (err.usage) {
-                applyServerUsage({
-                  monthKey: err.usage.monthKey,
-                  wordsUsed: err.usage.wordsUsed,
-                  wordsLimit: err.usage.wordsLimit,
-                  exceeded: err.usage.exceeded,
-                });
-              } else {
-                broadcast('usage:limitReached', {});
-              }
+            if (err instanceof CloudTranscribeError && err.reason === 'no-api-key') {
+              broadcast('transcription:blocked', { reason: 'no-api-key' });
+              continue;
+            }
+            if (err instanceof CloudTranscribeError && err.reason === 'invalid-key') {
+              broadcast('transcription:blocked', { reason: 'invalid-key' });
               continue;
             }
             // Network/upstream failure: fall back to the offline model so the
-            // user still gets a transcription. Other errors (auth, quota)
-            // propagate as before.
-            if (err instanceof CloudTranscribeError && (err.status === undefined || err.status === 502 || err.status === 503 || err.status === 504)) {
+            // user still gets a transcription.
+            if (
+              err instanceof CloudTranscribeError &&
+              (err.reason === 'network' || err.reason === 'upstream')
+            ) {
               console.warn('[backend] cloud transcription failed, falling back to offline:', err.message);
               broadcast('transcription:cloudFallback', { reason: err.message });
               out = await transcribePcm(job.pcm, job.sampleRate, job.channels);
@@ -171,12 +135,11 @@ async function processQueue(): Promise<void> {
         } else {
           out = await transcribePcm(job.pcm, job.sampleRate, job.channels);
         }
+        if (!out) continue;
         const meaningful = out.text.replace(/\s/g, '').length >= 2;
         const wordCount = meaningful ? countWords(out.text) : 0;
         if (meaningful) {
           await deliverText(out.text);
-        }
-        if (meaningful) {
           insertTranscription({
             id: randomUUID(),
             createdAt: Date.now(),
@@ -189,19 +152,6 @@ async function processQueue(): Promise<void> {
           });
           broadcast('history:changed');
           broadcast('stats:totals', getStatsTotals());
-        }
-        if (meaningful && wordCount > 0) {
-          // Local counter stays in sync with the user's monthly bucket so the UI
-          // updates immediately. When the cloud path ran, the server already
-          // incremented its own counter inside /api/transcribe — skip the
-          // queued sync to /api/usage to avoid double-counting.
-          addMonthlyWordUsage(wordCount);
-          if (!countedByServer) {
-            recordUsage({
-              words: wordCount,
-              audioSeconds: Math.round((out.audioDurationMs ?? 0) / 1000),
-            });
-          }
         }
       } catch (err) {
         console.error('[backend] transcription job failed:', err);
@@ -265,20 +215,7 @@ export async function registerBackend(opts: BackendOptions): Promise<void> {
   ensureAccessibilityForHotkey();
   warmUpRecordingWindow();
   prewarmMediaControl();
-
-  setUsageEventHandlers({
-    onLimitReached: (info) => broadcast('usage:limitReached', info),
-  });
-  setAuthEventHandlers({
-    onPlanDowngrade: () => {
-      void flushUsageQueue(true);
-      broadcast('auth:changed', getSession());
-      broadcast('stats:totals', getStatsTotals());
-      broadcast('usage:planChanged', { plan: 'free' });
-    },
-  });
-  startUsageSync();
-  startPeriodicAuthRefresh();
+  startReleasePolling();
 
   ipcMain.handle('settings:get', (): AppSettings => getSettings());
   ipcMain.handle(
@@ -343,13 +280,9 @@ export async function registerBackend(opts: BackendOptions): Promise<void> {
         syncState();
         return;
       }
-      const gate = canTranscribe(readLocalUsage);
-      if (!gate.allowed) {
-        if (gate.reason === 'limit-reached' && gate.info) {
-          broadcast('usage:limitReached', gate.info);
-        } else {
-          broadcast('transcription:blocked', { reason: gate.reason });
-        }
+      const cfg = getSettings();
+      if (cfg.mode === 'cloud' && !cfg.openaiApiKey) {
+        broadcast('transcription:blocked', { reason: 'no-api-key' });
         syncState();
         return;
       }
@@ -408,39 +341,9 @@ export async function registerBackend(opts: BackendOptions): Promise<void> {
   ipcMain.handle('app:openSettings', () => activeMainWindowOpener?.());
 
   ipcMain.handle('release:getState', () => getReleaseState());
-
-  ipcMain.handle('auth:getSession', (): AuthSession => getSession());
-  ipcMain.handle(
-    'auth:loginWithToken',
-    async (_e, token: string): Promise<AuthSession> => {
-      const session = await loginWithToken(token);
-      broadcast('auth:changed', session);
-      return session;
-    }
-  );
-  ipcMain.handle('auth:logout', async (): Promise<AuthSession> => {
-    const session = await authLogout();
-    broadcast('auth:changed', session);
-    return session;
-  });
-  ipcMain.handle('auth:refresh', async (): Promise<AuthSession> => {
-    const session = await refreshSession();
-    broadcast('auth:changed', session);
-    return session;
-  });
-  ipcMain.handle('auth:checkout', async (_e, billingPeriod: 'monthly' | 'annual'): Promise<string> => {
-    return startCheckout(billingPeriod);
-  });
-  ipcMain.handle('auth:billingPortal', async (): Promise<string> => {
-    return openBillingPortal();
-  });
-
-  ipcMain.handle('usage:getMonthly', () => ({
-    used: getMonthlyWordUsage(),
-    limit: getMonthlyWordLimit(),
-  }));
-  ipcMain.handle('usage:flush', async () => {
-    await flushUsageQueue(true);
+  ipcMain.handle('release:check', async () => {
+    await fetchLatestRelease();
+    return getReleaseState();
   });
 
   ipcMain.handle('onboarding:getState', (): OnboardingState => getOnboardingState());
@@ -480,18 +383,17 @@ export async function registerBackend(opts: BackendOptions): Promise<void> {
     ): Promise<string> => {
       const pcm = Buffer.from(payload.pcm);
       const cfg = getSettings();
-      if (cfg.mode === 'cloud') {
+      if (cfg.mode === 'cloud' && cfg.openaiApiKey) {
         try {
-          console.log('[onboarding] dispatching preview to cloud (language=auto)');
-          const out = await transcribeCloud(pcm, payload.sampleRate, payload.channels);
+          const out = await transcribeCloud(pcm, payload.sampleRate, payload.channels, {
+            apiKey: cfg.openaiApiKey,
+            model: cfg.openaiModel,
+          });
           return out.text;
         } catch (err) {
           if (
             err instanceof CloudTranscribeError &&
-            (err.status === undefined ||
-              err.status === 502 ||
-              err.status === 503 ||
-              err.status === 504)
+            (err.reason === 'network' || err.reason === 'upstream')
           ) {
             console.warn(
               '[onboarding] cloud preview failed, falling back to offline:',
@@ -508,45 +410,28 @@ export async function registerBackend(opts: BackendOptions): Promise<void> {
     }
   );
 
-  ipcMain.handle('deepLink:getPending', () => getPendingDeepLink());
-  ipcMain.handle('deepLink:clearPending', (_e, url?: string) => {
-    clearPendingDeepLink(url);
-  });
   ipcMain.handle('app:openExternal', (_e, url: string) => shell.openExternal(url));
 
   app.on('before-quit', () => {
     unregisterAll();
     destroyTray();
-    void flushUsageQueue(true);
-    stopUsageSync();
-    stopPeriodicAuthRefresh();
+    stopReleasePolling();
     shutdownMediaControl();
   });
-}
-
-function readLocalUsage(): { used: number; limit: number } {
-  return { used: getMonthlyWordUsage(), limit: getMonthlyWordLimit() };
 }
 
 function handleStartRecording(): void {
   if (isRecording) return;
   if (!recordingArmed) return;
-  if (getSession().isAuthenticated) {
-    const gate = canTranscribe(readLocalUsage);
-    if (!gate.allowed) {
-      if (gate.reason === 'limit-reached' && gate.info) {
-        broadcast('usage:limitReached', gate.info);
-      } else {
-        broadcast('transcription:blocked', { reason: gate.reason });
-      }
-      return;
-    }
+  const cfg = getSettings();
+  if (cfg.mode === 'cloud' && !cfg.openaiApiKey) {
+    broadcast('transcription:blocked', { reason: 'no-api-key' });
+    return;
   }
   isRecording = true;
   showRecordingWindow('recording');
   syncState();
   broadcast('recording:start');
-  const cfg = getSettings();
   if (cfg.muteSystemAudioWhileRecording) {
     void muteSystemAudio().then((snap) => {
       if (!isRecording) {

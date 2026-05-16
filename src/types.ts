@@ -3,6 +3,13 @@ export type RecordingState = 'idle' | 'recording' | 'transcribing';
 export type UiLanguage = 'en' | 'es' | 'zh' | 'hi' | 'ar';
 export type UiLanguageSetting = UiLanguage | 'system';
 
+export const OPENAI_TRANSCRIPTION_MODELS = [
+  'whisper-1',
+  'gpt-4o-mini-transcribe',
+  'gpt-4o-transcribe',
+] as const;
+export type OpenAITranscriptionModel = (typeof OPENAI_TRANSCRIPTION_MODELS)[number];
+
 export interface AppSettings {
   hotkey: string;
   handsFreeMode: boolean;
@@ -11,6 +18,8 @@ export interface AppSettings {
   muteSystemAudioWhileRecording: boolean;
   openAtLogin: boolean;
   mode: 'offline' | 'cloud';
+  openaiApiKey: string | null;
+  openaiModel: OpenAITranscriptionModel;
 }
 
 export interface TranscriptionRow {
@@ -37,44 +46,6 @@ export interface ResourceCheck {
   missing: string[];
 }
 
-export type Plan = 'free' | 'pro';
-
-export interface PricingPlan {
-  priceId: string | null;
-  amount: number;
-  currency: string;
-  label: string;
-}
-
-export interface PricingPlanAnnual extends PricingPlan {
-  monthlyEquivalent: string;
-  savings: string;
-}
-
-export interface Pricing {
-  pro: {
-    monthly: PricingPlan;
-    annual: PricingPlanAnnual;
-  };
-}
-
-export interface UserInfo {
-  userId: string;
-  email: string;
-  name: string;
-  plan: Plan;
-  avatarUrl?: string | null;
-  subscriptionStatus?: string | null;
-  subscriptionExpiresAt?: string | null;
-  subscriptionBillingPeriod?: string | null;
-  pricing?: Pricing | null;
-}
-
-export interface AuthSession {
-  isAuthenticated: boolean;
-  userInfo: UserInfo | null;
-}
-
 export type OnboardingStep = 1 | 2 | 3;
 
 export interface OnboardingState {
@@ -89,6 +60,7 @@ export interface PermissionStatus {
 
 export interface ReleaseInfo {
   version: string | null;
+  htmlUrl: string | null;
   downloadUrls: {
     mac: string | null;
     windows: string | null;
@@ -102,6 +74,10 @@ export interface ReleaseState {
   hasUpdate: boolean;
   downloadUrl: string | null;
   fetchedAt: number | null;
+}
+
+export interface TranscriptionBlockedPayload {
+  reason: 'no-api-key' | 'invalid-key' | string;
 }
 
 declare global {
@@ -133,6 +109,8 @@ declare global {
       notifyExternalKeyup: () => void;
       notifyExternalKeydown: () => void;
       onRecordingLevel: (cb: (level: number) => void) => () => void;
+      onTranscriptionBlocked: (cb: (payload: TranscriptionBlockedPayload) => void) => () => void;
+      onTranscriptionCloudFallback: (cb: (payload: { reason: string }) => void) => () => void;
       listHistory: (limit?: number) => Promise<TranscriptionRow[]>;
       deleteHistory: (id: string) => Promise<void>;
       clearHistory: () => Promise<void>;
@@ -141,27 +119,10 @@ declare global {
       onStatsTotalsChange: (cb: (s: StatsTotals) => void) => () => void;
       checkResources: () => Promise<ResourceCheck>;
       onNavigate: (cb: (payload: { to: string }) => void) => () => void;
-      auth: {
-        getSession: () => Promise<AuthSession>;
-        loginWithToken: (token: string) => Promise<AuthSession>;
-        logout: () => Promise<AuthSession>;
-        refresh: () => Promise<AuthSession>;
-        onChange: (cb: (s: AuthSession) => void) => () => void;
-        checkout: (billingPeriod: 'monthly' | 'annual') => Promise<string>;
-        billingPortal: () => Promise<string>;
-      };
-      deepLink: {
-        getPending: () => Promise<string | null>;
-        clearPending: (url?: string) => Promise<void>;
-        onLink: (cb: (payload: { url: string }) => void) => () => void;
-      };
       openExternal: (url: string) => Promise<void>;
-      usage: {
-        getMonthly: () => Promise<{ used: number; limit: number }>;
-        onLimitReached: (cb: (payload: { used: number; limit: number }) => void) => () => void;
-      };
       release: {
         getState: () => Promise<ReleaseState>;
+        check: () => Promise<ReleaseState>;
         onStateChange: (cb: (s: ReleaseState) => void) => () => void;
       };
       onboarding: {

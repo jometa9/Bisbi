@@ -3,7 +3,6 @@ import { createRoot } from 'react-dom/client';
 import { App } from './App';
 import { RecordingApp } from './RecordingApp';
 import { I18nGate } from './i18n/I18nGate';
-import { AuthProvider } from './context/AuthContext';
 import './styles.css';
 
 const root = createRoot(document.getElementById('root')!);
@@ -23,13 +22,7 @@ void window.bisbi?.getPlatform().then((p) => {
 root.render(
   <React.StrictMode>
     <I18nGate>
-      {isRecordingWindow ? (
-        <RecordingApp />
-      ) : (
-        <AuthProvider>
-          <App />
-        </AuthProvider>
-      )}
+      {isRecordingWindow ? <RecordingApp /> : <App />}
     </I18nGate>
   </React.StrictMode>
 );

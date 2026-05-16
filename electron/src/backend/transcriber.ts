@@ -5,8 +5,7 @@ import fs from 'fs';
 import os from 'os';
 import { randomUUID } from 'crypto';
 import { BUILD_CONFIG } from '../buildConfig';
-import { apiFetch } from './apiClient';
-import { getAuthToken } from './auth';
+import type { OpenAITranscriptionModel } from './types';
 
 let activeWhisper: ChildProcess | null = null;
 
@@ -140,20 +139,11 @@ export async function transcribePcm(
   }
 }
 
-export interface CloudUsageInfo {
-  monthKey: string;
-  wordsUsed: number;
-  wordsLimit: number | null;
-  exceeded: boolean;
-  tier: string;
-  remaining: number | null;
-}
-
 export class CloudTranscribeError extends Error {
   constructor(
     message: string,
     public readonly status?: number,
-    public readonly usage?: CloudUsageInfo
+    public readonly reason?: 'no-api-key' | 'invalid-key' | 'network' | 'upstream'
   ) {
     super(message);
     this.name = 'CloudTranscribeError';
@@ -182,109 +172,87 @@ function buildWavBuffer(pcm: Buffer, sampleRate: number, channels: number): Buff
   return Buffer.concat([header, pcm]);
 }
 
+const OPENAI_TRANSCRIBE_URL = 'https://api.openai.com/v1/audio/transcriptions';
+
 export async function transcribeCloud(
   pcm: Buffer,
   sampleRate: number,
-  channels: number
+  channels: number,
+  options: { apiKey: string | null; model: OpenAITranscriptionModel }
 ): Promise<TranscribeOutput> {
-  const token = getAuthToken();
-  if (!token) {
-    throw new CloudTranscribeError('Not authenticated');
+  const apiKey = options.apiKey?.trim();
+  if (!apiKey) {
+    throw new CloudTranscribeError('OpenAI API key not set', undefined, 'no-api-key');
   }
   const startedAt = Date.now();
   const bytesPerFrame = 2 * Math.max(1, channels);
   const audioDurationMs = Math.round((pcm.length / (sampleRate * bytesPerFrame)) * 1000);
-  const audioSeconds = Math.round(audioDurationMs / 1000);
   console.log(
-    `[transcriber] cloud transcription started: language=auto audioSeconds=${audioSeconds} pcmBytes=${pcm.length} sampleRate=${sampleRate} channels=${channels}`
+    `[transcriber] openai request started: model=${options.model} audioSeconds=${Math.round(audioDurationMs / 1000)} pcmBytes=${pcm.length}`
   );
 
   const wav = buildWavBuffer(pcm, sampleRate, channels);
-  const form = new FormData();
   // Copy into a fresh ArrayBuffer so the Blob constructor doesn't choke on
   // Buffer's union-typed underlying buffer (Node 20 typings include
   // SharedArrayBuffer, which Blob's BlobPart does not accept).
   const wavBytes = new Uint8Array(wav.byteLength);
   wavBytes.set(wav);
+
+  const form = new FormData();
   form.append('file', new Blob([wavBytes.buffer], { type: 'audio/wav' }), 'audio.wav');
-  form.append('audioSeconds', String(audioSeconds));
+  form.append('model', options.model);
+  // whisper-1 supports verbose_json (gives detected language); the gpt-4o
+  // transcribe models only return json/text with no language field. Stick to
+  // the lowest common denominator and don't depend on `language` downstream.
+  form.append('response_format', 'json');
 
   let resp: Response;
   try {
-    console.log('[transcriber] cloud request POST /api/transcribe');
-    resp = await apiFetch('/api/transcribe', {
+    resp = await fetch(OPENAI_TRANSCRIBE_URL, {
       method: 'POST',
+      headers: { Authorization: `Bearer ${apiKey}` },
       body: form,
-      token,
     });
-    console.log(`[transcriber] cloud response status=${resp.status} in ${Date.now() - startedAt}ms`);
   } catch (err) {
-    console.error('[transcriber] cloud request failed:', err instanceof Error ? err.message : String(err));
-    throw new CloudTranscribeError(
-      err instanceof Error ? err.message : String(err)
-    );
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error('[transcriber] openai network error:', msg);
+    throw new CloudTranscribeError(msg, undefined, 'network');
   }
 
   if (!resp.ok) {
     let detail = '';
-    let usage: CloudUsageInfo | undefined;
-    try {
-      detail = await resp.text();
-      try {
-        const parsed = JSON.parse(detail) as {
-          monthKey?: unknown;
-          wordsUsed?: unknown;
-          wordsLimit?: unknown;
-          exceeded?: unknown;
-          tier?: unknown;
-          remaining?: unknown;
-        };
-        if (
-          typeof parsed.monthKey === 'string' &&
-          typeof parsed.wordsUsed === 'number'
-        ) {
-          usage = {
-            monthKey: parsed.monthKey,
-            wordsUsed: parsed.wordsUsed,
-            wordsLimit:
-              typeof parsed.wordsLimit === 'number' ? parsed.wordsLimit : null,
-            exceeded: parsed.exceeded === true,
-            tier: typeof parsed.tier === 'string' ? parsed.tier : 'free',
-            remaining:
-              typeof parsed.remaining === 'number' ? parsed.remaining : null,
-          };
-        }
-      } catch {}
-    } catch {}
-    console.error(`[transcriber] cloud transcription failed status=${resp.status} detail=${detail.slice(0, 200)}`);
+    try { detail = await resp.text(); } catch {}
+    console.error(`[transcriber] openai failed status=${resp.status} detail=${detail.slice(0, 300)}`);
+    const reason = resp.status === 401 || resp.status === 403 ? 'invalid-key' : 'upstream';
     throw new CloudTranscribeError(
-      `Cloud transcription failed (${resp.status}): ${detail.slice(0, 200)}`,
+      `OpenAI transcription failed (${resp.status}): ${detail.slice(0, 200)}`,
       resp.status,
-      usage
+      reason
     );
   }
 
-  let payload: { text?: string; language?: string | null; model?: string } = {};
+  let payload: { text?: string; language?: string | null } = {};
   try {
     payload = (await resp.json()) as typeof payload;
   } catch (err) {
     throw new CloudTranscribeError(
-      `Malformed cloud response: ${err instanceof Error ? err.message : String(err)}`
+      `Malformed OpenAI response: ${err instanceof Error ? err.message : String(err)}`,
+      resp.status,
+      'upstream'
     );
   }
 
   const durationMs = Date.now() - startedAt;
   const text = (payload.text ?? '').trim();
-  const resolvedLanguage = payload.language ?? 'auto';
   console.log(
-    `[transcriber] cloud transcription done: model=${payload.model ?? 'cloud'} language=${resolvedLanguage} durationMs=${durationMs} textLength=${text.length}`
+    `[transcriber] openai done: model=${options.model} durationMs=${durationMs} textLength=${text.length}`
   );
   return {
     text,
     language: payload.language ?? null,
     durationMs,
     audioDurationMs,
-    modelFile: payload.model ?? 'cloud',
+    modelFile: options.model,
   };
 }
 

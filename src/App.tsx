@@ -2,41 +2,30 @@ import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { Home } from './pages/Home';
 import { Settings } from './pages/Settings';
 import { History } from './pages/History';
-import { Account } from './pages/Account';
-import { Login } from './pages/Login';
 import { Onboarding } from './pages/Onboarding';
 import { startRecording, type RecordingHandle } from './audio';
 import { UpdateBanner } from './components/UpdateBanner';
 import type { AppSettings, RecordingState } from './types';
 import { useTranslation } from './i18n';
-import { useAuth } from './context/AuthContext';
 import owlIdleSvg from '../build-resources/owl_head.svg';
 import owlRecSvg from '../build-resources/owl_head_rec.svg';
 
-type Tab = 'home' | 'settings' | 'history' | 'account';
+type Tab = 'home' | 'settings' | 'history';
 
 export function App() {
   const { t } = useTranslation();
-  const { isLoading: isAuthLoading, isAuthenticated, userInfo } = useAuth();
   const [tab, setTab] = useState<Tab>('home');
   const [settings, setSettings] = useState<AppSettings | null>(null);
   const settingsRef = useRef<AppSettings | null>(null);
   const [recState, setRecState] = useState<RecordingState>('idle');
   const [appVersion, setAppVersion] = useState('');
   const [resourcesOk, setResourcesOk] = useState<boolean | null>(null);
-  const [showLimitBanner, setShowLimitBanner] = useState(false);
-  const limitReached = showLimitBanner && userInfo?.plan !== 'pro';
-  const [tourActive, setTourActive] = useState(true);
-  const [tourMicNeeded, setTourMicNeeded] = useState(false);
-  const [avatarFailed, setAvatarFailed] = useState(false);
+  const [tourActive, setTourActive] = useState<boolean | null>(null);
+  const [blockedReason, setBlockedReason] = useState<string | null>(null);
 
   useEffect(() => {
     settingsRef.current = settings;
   }, [settings]);
-
-  useEffect(() => {
-    setAvatarFailed(false);
-  }, [userInfo?.avatarUrl]);
 
   useEffect(() => {
     if (!window.bisbi) return;
@@ -44,45 +33,35 @@ export function App() {
     void window.bisbi.getAppVersion().then(setAppVersion);
     void window.bisbi.getRecordingState().then(setRecState);
     void window.bisbi.checkResources().then((c) => setResourcesOk(c.ok));
+    void window.bisbi.onboarding.getState().then((s) => setTourActive(!s.completed));
 
     const offSettings = window.bisbi.onSettingsChange(setSettings);
     const offState = window.bisbi.onRecordingState(setRecState);
     const offNav = window.bisbi.onNavigate(({ to }) => {
       if (to === '/history') setTab('history');
       else if (to === '/settings') setTab('settings');
-      else if (to === '/account') setTab('account');
       else if (to === '/home' || to === '/') setTab('home');
     });
-    const offLimit = window.bisbi.usage.onLimitReached(() => {
-      setShowLimitBanner(true);
+    const offBlocked = window.bisbi.onTranscriptionBlocked(({ reason }) => {
+      setBlockedReason(reason);
+      // Auto-route the user to Settings so they can paste / fix their key.
+      if (reason === 'no-api-key' || reason === 'invalid-key') {
+        setTab('settings');
+      }
     });
     return () => {
       offSettings();
       offState();
       offNav();
-      offLimit();
+      offBlocked();
     };
   }, []);
 
   useEffect(() => {
-    if (userInfo?.plan === 'pro') setShowLimitBanner(false);
-  }, [userInfo?.plan]);
-
-  useEffect(() => {
-    if (isAuthenticated) {
-      setTab('home');
-      setTourActive(false);
-      setTourMicNeeded(false);
-    } else {
-      setTourActive(true);
-    }
-  }, [isAuthenticated]);
-
-  useEffect(() => {
     if (!window.bisbi) return;
-    const armed = isAuthenticated || tourMicNeeded;
-    void window.bisbi.setRecordingArmed(armed);
-  }, [isAuthenticated, tourMicNeeded]);
+    if (tourActive === null) return;
+    void window.bisbi.setRecordingArmed(!tourActive);
+  }, [tourActive]);
 
   useEffect(() => {
     if (!window.bisbi) return;
@@ -120,7 +99,7 @@ export function App() {
 
   useEffect(() => {
     if (!window.bisbi) return;
-    if (!isAuthenticated) return;
+    if (tourActive !== false) return;
     let handle: RecordingHandle | null = null;
     let chain: Promise<void> = Promise.resolve();
 
@@ -171,7 +150,7 @@ export function App() {
       offCancel();
       handle?.cancel();
     };
-  }, [t, isAuthenticated]);
+  }, [t, tourActive]);
 
   if (!window.bisbi) {
     return (
@@ -194,27 +173,22 @@ export function App() {
     );
   }
 
-  if (isAuthLoading || !settings) {
+  if (!settings || tourActive === null) {
     return <div className="loading">{t('app.loading')}</div>;
   }
 
-  if (!isAuthenticated) {
-    if (tourActive) {
-      return (
-        <Onboarding
-          settings={settings}
-          onSettingsChange={setSettings}
-          onExit={() => setTourActive(false)}
-          onMicNeeded={setTourMicNeeded}
-        />
-      );
-    }
-    return <Login onStartTour={() => setTourActive(true)} />;
+  if (tourActive) {
+    return (
+      <Onboarding
+        settings={settings}
+        onSettingsChange={setSettings}
+        onExit={() => {
+          setTourActive(false);
+          void window.bisbi.onboarding.setState({ completed: true });
+        }}
+      />
+    );
   }
-
-  const accountInitial = (
-    userInfo?.name || userInfo?.email || '?'
-  ).trim().charAt(0).toUpperCase();
 
   return (
     <div
@@ -255,32 +229,6 @@ export function App() {
         </nav>
         <div className="sidebar-bottom">
           <UpdateBanner />
-          <button
-            className={`sidebar-account${tab === 'account' ? ' active' : ''}`}
-            onClick={() => setTab('account')}
-          >
-            <span className="sidebar-account-avatar" aria-hidden="true">
-              {userInfo?.avatarUrl && !avatarFailed ? (
-                <img
-                  src={userInfo.avatarUrl}
-                  alt=""
-                  onError={() => setAvatarFailed(true)}
-                />
-              ) : (
-                accountInitial
-              )}
-            </span>
-            <span className="sidebar-account-text">
-              <span className="sidebar-account-name">
-                {userInfo?.name || userInfo?.email || t('app.tabs.account')}
-              </span>
-              <span className={`sidebar-account-plan plan-${userInfo?.plan ?? 'free'}`}>
-                {userInfo?.plan === 'pro'
-                  ? t('account.planPro')
-                  : t('account.planFree')}
-              </span>
-            </span>
-          </button>
           <div className="sidebar-status-row">
             <StatusBadge state={recState} />
             {appVersion && <span className="sidebar-version">v{appVersion}</span>}
@@ -294,16 +242,21 @@ export function App() {
             {t('app.resourcesMissing')}
           </div>
         )}
+        {blockedReason === 'no-api-key' && settings.mode === 'cloud' && (
+          <div className="banner banner-error">
+            {t('app.missingApiKey')}
+          </div>
+        )}
+        {blockedReason === 'invalid-key' && settings.mode === 'cloud' && (
+          <div className="banner banner-error">
+            {t('app.invalidApiKey')}
+          </div>
+        )}
         <div className="content-inner">
           {tab === 'home' && (
             <Home
               settings={settings}
               recState={recState}
-              limitReached={limitReached}
-              onUpgrade={() => {
-                setShowLimitBanner(false);
-                setTab('account');
-              }}
               onNavigateToHistory={() => setTab('history')}
             />
           )}
@@ -314,6 +267,12 @@ export function App() {
                 try {
                   const next = await window.bisbi.updateSettings(patch);
                   setSettings(next);
+                  if (
+                    patch.openaiApiKey !== undefined ||
+                    patch.mode !== undefined
+                  ) {
+                    setBlockedReason(null);
+                  }
                 } catch (err) {
                   alert((err as Error).message);
                 }
@@ -328,7 +287,6 @@ export function App() {
             />
           )}
           {tab === 'history' && <History />}
-          {tab === 'account' && <Account limitReached={limitReached} />}
         </div>
       </main>
     </div>

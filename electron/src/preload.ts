@@ -55,6 +55,10 @@ const bisbi = {
   notifyExternalKeydown: () => ipcRenderer.send('hotkey:externalKeydown'),
   onRecordingLevel: (cb: (level: number) => void) =>
     listen<number>('recording:level', cb),
+  onTranscriptionBlocked: (cb: (payload: { reason: string }) => void) =>
+    listen<{ reason: string }>('transcription:blocked', cb),
+  onTranscriptionCloudFallback: (cb: (payload: { reason: string }) => void) =>
+    listen<{ reason: string }>('transcription:cloudFallback', cb),
 
   // History
   listHistory: (limit?: number) =>
@@ -79,31 +83,10 @@ const bisbi = {
   onNavigate: (cb: (payload: { to: string }) => void) =>
     listen<{ to: string }>('navigate', cb),
 
-  // Auth
-  auth: {
-    getSession: () =>
-      invoke<import('./backend/auth').AuthSession>('auth:getSession'),
-    loginWithToken: (token: string) =>
-      invoke<import('./backend/auth').AuthSession>('auth:loginWithToken', token),
-    logout: () => invoke<import('./backend/auth').AuthSession>('auth:logout'),
-    refresh: () => invoke<import('./backend/auth').AuthSession>('auth:refresh'),
-    onChange: (cb: (s: import('./backend/auth').AuthSession) => void) =>
-      listen<import('./backend/auth').AuthSession>('auth:changed', cb),
-    checkout: (billingPeriod: 'monthly' | 'annual') =>
-      invoke<string>('auth:checkout', billingPeriod),
-    billingPortal: () => invoke<string>('auth:billingPortal'),
-  },
-
-  // Deep link / external links
-  deepLink: {
-    getPending: () => invoke<string | null>('deepLink:getPending'),
-    clearPending: (url?: string) => invoke<void>('deepLink:clearPending', url),
-    onLink: (cb: (payload: { url: string }) => void) =>
-      listen<{ url: string }>('deep-link', cb),
-  },
+  // External links
   openExternal: (url: string) => invoke<void>('app:openExternal', url),
 
-  // Onboarding (first-run flow shown before login)
+  // Onboarding (first-run flow)
   onboarding: {
     getState: () =>
       invoke<import('./backend/onboarding').OnboardingState>('onboarding:getState'),
@@ -130,21 +113,15 @@ const bisbi = {
       invoke<string>('onboarding:transcribePreview', { pcm, sampleRate, channels }),
   },
 
-  // Release / update banner — admin-managed via landing page; refreshed on every API call.
+  // Release / update banner — polled from GitHub Releases of the public repo.
   release: {
     getState: () =>
       invoke<import('./backend/release').ReleaseState>('release:getState'),
+    check: () =>
+      invoke<import('./backend/release').ReleaseState>('release:check'),
     onStateChange: (
       cb: (s: import('./backend/release').ReleaseState) => void
     ) => listen<import('./backend/release').ReleaseState>('release:state', cb),
-  },
-
-  // Usage / quota — free plan monthly word cap, tracked locally.
-  usage: {
-    getMonthly: () =>
-      invoke<{ used: number; limit: number }>('usage:getMonthly'),
-    onLimitReached: (cb: (payload: { used: number; limit: number }) => void) =>
-      listen<{ used: number; limit: number }>('usage:limitReached', cb),
   },
 };
 

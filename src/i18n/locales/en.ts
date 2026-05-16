@@ -4,70 +4,16 @@
 export const en: {
   app: {
     brand: string;
-    tabs: { home: string; history: string; settings: string; account: string };
+    tabs: { home: string; history: string; settings: string };
     status: { idle: string; recording: string; transcribing: string };
     loading: string;
     notElectron: { body: string; devHint: string };
     resourcesMissing: string;
     micError: string;
-    limitReached: string;
-    limitResetsNextMonth: string;
+    missingApiKey: string;
+    invalidApiKey: string;
     updateAvailable: string;
     updateAction: string;
-  };
-  auth: {
-    welcome: string;
-    tagline: string;
-    signIn: string;
-    authenticating: string;
-    redirecting: string;
-    validating: string;
-    tryAgain: string;
-    invalidToken: string;
-    connectionError: string;
-    noAccount: string;
-    signUp: string;
-    takeTour: string;
-    backToLogin: string;
-  };
-  account: {
-    title: string;
-    plan: string;
-    billing: string;
-    planFree: string;
-    planPro: string;
-    planTrial: string;
-    planCanceling: string;
-    trialEnds: string;
-    renewsOn: string;
-    cancelsOn: string;
-    refresh: string;
-    refreshing: string;
-    email: string;
-    name: string;
-    userId: string;
-    manageSubscription: string;
-    upgradeToPro: string;
-    logout: string;
-    confirmLogout: string;
-    monthly: string;
-    annual: string;
-    month: string;
-    forever: string;
-    currentPlan: string;
-    billingPeriod: string;
-    opening: string;
-    features: {
-      dictation2k: string;
-      unlimited: string;
-      allDevices: string;
-      languages: string;
-      zeroRetention: string;
-      priority: string;
-    };
-    profileSection: { title: string; description: string };
-    subscriptionSection: { title: string; description: string };
-    sessionSection: { title: string; description: string };
   };
   home: {
     greeting: { lateNight: string; morning: string; afternoon: string; evening: string };
@@ -117,6 +63,20 @@ export const en: {
       description: string;
       offline: { label: string; hint: string };
       cloud: { label: string; hint: string };
+    };
+    openaiKey: {
+      title: string;
+      description: string;
+      show: string;
+      hide: string;
+      save: string;
+      saved: string;
+      clear: string;
+      hint: string;
+    };
+    openaiModel: {
+      title: string;
+      description: string;
     };
     uiLanguage: { title: string; description: string; system: string };
     openAtLogin: {
@@ -178,6 +138,7 @@ export const en: {
   onboarding: {
     progress: string;
     back: string;
+    skip: string;
     welcome: {
       title: string;
       subtitle: string;
@@ -221,7 +182,6 @@ export const en: {
       home: 'Home',
       history: 'History',
       settings: 'Settings',
-      account: 'Account',
     },
     status: {
       idle: 'Ready',
@@ -233,76 +193,13 @@ export const en: {
       body: 'This window must be opened from Electron so the global hotkey, the microphone, and transcription work.',
       devHint: 'If you are in development, run {cmd} in the repo root and let Electron open its own window. Do not open {url} directly in the browser.',
     },
-    resourcesMissing: 'Something went wrong. Please contact support.',
+    resourcesMissing: 'Something went wrong loading local resources. Try reinstalling Bisbi.',
     micError:
       'Could not access the microphone. Make sure Bisbi has permission in your system settings.',
-    limitReached: 'Limit reached',
-    limitResetsNextMonth: 'Your free plan limit resets next month.',
+    missingApiKey: 'Add your OpenAI API key in Settings to use online transcription.',
+    invalidApiKey: 'OpenAI rejected your API key. Check it in Settings.',
     updateAvailable: 'A new version of Bisbi is available.',
     updateAction: 'Download',
-  },
-  auth: {
-    welcome: 'You know how it works now.',
-    tagline: 'Create your free account or sign in.',
-    signIn: 'Sign in with Google',
-    authenticating: 'Authenticating in browser…',
-    redirecting: 'Redirecting back to the app…',
-    validating: 'Validating session…',
-    tryAgain: 'Try again',
-    invalidToken: 'We could not validate that session. Please sign in again.',
-    connectionError: 'Connection error. Check your internet and try again.',
-    noAccount: "Don't have an account?",
-    signUp: 'Sign up',
-    takeTour: 'Take a tour',
-    backToLogin: 'Go to login',
-  },
-  account: {
-    title: 'Account',
-    plan: 'Plan',
-    billing: 'Billing',
-    planFree: 'Free',
-    planPro: 'Pro',
-    planTrial: 'Trial',
-    planCanceling: 'Canceling',
-    trialEnds: 'Trial ends {date}',
-    renewsOn: 'Renews {date}',
-    cancelsOn: 'Cancels {date}',
-    refresh: 'Refresh plan',
-    refreshing: 'Refreshing…',
-    email: 'Email',
-    name: 'Name',
-    userId: 'User ID',
-    manageSubscription: 'Manage subscription',
-    upgradeToPro: 'Upgrade to Pro',
-    logout: 'Log out',
-    confirmLogout: 'Log out of Bisbi?',
-    monthly: 'Monthly',
-    annual: 'Annual',
-    month: 'month',
-    forever: 'forever',
-    currentPlan: 'Current plan',
-    billingPeriod: 'Billing period',
-    opening: 'Opening…',
-    features: {
-      dictation2k: '2,000 words / month on desktop',
-      unlimited: 'Unlimited words on all devices',
-      allDevices: 'Mac & Windows',
-      languages: '99 languages',
-      zeroRetention: 'Zero data retention',
-      priority: 'Priority support',
-    },
-    profileSection: {
-      title: 'Profile',
-      description: 'How Bisbi identifies you across devices.',
-    },
-    subscriptionSection: {
-      title: 'Subscription',
-      description: 'Manage your plan and billing.',
-    },
-    sessionSection: {
-      title: 'Session',
-      description: 'Sign out of this device.',
-    },
   },
   home: {
     greeting: {
@@ -381,12 +278,26 @@ export const en: {
       description: 'Where transcription runs.',
       offline: {
         label: 'Offline',
-        hint: 'Runs entirely on this computer with a lightweight model — your voice never leaves the device. Quality is noticeably lower than online, especially with accents, names and noisy audio. Use online for better results.',
+        hint: 'Runs entirely on this computer with a lightweight model — your voice never leaves the device. Quality is lower than the online OpenAI models.',
       },
       cloud: {
-        label: 'Online',
-        hint: 'Best quality transcription using our servers. Requires internet. We do not store your audio or transcripts — we process them and return the result.',
+        label: 'Online (OpenAI)',
+        hint: 'Sends audio directly to OpenAI using your own API key. Best quality. You are billed by OpenAI; Bisbi never sees your audio or key.',
       },
+    },
+    openaiKey: {
+      title: 'OpenAI API key',
+      description: 'Stored locally on this device and used only to call OpenAI.',
+      show: 'Show',
+      hide: 'Hide',
+      save: 'Save',
+      saved: 'Saved',
+      clear: 'Clear',
+      hint: 'Create one at',
+    },
+    openaiModel: {
+      title: 'OpenAI transcription model',
+      description: 'Which OpenAI model to send your audio to.',
     },
     uiLanguage: {
       title: 'App language',
@@ -482,6 +393,7 @@ export const en: {
   onboarding: {
     progress: '{current} of {total}',
     back: 'Back',
+    skip: 'Skip',
     welcome: {
       title: 'You type slow. Talking is 3× faster.',
       subtitle:

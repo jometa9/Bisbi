@@ -98,12 +98,11 @@
       "buildResources": "build-resources"
     },
     "afterPack": "electron/dist/afterPack.js",
-    "protocols": [
+    "publish": [
       {
-        "name": "Bisbi",
-        "schemes": [
-          "bisbi"
-        ]
+        "provider": "github",
+        "owner": "jometa9",
+        "repo": "Bisbi"
       }
     ],
     "mac": {
@@ -132,7 +131,7 @@
           ]
         }
       ],
-      "artifactName": "Bisbi-Setup.${ext}"
+      "artifactName": "Bisbi-${version}-${os}-${arch}.${ext}"
     },
     "dmg": {
       "icon": "build-resources/icon.icns",
@@ -173,7 +172,7 @@
       "include": "build/installer.nsh",
       "installerSidebar": "build-resources/installerSidebar.bmp",
       "uninstallerSidebar": "build-resources/uninstallerSidebar.bmp",
-      "artifactName": "Bisbi-Setup.${ext}"
+      "artifactName": "Bisbi-${version}-${os}-${arch}.${ext}"
     },
     "linux": {
       "icon": "build-resources/icon.png",
@@ -192,7 +191,7 @@
           ]
         }
       ],
-      "artifactName": "Bisbi-Setup.${ext}"
+      "artifactName": "Bisbi-${version}-${os}-${arch}.${ext}"
     }
   }
 }

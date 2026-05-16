@@ -8,8 +8,6 @@ import type { KeyPlatform } from '../lib/hotkey';
 interface Props {
   settings: AppSettings;
   recState: RecordingState;
-  limitReached?: boolean;
-  onUpgrade?: () => void;
   onNavigateToHistory?: () => void;
 }
 
@@ -22,7 +20,7 @@ const EMPTY_TOTALS: StatsTotals = {
   totalWords: 0,
 };
 
-export function Home({ settings, recState, limitReached = false, onUpgrade, onNavigateToHistory }: Props) {
+export function Home({ settings, recState, onNavigateToHistory }: Props) {
   const { t, language } = useTranslation();
   const [rows, setRows] = useState<TranscriptionRow[]>([]);
   const [totals, setTotals] = useState<StatsTotals>(EMPTY_TOTALS);
@@ -57,13 +55,12 @@ export function Home({ settings, recState, limitReached = false, onUpgrade, onNa
 
   const statusText = t(`home.statusTitle.${recState}` as const);
   const lastTranscription = rows[0]?.text?.trim() ?? '';
-  const watermarkText = limitReached
-    ? t('app.limitReached')
-    : recState === 'recording'
-    ? t('home.watermark.listening')
-    : recState === 'transcribing'
-    ? t('home.watermark.transcribing')
-    : lastTranscription || t('home.watermark.idle');
+  const watermarkText =
+    recState === 'recording'
+      ? t('home.watermark.listening')
+      : recState === 'transcribing'
+      ? t('home.watermark.transcribing')
+      : lastTranscription || t('home.watermark.idle');
   const showWatermark = watermarkText.length > 0;
   const transcriptionsLabel =
     totals.totalTranscriptions === 1
@@ -83,7 +80,7 @@ export function Home({ settings, recState, limitReached = false, onUpgrade, onNa
         </h1>
       </div>
 
-      <div className={`home-hotkey${limitReached ? ' is-limit-reached' : ''}`}>
+      <div className="home-hotkey">
         {showWatermark && (
           <div className="home-hotkey-watermark" aria-hidden="true">
             {watermarkText}
@@ -95,31 +92,12 @@ export function Home({ settings, recState, limitReached = false, onUpgrade, onNa
             <HotkeyKeys
               accel={settings.hotkey}
               platform={keyStyle}
-              visual={
-                limitReached
-                  ? 'disabled'
-                  : hotkeyVisualState(recState, settings.handsFreeMode)
-              }
+              visual={hotkeyVisualState(recState, settings.handsFreeMode)}
             />
           </div>
-          {limitReached ? (
-            <>
-              <span className="home-hotkey-limit-text">
-                {t('app.limitResetsNextMonth')}
-              </span>
-              <button
-                type="button"
-                className="home-hotkey-upgrade"
-                onClick={() => onUpgrade?.()}
-              >
-                {t('account.upgradeToPro')}
-              </button>
-            </>
-          ) : (
-            <span className="home-hotkey-hint">
-              {t('home.hotkeyHintPaste')}
-            </span>
-          )}
+          <span className="home-hotkey-hint">
+            {t('home.hotkeyHintPaste')}
+          </span>
         </div>
       </div>
 

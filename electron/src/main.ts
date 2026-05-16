@@ -8,12 +8,6 @@ import { appendLogLineWithRetention, trimLogFileToRetention } from './logRetenti
 import { registerBackend } from './backend';
 import { getSettings } from './backend/settings';
 import { hardenWindow } from './windowHardening';
-import {
-  PROTOCOL,
-  findProtocolUrl,
-  handleDeepLink,
-  setMainWindowGetter,
-} from './backend/deepLink';
 
 const appRoot = path.resolve(__dirname, '..', '..');
 const PRODUCT_NAME = BUILD_CONFIG.PRODUCT_NAME;
@@ -113,47 +107,12 @@ if (!app.isPackaged) {
   app.setPath('userData', path.join(app.getPath('appData'), PRODUCT_NAME));
 }
 
-setMainWindowGetter(() => settingsWindow);
-
-// Capture a deep link if the OS launched the app via the bisbi:// protocol
-// directly (Windows / Linux pass it as a process argument).
-{
-  const initial = findProtocolUrl(process.argv);
-  if (initial) handleDeepLink(initial);
-}
-
 const gotTheLock = app.requestSingleInstanceLock();
 if (!gotTheLock) {
   app.quit();
 } else {
-  // Register the bisbi:// protocol so the OS sends us back here when the
-  // landing page redirects after Google sign-in. On Windows in dev we have
-  // to point the OS at electron.exe + the app entry, so the relaunched
-  // instance can re-attach to this one via the single-instance lock.
-  if (process.platform === 'win32' && !app.isPackaged) {
-    app.setAsDefaultProtocolClient(PROTOCOL, process.execPath, [appRoot]);
-  } else {
-    app.setAsDefaultProtocolClient(PROTOCOL);
-  }
-
-  app.on('second-instance', (_event, commandLine) => {
-    const url = findProtocolUrl(commandLine);
-    if (url) {
-      // Defer slightly so the relaunched instance has time to bring the
-      // existing window to the front before we push the deep link payload.
-      setTimeout(() => handleDeepLink(url), 200);
-    } else {
-      openSettingsWindow();
-    }
-  });
-
-  // macOS delivers protocol URLs through this event instead of argv.
-  app.on('open-url', (event, url) => {
-    event.preventDefault();
-    if (!settingsWindow || settingsWindow.isDestroyed()) {
-      openSettingsWindow();
-    }
-    handleDeepLink(url);
+  app.on('second-instance', () => {
+    openSettingsWindow();
   });
 
   app.whenReady().then(async () => {
@@ -188,21 +147,13 @@ if (!gotTheLock) {
 
     // The renderer process owns the microphone (getUserMedia) and arms the
     // recording pipeline, so the hotkey only works once a BrowserWindow is
-    // alive. To make the shortcut available immediately after login without
-    // forcing the user to click the tray, always create the settings window
-    // at startup — but keep it hidden when the OS launched us at login (or
-    // we're a packaged non-first-run start), so it stays out of the way.
+    // alive. Always create the settings window at startup, but keep it hidden
+    // on subsequent packaged starts so it stays out of the way.
     const isFirstRun = !fs.existsSync(getWindowStatePath());
-    const wasOpenedAtLogin = (() => {
-      try { return app.getLoginItemSettings().wasOpenedAtLogin === true; }
-      catch { return false; }
-    })();
     const keepHidden = app.isPackaged && !isFirstRun;
-    logMain(`[main] opening settings window (hidden=${keepHidden}, firstRun=${isFirstRun}, atLogin=${wasOpenedAtLogin})`);
+    logMain(`[main] opening settings window (hidden=${keepHidden}, firstRun=${isFirstRun})`);
     openSettingsWindow({ keepHidden });
 
-    // Keep the dock icon visible whenever the app is running, even when no
-    // window is open. It only disappears when the user fully quits Bisbi.
     if (process.platform === 'darwin' && app.dock) {
       app.dock.show();
     }
@@ -307,7 +258,7 @@ function openSettingsWindow(opts: { keepHidden?: boolean } = {}): void {
 
 app.on('window-all-closed', () => {
   // Don't quit — Bisbi lives in the tray. Only `before-quit` (triggered by
-  // the tray's "Salir" or Cmd+Q) actually shuts the app down.
+  // the tray's "Quit" or Cmd+Q) actually shuts the app down.
 });
 
 app.on('before-quit', () => {
