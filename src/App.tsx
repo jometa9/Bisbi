@@ -237,7 +237,7 @@ export function App() {
       </aside>
 
       <main className="content">
-        {resourcesOk === false && (
+        {resourcesOk === false && settings.mode === 'offline' && (
           <div className="banner banner-error">
             {t('app.resourcesMissing')}
           </div>
