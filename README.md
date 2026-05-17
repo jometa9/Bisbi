@@ -1,8 +1,23 @@
-# Bisbi
+<p align="center">
+  <img src="build-resources/icon.png" alt="Bisbi" width="96" height="96" />
+</p>
 
-**Local-first voice dictation for your desktop. Press a hotkey, speak, and the text gets pasted right where your cursor was.**
+<h1 align="center">Bisbi</h1>
 
-Bisbi is a desktop app (macOS, Windows and Linux) that turns your voice into text and inserts it automatically into the active application — be it a code editor, an email, a chat or a document. It works with a global hotkey, supports two transcription engines (OpenAI cloud or local `whisper.cpp`) and keeps an encrypted local history of your transcriptions.
+<p align="center">
+  <strong>Local-first voice dictation for your desktop. Press a hotkey, speak, and the text gets pasted right where your cursor was.</strong>
+</p>
+
+<p align="center">
+  <a href="https://jometa9.github.io/bisbi-landing/"><strong>Landing →</strong></a> ·
+  <a href="https://github.com/jometa9/Bisbi/releases/latest"><strong>Download latest →</strong></a>
+</p>
+
+---
+
+Bisbi is a desktop app for **Mac**, **Windows** and **Linux** that turns your voice into text and inserts it automatically into the active application — a code editor, an email, a chat, a document, the terminal, anywhere your cursor is. It works with a global hotkey, supports two transcription engines (OpenAI cloud or local `whisper.cpp`) and keeps an encrypted local history of your transcriptions.
+
+No accounts. No subscriptions. No usage limits. Free and open source.
 
 ---
 
