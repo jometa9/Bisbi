@@ -1,7 +1,7 @@
 {
   "name": "bisbi",
   "productName": "Bisbi",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "Local-first voice dictation. Press a hotkey, speak, paste.",
   "private": true,
   "main": "electron/dist/main.js",
