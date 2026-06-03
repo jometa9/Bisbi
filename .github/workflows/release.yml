@@ -186,3 +186,25 @@ jobs:
         run: |
           npm run build
           npx electron-builder --linux --x64 --publish always
+
+  publish-release:
+    name: Publish GitHub release (promote draft → latest)
+    needs: [version-bump, build-macos, build-windows, build-linux]
+    # electron-builder uploads every installer into a *draft* release. Once all
+    # three platforms have uploaded their assets, flip that draft to a published,
+    # non-prerelease "Latest" release so /releases/latest (the README link)
+    # resolves to the app installers instead of the whisper-models prerelease.
+    if: |
+      needs.build-macos.result == 'success' &&
+      needs.build-windows.result == 'success' &&
+      needs.build-linux.result == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Promote draft to published latest release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ needs.version-bump.outputs.tag || github.ref_name }}
+        run: gh release edit "$TAG" --draft=false --prerelease=false --latest
