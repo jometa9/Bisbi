@@ -206,6 +206,20 @@ function onKeydown(e: UiohookEvent): void {
     state.cb.onCancelRecording();
     return;
   }
+  // A bare modifier (e.g. Right Cmd) held together with another key is a
+  // system shortcut (Cmd+Backspace, Cmd+C...), not a dictation request.
+  // Cancel the recording it started so nothing gets transcribed and pasted.
+  if (
+    state.parsed.bareModifier &&
+    state.keyHeld &&
+    state.mode === 'recording' &&
+    e.keycode !== state.parsed.keycode &&
+    e.keycode !== MODIFIER_SIBLING[state.parsed.keycode]
+  ) {
+    state.mode = 'idle';
+    state.cb.onCancelRecording();
+    return;
+  }
   if (!eventMatches(state.parsed, e)) return;
   if (state.keyHeld) return;
   state.keyHeld = true;
